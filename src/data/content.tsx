@@ -2,46 +2,19 @@ import { SectionContent, NavigationSection, ProjectData, AchievementData } from 
 
 export const sectionContent: Record<NavigationSection, SectionContent> = {
   home: {
-    title: 'Welcome',
+    title: 'Dashboard',
     content: (
-      <div className="space-y-8">
-        <div className="text-xl text-gray-700 leading-relaxed">
-          <p className="mb-6">
-            Hello! I'm <strong>Carlo Baclao</strong>, a passionate Full Stack Developer with a love for creating 
-            innovative web solutions that make a difference.
-          </p>
-          <p className="mb-6">
-            With over 5 years of experience in the industry, I specialize in building scalable, 
-            user-friendly applications using modern technologies like React, Node.js, and cloud platforms.
-          </p>
-          <p>
-            I believe in writing clean, maintainable code and am always eager to learn new technologies 
-            and tackle challenging problems.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          <div className="text-center p-6 bg-gray-50 rounded-lg">
-            <div className="text-3xl mb-3">🚀</div>
-            <h3 className="font-semibold text-gray-900 mb-2">Innovation</h3>
-            <p className="text-gray-600 text-sm">Always exploring new technologies and approaches</p>
-          </div>
-          <div className="text-center p-6 bg-gray-50 rounded-lg">
-            <div className="text-3xl mb-3">⚡</div>
-            <h3 className="font-semibold text-gray-900 mb-2">Performance</h3>
-            <p className="text-gray-600 text-sm">Optimizing for speed and user experience</p>
-          </div>
-          <div className="text-center p-6 bg-gray-50 rounded-lg">
-            <div className="text-3xl mb-3">🎯</div>
-            <h3 className="font-semibold text-gray-900 mb-2">Quality</h3>
-            <p className="text-gray-600 text-sm">Committed to clean, maintainable code</p>
-          </div>
-        </div>
+      <div className="text-center py-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to my Portfolio</h2>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Explore my work, skills, and experience through the interactive dashboard above. 
+          Each section provides detailed insights into my journey as a Full Stack Developer.
+        </p>
       </div>
     ),
     metadata: {
       lastUpdated: new Date(),
-      tags: ['introduction', 'overview']
+      tags: ['dashboard', 'overview']
     }
   },
   

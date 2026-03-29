@@ -9,19 +9,21 @@ function PortfolioContent() {
   const { currentSection, setCurrentSection, isResumeOpen, openResume, closeResume } = useNavigation();
 
   return (
-    <>
-      {/* Sidebar */}
-      <Sidebar
-        currentSection={currentSection}
-        onSectionChange={setCurrentSection}
-        onResumeOpen={openResume}
-      />
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto flex gap-6">
+        {/* Sidebar */}
+        <Sidebar
+          currentSection={currentSection}
+          onSectionChange={setCurrentSection}
+          onResumeOpen={openResume}
+        />
 
-      {/* Main Content Area */}
-      <ContentArea
-        section={currentSection}
-        content={sectionContent[currentSection]}
-      />
+        {/* Main Content Area */}
+        <ContentArea
+          section={currentSection}
+          content={sectionContent[currentSection]}
+        />
+      </div>
 
       {/* Resume Modal */}
       <ResumeModal
@@ -29,7 +31,7 @@ function PortfolioContent() {
         onClose={closeResume}
         resumeContent={resumeData}
       />
-    </>
+    </div>
   );
 }
 

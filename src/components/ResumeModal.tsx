@@ -40,8 +40,8 @@ export function ResumeModal({ isOpen, onClose, resumeContent }: ResumeModalProps
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ left: '320px' }} // Offset by sidebar width to keep sidebar visible
+      className="fixed inset-0 z-50 flex items-center justify-center pl-6"
+      style={{ left: '368px' }} // Offset by sidebar width + margins (320px + 48px)
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"

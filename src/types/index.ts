@@ -1,6 +1,6 @@
 // Core type definitions for Carlo Baclao Portfolio Website
 
-export type NavigationSection = 'home' | 'about' | 'achievements' | 'projects' | 'blogs';
+export type NavigationSection = 'home' | 'about' | 'certificates' | 'projects';
 
 export interface NavigationState {
   currentSection: NavigationSection;

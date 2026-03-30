@@ -9,8 +9,8 @@ function PortfolioContent() {
   const { currentSection, setCurrentSection, isResumeOpen, openResume, closeResume } = useNavigation();
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-full mx-auto flex gap-6">
+    <div className="h-screen bg-gray-50 p-6 flex flex-col overflow-hidden">
+      <div className="flex-1 flex gap-6 overflow-hidden">
         {/* Sidebar */}
         <Sidebar
           currentSection={currentSection}
@@ -21,7 +21,7 @@ function PortfolioContent() {
         {/* Main Content Area */}
         <ContentArea
           section={currentSection}
-          content={sectionContent[currentSection]}
+          content={sectionContent[currentSection].content}
         />
 
         {/* Right Sidebar - Only show on home */}

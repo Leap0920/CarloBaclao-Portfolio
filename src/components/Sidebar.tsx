@@ -8,7 +8,7 @@ import { DarkModeToggle } from './DarkModeToggle';
 export function Sidebar({ currentSection, onSectionChange, onResumeOpen }: SidebarProps) {
   return (
     <aside 
-      className="w-80 bg-white rounded-2xl shadow-sm flex flex-col h-fit"
+      className="w-80 bg-white rounded-2xl shadow-sm flex flex-col h-full"
       role="complementary"
       aria-label="Sidebar navigation"
     >

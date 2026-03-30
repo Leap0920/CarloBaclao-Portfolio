@@ -12,7 +12,11 @@ export const metadata: Metadata = {
   description: "Professional portfolio of Carlo Baclao, showcasing expertise in full stack development, projects, and achievements.",
   keywords: ["Carlo Baclao", "Full Stack Developer", "Portfolio", "Web Development", "React", "Next.js"],
   authors: [{ name: "Carlo Baclao" }],
-  viewport: "width=device-width, initial-scale=1",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -21,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`}>
-      <body className={`${inter.className} min-h-full bg-gray-50 text-gray-900 antialiased`}>
+    <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
+      <body className={`${inter.className} min-h-full bg-gray-50 text-gray-900 antialiased`} suppressHydrationWarning>
         {children}
       </body>
     </html>

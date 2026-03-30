@@ -1,5 +1,42 @@
 import { SectionContent, NavigationSection, ProjectData, AchievementData } from '@/types';
 
+export const careerStats = [
+  { icon: '⏱️', label: 'Experience', value: '3', unit: 'years' },
+  { icon: '🎖️', label: 'Certificates', value: '20', unit: '' },
+  { icon: '💻', label: 'Projects', value: '16', unit: '' },
+  { icon: '⚙️', label: 'Technologies', value: '20', unit: '' }
+];
+
+export const skillsData = {
+  top: [
+    { name: 'JavaScript', image: '/images/languages/js.jpg' },
+    { name: 'React', image: '/images/languages/react.jpg' },
+    { name: 'HTML', image: '/images/languages/html.jpg' },
+    { name: 'Tailwind', image: '/images/languages/tailwind.jpg' }
+  ],
+  bottom: [
+    { name: 'PostgreSQL', image: '/images/languages/postgre.jpg' },
+    { name: 'MongoDB', image: '/images/languages/mongo.jpg' },
+    { name: 'Git', image: '/images/languages/git.jpg' },
+    { name: 'GitHub', image: '/images/languages/githuv.jpg' }
+  ]
+};
+
+export const expertiseData = [
+  { title: 'Web Development', icon: '🌐' },
+  { title: 'Graphic Design', icon: '🎨' },
+  { title: 'Digital Marketing', icon: '📱' },
+  { title: 'UI / UX Design', icon: '🎯' }
+];
+
+export const socialLinks = [
+  { name: 'Facebook', icon: 'f' },
+  { name: 'GitHub', icon: 'gh' },
+  { name: 'LinkedIn', icon: 'in' },
+  { name: 'Medium', icon: 'M' },
+  { name: 'WhatsApp', icon: 'wa' }
+];
+
 export const sectionContent: Record<NavigationSection, SectionContent> = {
   home: {
     title: 'Dashboard',

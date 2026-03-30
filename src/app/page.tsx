@@ -1,8 +1,8 @@
 'use client';
 
 import { NavigationProvider, useNavigation } from '@/contexts';
-import { Sidebar, ContentArea, ResumeModal } from '@/components';
-import { sectionContent } from '@/data/content';
+import { Sidebar, ContentArea, ResumeModal, RightSidebar } from '@/components';
+import { sectionContent, skillsData, expertiseData, socialLinks } from '@/data/content';
 import { resumeData } from '@/data/resume';
 
 function PortfolioContent() {
@@ -10,7 +10,7 @@ function PortfolioContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto flex gap-6">
+      <div className="max-w-full mx-auto flex gap-6">
         {/* Sidebar */}
         <Sidebar
           currentSection={currentSection}
@@ -23,6 +23,18 @@ function PortfolioContent() {
           section={currentSection}
           content={sectionContent[currentSection]}
         />
+
+        {/* Right Sidebar - Only show on home */}
+        {currentSection === 'home' && (
+          <RightSidebar
+            skills={{
+              topSkills: skillsData.top,
+              bottomSkills: skillsData.bottom
+            }}
+            expertise={expertiseData}
+            socialLinks={socialLinks}
+          />
+        )}
       </div>
 
       {/* Resume Modal */}

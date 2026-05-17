@@ -1,0 +1,226 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary "Sidebar navigation" [ref=e5]:
+      - generic [ref=e6]:
+        - img "Carlo C. Baclao profile photo" [ref=e9]
+        - generic [ref=e10]:
+          - heading "Carlo C. Baclao" [level=1] [ref=e11]
+          - paragraph [ref=e12]: Software Engineer
+        - button "View resume" [ref=e13]:
+          - img [ref=e14]
+          - text: Resume
+        - generic [ref=e17]:
+          - generic [ref=e18]:
+            - img [ref=e19]
+            - link "baclao.carlo.cometa@gmail.com" [ref=e22] [cursor=pointer]:
+              - /url: mailto:baclao.carlo.cometa@gmail.com
+          - generic [ref=e23]:
+            - img [ref=e24]
+            - generic [ref=e26]: "09686890263"
+          - generic [ref=e27]:
+            - img [ref=e28]
+            - generic "Quezon City, Philippines" [ref=e31]: Quezon City, PH
+      - generic [ref=e32]:
+        - navigation "Main navigation" [ref=e33]:
+          - list [ref=e34]:
+            - listitem [ref=e35]:
+              - button "Home" [ref=e36]:
+                - img [ref=e38]:
+                  - img [ref=e39]
+                - generic [ref=e42]: Home
+            - listitem [ref=e45]:
+              - button "About" [ref=e46]:
+                - img [ref=e47]:
+                  - img [ref=e48]
+                - generic [ref=e51]: About
+            - listitem [ref=e52]:
+              - button "Skills" [ref=e53]:
+                - img [ref=e54]:
+                  - img [ref=e55]
+                - generic [ref=e59]: Skills
+            - listitem [ref=e60]:
+              - button "Experience" [ref=e61]:
+                - img [ref=e62]:
+                  - img [ref=e63]
+                - generic [ref=e66]: Experience
+            - listitem [ref=e67]:
+              - button "Projects" [active] [ref=e68]:
+                - img [ref=e69]:
+                  - img [ref=e70]
+                - generic [ref=e72]: Projects
+                - img [ref=e667]
+            - listitem [ref=e73]:
+              - button "GitHub" [ref=e74]:
+                - img [ref=e75]:
+                  - img [ref=e76]
+                - generic [ref=e78]: GitHub
+            - listitem [ref=e79]:
+              - button "Contact" [ref=e80]:
+                - img [ref=e81]:
+                  - img [ref=e82]
+                - generic [ref=e84]: Contact
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - img [ref=e88]
+            - generic [ref=e90]: Dark Mode
+          - switch [ref=e91]
+      - paragraph [ref=e94]:
+        - text: Designed & Built by Carlo C. Baclao
+        - text: © 2025, All rights reserved.
+    - main [ref=e670]:
+      - heading "GOOD AFTER" [level=1] [ref=e672]: GOOD AFTER
+      - generic [ref=e675]:
+        - generic [ref=e676]:
+          - heading "Featured Projects" [level=3] [ref=e677]:
+            - img [ref=e678]
+            - text: Featured Projects
+          - generic [ref=e681]:
+            - generic [ref=e682] [cursor=pointer]:
+              - img [ref=e684]
+              - generic [ref=e686]:
+                - heading "Portfolio Website" [level=4] [ref=e687]
+                - paragraph [ref=e688]: A modern, responsive personal portfolio built with Next.js, React, Tailwind CSS, and Framer Motion.
+                - generic [ref=e689]:
+                  - generic [ref=e690]: Next.js
+                  - generic [ref=e691]: React
+                  - generic [ref=e692]: Tailwind CSS
+            - generic [ref=e693] [cursor=pointer]:
+              - img [ref=e695]
+              - generic [ref=e697]:
+                - heading "Chat Application" [level=4] [ref=e698]
+                - paragraph [ref=e699]: A real-time messaging application built with Flutter, Firebase, and Provider state management.
+                - generic [ref=e700]:
+                  - generic [ref=e701]: Flutter
+                  - generic [ref=e702]: Dart
+                  - generic [ref=e703]: Firebase
+        - generic [ref=e704]:
+          - heading "Certifications (24 Total)" [level=3] [ref=e705]:
+            - img [ref=e706]
+            - text: Certifications (24 Total)
+          - generic [ref=e711]:
+            - generic [ref=e712]:
+              - img [ref=e714]
+              - generic [ref=e717]:
+                - heading "CS50's Web Programming with Python and JavaScript" [level=5] [ref=e718]
+                - paragraph [ref=e719]: HarvardX / CS50
+            - generic [ref=e720]:
+              - img [ref=e722]
+              - generic [ref=e725]:
+                - heading "Professional Diploma in Agile Product Management" [level=5] [ref=e726]
+                - paragraph [ref=e727]: Udemy
+            - generic [ref=e728]:
+              - img [ref=e730]
+              - generic [ref=e733]:
+                - heading "Professional Certificate in Project Management" [level=5] [ref=e734]
+                - paragraph [ref=e735]: Udemy
+            - generic [ref=e736]:
+              - img [ref=e738]
+              - generic [ref=e741]:
+                - heading "Introduction to Software Engineering" [level=5] [ref=e742]
+                - paragraph [ref=e743]: Udemy
+            - generic [ref=e744]:
+              - img [ref=e746]
+              - generic [ref=e749]:
+                - heading "Git, GitHub, GitHub Fundamentals for Software Developers" [level=5] [ref=e750]
+                - paragraph [ref=e751]: Udemy
+            - generic [ref=e752]:
+              - img [ref=e754]
+              - generic [ref=e757]:
+                - heading "AI Tools for UX/UI Designers and Web Designers" [level=5] [ref=e758]
+                - paragraph [ref=e759]: Udemy
+            - generic [ref=e760]:
+              - img [ref=e762]
+              - generic [ref=e765]:
+                - heading "Social Media Graphics Design and Video Editing in Canva" [level=5] [ref=e766]
+                - paragraph [ref=e767]: Udemy
+            - generic [ref=e768]:
+              - img [ref=e770]
+              - generic [ref=e773]:
+                - heading "Dart & Flutter | The Complete Flutter Development Course" [level=5] [ref=e774]
+                - paragraph [ref=e775]: Udemy
+            - generic [ref=e776]:
+              - img [ref=e778]
+              - generic [ref=e781]:
+                - heading "Build A Chat Application With Firebase, Flutter and Provider" [level=5] [ref=e782]
+                - paragraph [ref=e783]: Udemy
+            - generic [ref=e784]:
+              - img [ref=e786]
+              - generic [ref=e789]:
+                - heading "Web3 / Blockchain Project Manager Certification Course" [level=5] [ref=e790]
+                - paragraph [ref=e791]: Udemy
+            - generic [ref=e792]:
+              - img [ref=e794]
+              - generic [ref=e797]:
+                - heading "Mastering C++ Language - C++ Programming For Beginners" [level=5] [ref=e798]
+                - paragraph [ref=e799]: Udemy
+            - generic [ref=e800]:
+              - img [ref=e802]
+              - generic [ref=e805]:
+                - heading "Build 13 Projects with PHP MySQL Bootstrap and PDO" [level=5] [ref=e806]
+                - paragraph [ref=e807]: Udemy
+            - generic [ref=e808]:
+              - img [ref=e810]
+              - generic [ref=e813]:
+                - heading "Strong Problem-Solving" [level=5] [ref=e814]
+                - paragraph [ref=e815]: Udemy
+            - generic [ref=e816]:
+              - img [ref=e818]
+              - generic [ref=e821]:
+                - 'heading "JavaScript Fundamentals to Advanced: Full Stack Development" [level=5] [ref=e822]'
+                - paragraph [ref=e823]: Udemy
+            - generic [ref=e824]:
+              - img [ref=e826]
+              - generic [ref=e829]:
+                - heading "Introduction to Cybersecurity" [level=5] [ref=e830]
+                - paragraph [ref=e831]: Cisco
+            - generic [ref=e832]:
+              - img [ref=e834]
+              - generic [ref=e837]:
+                - heading "Responsive Web Design" [level=5] [ref=e838]
+                - paragraph [ref=e839]: FreeCodeCamp
+    - generic [ref=e136]:
+      - generic [ref=e137]:
+        - heading "Core Stack" [level=3] [ref=e138]
+        - generic [ref=e139]:
+          - generic [ref=e140]: 🟨 JavaScript
+          - generic [ref=e141]: 🟣 .NET
+          - generic [ref=e142]: ☕ Java
+          - generic [ref=e143]: 🐍 Python
+        - generic [ref=e144]:
+          - generic [ref=e145]: 🗄️ SQL
+          - generic [ref=e146]: 📚 Git
+          - generic [ref=e147]: 🐙 GitHub
+          - generic [ref=e148]: 🛠️ Visual Studio
+      - generic [ref=e149]:
+        - generic [ref=e150]:
+          - generic [ref=e151]: 🎯
+          - heading "Expertise" [level=3] [ref=e152]
+        - generic [ref=e153]:
+          - button "💻 Full Stack Dev" [ref=e154]:
+            - generic [ref=e155]:
+              - generic [ref=e156]: 💻
+              - generic [ref=e157]: Full Stack Dev
+          - button "📱 Mobile Dev" [ref=e158]:
+            - generic [ref=e159]:
+              - generic [ref=e160]: 📱
+              - generic [ref=e161]: Mobile Dev
+          - button "🛡️ Cybersecurity" [ref=e162]:
+            - generic [ref=e163]:
+              - generic [ref=e164]: 🛡️
+              - generic [ref=e165]: Cybersecurity
+          - button "🎨 UI/UX Design" [ref=e166]:
+            - generic [ref=e167]:
+              - generic [ref=e168]: 🎨
+              - generic [ref=e169]: UI/UX Design
+      - generic [ref=e170]:
+        - heading "Connect" [level=3] [ref=e171]
+        - generic [ref=e172]:
+          - link "GitHub" [ref=e173] [cursor=pointer]:
+            - /url: https://github.com/Leap0920
+            - img [ref=e174]
+          - link "LinkedIn" [ref=e176] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/baclao-carlo-22936435a/
+            - img [ref=e177]
+  - button "Open Next.js Dev Tools" [ref=e186] [cursor=pointer]:
+    - img [ref=e187]
+  - alert [ref=e192]

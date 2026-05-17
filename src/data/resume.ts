@@ -2,80 +2,174 @@ import { ResumeData } from '@/types';
 
 export const resumeData: ResumeData = {
   personalInfo: {
-    name: 'Carlo Baclao',
-    title: 'Full Stack Developer',
-    email: 'carlo.baclao@example.com',
-    phone: '+1 (555) 123-4567',
-    location: 'San Francisco, CA',
-    linkedin: 'https://linkedin.com/in/carlobaclao',
-    github: 'https://github.com/carlobaclao',
+    name: 'Carlo C. Baclao',
+    title: 'Software Engineer',
+    email: 'baclao.carlo.cometa@gmail.com',
+    phone: '09686890263',
+    location: 'Quezon City, Philippines',
+    linkedin: 'https://www.linkedin.com/in/baclao-carlo-22936435a/',
+    github: 'https://github.com/Leap0920',
   },
-  summary: 'Passionate Full Stack Developer with 5+ years of experience building scalable web applications using modern technologies. Expertise in React, Node.js, and cloud platforms. Strong problem-solving skills and commitment to writing clean, maintainable code.',
+  summary: 'Curious and sociable individual with a passion for software development. I enjoy learning new technologies and applying them to solve real-world problems. My goal is to become a proficient software engineer and contribute to innovative projects that make a positive impact.',
   experience: [
     {
       id: '1',
-      company: 'Tech Solutions Inc.',
-      position: 'Senior Full Stack Developer',
-      startDate: new Date('2022-01-01'),
-      endDate: undefined, // Current position
+      company: 'State Lab Clinics and Diagnostic Center',
+      position: 'Data Encoder',
+      startDate: new Date('2022-04-01'),
+      endDate: new Date('2022-07-31'),
       description: [
-        'Led development of customer-facing web applications serving 100K+ users',
-        'Architected and implemented microservices using Node.js and Docker',
-        'Collaborated with cross-functional teams to deliver features on time',
-        'Mentored junior developers and conducted code reviews'
+        'Accurately encoded and updated patient information, laboratory results, and other critical data into the clinic\'s management system.',
+        'Managed and organized digital and physical files, maintaining strict confidentiality in compliance with data privacy standards.'
       ],
-      technologies: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'AWS', 'Docker']
-    },
-    {
-      id: '2',
-      company: 'Digital Innovations LLC',
-      position: 'Full Stack Developer',
-      startDate: new Date('2020-03-01'),
-      endDate: new Date('2021-12-31'),
-      description: [
-        'Developed and maintained e-commerce platform handling $2M+ in transactions',
-        'Implemented responsive designs and improved mobile user experience',
-        'Optimized database queries resulting in 40% performance improvement',
-        'Integrated third-party APIs and payment processing systems'
-      ],
-      technologies: ['Vue.js', 'Express.js', 'MongoDB', 'Stripe API', 'Redis']
+      technologies: ['Data Entry', 'Database Management', 'Information Security']
     }
   ],
   education: [
     {
       id: '1',
-      institution: 'University of California, Berkeley',
+      institution: 'Quezon City University',
       degree: 'Bachelor of Science',
-      field: 'Computer Science',
-      startDate: new Date('2016-08-01'),
-      endDate: new Date('2020-05-01'),
-      gpa: '3.8',
-      honors: ['Magna Cum Laude', 'Dean\'s List']
+      field: 'Information Technology',
+      startDate: new Date('2022-08-14'),
+      endDate: new Date('2028-06-01'),
+    },
+    {
+      id: '2',
+      institution: 'Asian Institute of Computer Studies',
+      degree: 'Information Technology',
+      field: 'Information Technology',
+      startDate: new Date('2021-08-01'),
+      endDate: new Date('2023-06-01'),
     }
   ],
   skills: [
     {
-      category: 'Frontend',
-      skills: ['React', 'Vue.js', 'TypeScript', 'Next.js', 'Tailwind CSS', 'HTML5', 'CSS3']
+      category: 'Languages & Core',
+      skills: ['JavaScript', '.NET', 'Java', 'Python', 'SQL']
     },
     {
-      category: 'Backend',
-      skills: ['Node.js', 'Express.js', 'Python', 'PostgreSQL', 'MongoDB', 'Redis']
+      category: 'Software & Tools',
+      skills: ['Visual Studio', 'IntelliJ IDEA', 'XAMPP', 'SQLite', 'Git', 'GitHub']
     },
     {
-      category: 'DevOps & Tools',
-      skills: ['AWS', 'Docker', 'Git', 'CI/CD', 'Jest', 'Webpack']
+      category: 'Concepts & Disciplines',
+      skills: ['Responsive Web Design', 'Networking', 'Cybersecurity Fundamentals', 'Agile Product Management', 'Project Management']
+    },
+    {
+      category: 'Personal Attributes',
+      skills: ['Quick Learner', 'Adaptable', 'Strong Problem-Solving', 'Leadership', 'Meticulous', 'Curious', 'Sociable']
     }
   ],
   certifications: [
     {
-      id: '1',
-      name: 'AWS Certified Developer - Associate',
-      issuer: 'Amazon Web Services',
-      issueDate: new Date('2023-06-01'),
-      expiryDate: new Date('2026-06-01'),
-      credentialId: 'AWS-DEV-2023-001',
-      credentialUrl: 'https://aws.amazon.com/verification'
+      id: 'cs50-1',
+      name: "CS50's Web Programming with Python and JavaScript",
+      issuer: 'HarvardX / CS50',
+      issueDate: new Date('2023-01-01'),
+    },
+    {
+      id: 'udemy-1',
+      name: 'Professional Diploma in Agile Product Management',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'udemy-2',
+      name: 'Professional Certificate in Project Management',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'udemy-3',
+      name: 'Introduction to Software Engineering',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'udemy-4',
+      name: 'Git, GitHub, GitHub Fundamentals for Software Developers',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'udemy-5',
+      name: 'AI Tools for UX/UI Designers and Web Designers',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'udemy-6',
+      name: 'Social Media Graphics Design and Video Editing in Canva',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'udemy-7',
+      name: 'Dart & Flutter | The Complete Flutter Development Course',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/Dart & Flutter The Complete Flutter Development Course.jpg',
+    },
+    {
+      id: 'udemy-8',
+      name: 'Build A Chat Application With Firebase, Flutter and Provider',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'udemy-9',
+      name: 'Web3 / Blockchain Project Manager Certification Course',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'udemy-10',
+      name: 'Mastering C++ Language - C++ Programming For Beginners',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'udemy-11',
+      name: 'Build 13 Projects with PHP MySQL Bootstrap and PDO',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'udemy-12',
+      name: 'Strong Problem-Solving',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'udemy-13',
+      name: 'JavaScript Fundamentals to Advanced: Full Stack Development',
+      issuer: 'Udemy',
+      issueDate: new Date('2023-01-01'),
+      imageUrl: '/images/Certification/udemy.png',
+    },
+    {
+      id: 'cisco-1',
+      name: 'Introduction to Cybersecurity',
+      issuer: 'Cisco',
+      issueDate: new Date('2023-01-01'),
+    },
+    {
+      id: 'fcc-1',
+      name: 'Responsive Web Design',
+      issuer: 'FreeCodeCamp',
+      issueDate: new Date('2023-01-01'),
     }
   ]
 };

@@ -1,228 +1,112 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { FileCode2, Box, Coffee, Database, GitBranch, Code, Monitor, Smartphone, Shield, Palette, Target } from 'lucide-react';
+import { GithubIcon, LinkedinIcon } from './BrandIcons';
 
-interface SkillSetProps {
-  topSkills: Array<{ name: string; image: string }>;
-  bottomSkills: Array<{ name: string; image: string }>;
-}
+const skillIcons: Record<string, React.ReactNode> = {
+  'JavaScript': <FileCode2 size={14} className="text-yellow-500" />,
+  '.NET': <Box size={14} className="text-purple-500" />,
+  'Java': <Coffee size={14} className="text-orange-600" />,
+  'Python': <FileCode2 size={14} className="text-blue-500" />,
+  'SQL': <Database size={14} className="text-emerald-500" />,
+  'Git': <GitBranch size={14} className="text-red-500" />,
+  'GitHub': <GithubIcon size={14} />,
+  'Visual Studio': <Code size={14} className="text-indigo-500" />,
+};
 
-interface ExpertiseItem {
-  title: string;
-  icon: string;
-}
+export function RightSidebar() {
+  const topSkills = ['JavaScript', '.NET', 'Java', 'Python'];
+  const bottomSkills = ['SQL', 'Git', 'GitHub', 'Visual Studio'];
 
-interface SocialLink {
-  name: string;
-  icon: string;
-}
+  const expertise = [
+    { title: 'Full Stack Dev', icon: <Monitor size={16} className="text-blue-500" /> },
+    { title: 'Mobile Dev', icon: <Smartphone size={16} className="text-green-500" /> },
+    { title: 'Cybersecurity', icon: <Shield size={16} className="text-red-500" /> },
+    { title: 'UI/UX Design', icon: <Palette size={16} className="text-purple-500" /> },
+  ];
 
-interface RightSidebarProps {
-  skills: SkillSetProps;
-  expertise: ExpertiseItem[];
-  socialLinks: SocialLink[];
-  showSkills?: boolean;
-  showExpertise?: boolean;
-}
-
-export function RightSidebar({ skills, expertise, socialLinks, showSkills = true, showExpertise = true }: RightSidebarProps) {
-  const [expandedExpertise, setExpandedExpertise] = useState<string | null>(null);
-  const [isHoveringTopSkills, setIsHoveringTopSkills] = useState(false);
-  const [isHoveringBottomSkills, setIsHoveringBottomSkills] = useState(false);
-  const topScrollRef = useRef<HTMLDivElement>(null);
-  const bottomScrollRef = useRef<HTMLDivElement>(null);
-  const topAnimationRef = useRef<number | null>(null);
-  const bottomAnimationRef = useRef<number | null>(null);
-  const topOffsetRef = useRef(0);
-  const bottomOffsetRef = useRef(0);
-  const [topSingleWidth, setTopSingleWidth] = useState(0);
-  const [bottomSingleWidth, setBottomSingleWidth] = useState(0);
-
-  const toggleExpertise = (title: string) => {
-    setExpandedExpertise(expandedExpertise === title ? null : title);
-  };
-
-  // Calculate single set width on mount
-  useEffect(() => {
-    if (topScrollRef.current) {
-      const width = topScrollRef.current.scrollWidth / 2;
-      setTopSingleWidth(width);
-    }
-    if (bottomScrollRef.current) {
-      const width = bottomScrollRef.current.scrollWidth / 2;
-      setBottomSingleWidth(width);
-    }
-  }, [skills]);
-
-  // Continuous scroll animation without reset
-  useEffect(() => {
-    if (!showSkills) return;
-    const animateTopScroll = () => {
-      if (!isHoveringTopSkills && topScrollRef.current && topSingleWidth > 0) {
-        topOffsetRef.current += 0.5; // Slide LEFT
-        topScrollRef.current.style.transform = `translateX(-${topOffsetRef.current}px)`;
-        
-        // Seamless loop: reset when reaching exactly one full set
-        if (topOffsetRef.current >= topSingleWidth) {
-          topOffsetRef.current = 0;
-          topScrollRef.current.style.transform = `translateX(0px)`;
-        }
-      }
-      topAnimationRef.current = requestAnimationFrame(animateTopScroll);
-    };
-
-    topAnimationRef.current = requestAnimationFrame(animateTopScroll);
-
-    return () => {
-      if (topAnimationRef.current) cancelAnimationFrame(topAnimationRef.current);
-    };
-  }, [isHoveringTopSkills, topSingleWidth, showSkills]);
-
-  useEffect(() => {
-    if (!showSkills) return;
-    const animateBottomScroll = () => {
-      if (!isHoveringBottomSkills && bottomScrollRef.current && bottomSingleWidth > 0) {
-        bottomOffsetRef.current += 0.5; // Slide RIGHT
-        bottomScrollRef.current.style.transform = `translateX(${bottomOffsetRef.current}px)`;
-        
-        // Seamless loop: reset when reaching exactly one full set
-        if (bottomOffsetRef.current >= bottomSingleWidth) {
-          bottomOffsetRef.current = 0;
-          bottomScrollRef.current.style.transform = `translateX(0px)`;
-        }
-      }
-      bottomAnimationRef.current = requestAnimationFrame(animateBottomScroll);
-    };
-
-    bottomAnimationRef.current = requestAnimationFrame(animateBottomScroll);
-
-    return () => {
-      if (bottomAnimationRef.current) cancelAnimationFrame(bottomAnimationRef.current);
-    };
-  }, [isHoveringBottomSkills, bottomSingleWidth, showSkills]);
+  const socialLinks = [
+    { name: 'GitHub', icon: <GithubIcon size={18} />, url: 'https://github.com/Leap0920' },
+    { name: 'LinkedIn', icon: <LinkedinIcon size={18} />, url: 'https://www.linkedin.com/in/baclao-carlo-22936435a/' },
+  ];
 
   return (
-    <div className="w-72 flex flex-col gap-6">
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+      className="w-64 flex flex-col gap-4"
+    >
       {/* Skill Set Section */}
-      {showSkills && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Skill Set</h3>
-          
-          {/* Top Row - Scroll Left */}
-          <div className="mb-4 overflow-hidden rounded-lg">
-            <div
-              ref={topScrollRef}
-              className="flex gap-3"
-              onMouseEnter={() => setIsHoveringTopSkills(true)}
-              onMouseLeave={() => setIsHoveringTopSkills(false)}
-              style={{ willChange: 'transform' }}
-            >
-              {[...skills.topSkills, ...skills.topSkills].map((skill, idx) => (
-                <div
-                  key={`top-${idx}`}
-                  className="min-w-fit flex flex-col items-center gap-2 cursor-pointer"
-                >
-                  <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-gray-100 hover:shadow-md transition-shadow flex items-center justify-center flex-shrink-0">
-                    <Image
-                      src={skill.image}
-                      alt={skill.name}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      <motion.div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-slate-700">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Core Stack</h3>
 
-          {/* Bottom Row - Scroll Right */}
-          <div className="overflow-hidden rounded-lg">
-            <div
-              ref={bottomScrollRef}
-              className="flex gap-3"
-              onMouseEnter={() => setIsHoveringBottomSkills(true)}
-              onMouseLeave={() => setIsHoveringBottomSkills(false)}
-              style={{ willChange: 'transform' }}
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {topSkills.map((skill, idx) => (
+            <motion.span
+              key={`top-${idx}`}
+              whileHover={{ scale: 1.05 }}
+              className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-md font-medium border border-slate-200 dark:border-slate-600 flex items-center gap-1.5"
             >
-              {[...skills.bottomSkills, ...skills.bottomSkills].map((skill, idx) => (
-                <div
-                  key={`bottom-${idx}`}
-                  className="min-w-fit flex flex-col items-center gap-2 cursor-pointer"
-                >
-                  <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-gray-100 hover:shadow-md transition-shadow flex items-center justify-center flex-shrink-0">
-                    <Image
-                      src={skill.image}
-                      alt={skill.name}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+              {skillIcons[skill]}
+              {skill}
+            </motion.span>
+          ))}
         </div>
-      )}
+        <div className="flex flex-wrap gap-1.5">
+          {bottomSkills.map((skill, idx) => (
+            <motion.span
+              key={`bottom-${idx}`}
+              whileHover={{ scale: 1.05 }}
+              className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-md font-medium border border-slate-200 dark:border-slate-600 flex items-center gap-1.5"
+            >
+              {skillIcons[skill]}
+              {skill}
+            </motion.span>
+          ))}
+        </div>
+      </motion.div>
 
       {/* Expertise Section */}
-      {showExpertise && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg">👤</span>
-            <h3 className="text-lg font-semibold text-gray-900">Expertise</h3>
-          </div>
-
-          <div className="space-y-2">
-            {expertise.map((item, idx) => (
-              <button
-                key={idx}
-                onClick={() => toggleExpertise(item.title)}
-                className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-lg">{item.icon}</span>
-                  <span className="font-medium text-gray-700">{item.title}</span>
-                </div>
-                <span
-                  className={`text-gray-400 transition-transform ${
-                    expandedExpertise === item.title ? 'rotate-180' : ''
-                  }`}
-                >
-                  ▼
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Get in Touch Section */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <motion.div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-slate-700">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-lg">💌</span>
-          <h3 className="text-lg font-semibold text-gray-900">Get in touch</h3>
+          <Target size={16} className="text-blue-500" />
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Expertise</h3>
         </div>
-        
-        <p className="text-sm text-gray-600 mb-4">
-          Let's build something great together — feel free to connect with me through any of the platforms above.
-        </p>
 
-        <div className="flex gap-3 justify-start">
+        <div className="space-y-1.5">
+          {expertise.map((item, idx) => (
+            <motion.div
+              key={idx}
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2.5 border border-transparent"
+              whileHover={{ scale: 1.01, x: 2 }}
+            >
+              {item.icon}
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{item.title}</span>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Quick Links Section */}
+      <motion.div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-slate-700">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Connect</h3>
+        <div className="flex gap-2">
           {socialLinks.map((link, idx) => (
             <a
               key={idx}
-              href="#"
-              className="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition-colors text-sm font-semibold text-gray-700"
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-9 h-9 flex items-center justify-center bg-gray-50 dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition-colors text-gray-600 dark:text-gray-300"
               aria-label={link.name}
             >
               {link.icon}
             </a>
           ))}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -1,6 +1,18 @@
 // Core type definitions for Carlo Baclao Portfolio Website
 
-export type NavigationSection = 'home' | 'about' | 'certificates' | 'projects';
+export type NavigationSection = 'home' | 'about' | 'skills' | 'experience' | 'projects' | 'github' | 'contact';
+
+export interface NavigationContextType {
+  currentSection: NavigationSection;
+  setCurrentSection: (section: NavigationSection) => void;
+  isResumeOpen: boolean;
+  openResume: () => void;
+  closeResume: () => void;
+  selectedCertification: CertificationItem | null;
+  isCertModalOpen: boolean;
+  openCertModal: (cert: CertificationItem) => void;
+  closeCertModal: () => void;
+}
 
 export interface NavigationState {
   currentSection: NavigationSection;
@@ -70,6 +82,7 @@ export interface CertificationItem {
   expiryDate?: Date;
   credentialId?: string;
   credentialUrl?: string;
+  imageUrl?: string;
 }
 
 export interface ResumeData {

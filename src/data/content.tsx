@@ -1,452 +1,398 @@
-import { SectionContent, NavigationSection, ProjectData, AchievementData } from '@/types';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { SectionContent, NavigationSection, CertificationItem } from '@/types';
+import { resumeData } from './resume';
+import { GitHubSection } from '@/components/GitHubSection';
+import {
+  Briefcase, Sparkles, Award, Layers, User, Target, FileText,
+  GraduationCap, BookOpen, Code, FolderOpen, MessageSquare,
+  CheckCircle, Phone, Mail, ExternalLink,
+} from 'lucide-react';
+import { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from '@/components/BrandIcons';
 
-export const careerStats = [
-  { icon: '⏱️', label: 'Experience', value: '3', unit: 'years' },
-  { icon: '🎖️', label: 'Certificates', value: '24', unit: '' },
-  { icon: '💻', label: 'Projects', value: '16', unit: '' },
-  { icon: '⚙️', label: 'Technologies', value: '20', unit: '' }
-];
+const { personalInfo, summary, experience, education, skills, certifications } = resumeData;
 
-export const skillsData = {
-  top: [
-    { name: 'JavaScript', image: '/images/languages/js.jpg' },
-    { name: 'React', image: '/images/languages/react.jpg' },
-    { name: 'HTML', image: '/images/languages/html.jpg' },
-    { name: 'Tailwind', image: '/images/languages/tailwind.jpg' }
-  ],
-  bottom: [
-    { name: 'PostgreSQL', image: '/images/languages/postgre.jpg' },
-    { name: 'MongoDB', image: '/images/languages/mongo.jpg' },
-    { name: 'Git', image: '/images/languages/git.jpg' },
-    { name: 'GitHub', image: '/images/languages/githuv.jpg' }
-  ]
-};
+export function getSectionContent(openCertModal: (cert: CertificationItem) => void): Record<NavigationSection, SectionContent> {
+  return {
+    home: {
+      title: "Welcome",
+      content: (
+        <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 md:p-8 text-white shadow-md relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-blue-400 opacity-20 blur-2xl"></div>
 
-export const expertiseData = [
-  { title: 'Web Development', icon: '🌐' },
-  { title: 'Graphic Design', icon: '🎨' },
-  { title: 'Digital Marketing', icon: '📱' },
-  { title: 'UI / UX Design', icon: '🎯' }
-];
+            <div className="relative z-10">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">Hi, I'm {personalInfo.name} 👋</h2>
+              <p className="text-blue-100 text-sm md:text-base max-w-2xl leading-relaxed mb-6">
+                A 19-year-old IT student and passionate Software Engineer from the Philippines.
+                I specialize in full-stack development, continuous learning, and creating
+                innovative digital solutions.
+              </p>
 
-export const socialLinks = [
-  { name: 'Facebook', icon: 'f' },
-  { name: 'GitHub', icon: 'gh' },
-  { name: 'LinkedIn', icon: 'in' },
-  { name: 'Medium', icon: 'M' },
-  { name: 'WhatsApp', icon: 'wa' }
-];
-
-// Certificates data
-const certificatesData = [
-  'Dart & Flutter | The Complete Flutter Development Course',
-  'Introduction to Databases and SQL Querying',
-  'Java Database Connection: JDBC and MySQL',
-  'Java Programming Basics',
-  'PyScript Fundamentals 101 - Run Python in your Browser\'s HTML',
-  'Python Programming: The Complete Course for Success',
-  'Java Training Crash Course for Java Beginners',
-  'C++ And Java Training Crash Course for Beginners',
-  'MongoDB - The Complete MongoDB Developers Course',
-  'Python Complete Course: with 30+ Hands-on Tasks and Solution',
-  'Hands-On Introduction to JavaScript for the Web',
-  'JavaScript Fundamentals to Advanced: Full Stack Development',
-  'Python from Beginner to Intermediate in 30 min.',
-  'Build 13 Projects with PHP MySQL Bootstrap and PDO',
-  'Professional Diploma in Agile Product Management',
-  'Social Media Graphics Design and Video Editing in Canva',
-  'Build A Chat Application With Firebase, Flutter and Provider',
-  'Web3 / Blockchain Project Manager Certification Course',
-  'Mastering C++ Language - C++ Programming For Beginners',
-  'GIT, GitLab, GitHub Fundamentals for Software Developers',
-  'Professional Certificate in Project Management',
-  'Introduction to Software Engineering',
-  'Cisco Introduction to Cybersecurity',
-  'FreeCodeCamp Responsive Web Design',
-];
-
-// Certificate icon colors for visual variety
-const certIconStyles = [
-  { bg: 'bg-gradient-to-br from-blue-500 to-blue-600', letter: 'DF' },
-  { bg: 'bg-gradient-to-br from-orange-400 to-orange-500', letter: 'DB' },
-  { bg: 'bg-gradient-to-br from-red-500 to-red-600', letter: 'JV' },
-  { bg: 'bg-gradient-to-br from-red-400 to-red-500', letter: 'JV' },
-  { bg: 'bg-gradient-to-br from-yellow-400 to-yellow-500', letter: 'Py' },
-  { bg: 'bg-gradient-to-br from-green-500 to-green-600', letter: 'Py' },
-  { bg: 'bg-gradient-to-br from-red-500 to-red-600', letter: 'JV' },
-  { bg: 'bg-gradient-to-br from-purple-500 to-purple-600', letter: 'C+' },
-  { bg: 'bg-gradient-to-br from-green-600 to-green-700', letter: 'MG' },
-  { bg: 'bg-gradient-to-br from-yellow-500 to-yellow-600', letter: 'Py' },
-  { bg: 'bg-gradient-to-br from-yellow-400 to-amber-500', letter: 'JS' },
-  { bg: 'bg-gradient-to-br from-amber-400 to-amber-500', letter: 'JS' },
-  { bg: 'bg-gradient-to-br from-blue-400 to-blue-500', letter: 'Py' },
-  { bg: 'bg-gradient-to-br from-indigo-500 to-indigo-600', letter: 'PH' },
-  { bg: 'bg-gradient-to-br from-teal-500 to-teal-600', letter: 'PM' },
-  { bg: 'bg-gradient-to-br from-pink-400 to-pink-500', letter: 'Ca' },
-  { bg: 'bg-gradient-to-br from-orange-500 to-orange-600', letter: 'Fl' },
-  { bg: 'bg-gradient-to-br from-violet-500 to-violet-600', letter: 'W3' },
-  { bg: 'bg-gradient-to-br from-blue-600 to-blue-700', letter: 'C+' },
-  { bg: 'bg-gradient-to-br from-gray-700 to-gray-800', letter: 'Gt' },
-  { bg: 'bg-gradient-to-br from-emerald-500 to-emerald-600', letter: 'PM' },
-  { bg: 'bg-gradient-to-br from-cyan-500 to-cyan-600', letter: 'SE' },
-  { bg: 'bg-gradient-to-br from-sky-600 to-sky-700', letter: 'Ci' },
-  { bg: 'bg-gradient-to-br from-green-400 to-green-500', letter: 'FC' },
-];
-
-export const sectionContent: Record<NavigationSection, SectionContent> = {
-  home: {
-    title: 'Dashboard',
-    content: (
-      <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to my Portfolio</h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Explore my work, skills, and experience through the interactive dashboard above.
-          Each section provides detailed insights into my journey as a Full Stack Developer.
-        </p>
-      </div>
-    ),
-    metadata: {
-      lastUpdated: new Date(),
-      tags: ['dashboard', 'overview']
-    }
-  },
-
-  about: {
-    title: 'About Me',
-    content: (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Left Column - Wider */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Profile Hero Section */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-            <div className="h-44 relative">
-              <img
-                src="/images/cover.jpg"
-                alt="Profile Cover"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            </div>
-            <div className="relative px-6 pb-6">
-              <div className="flex items-end gap-5 -mt-12">
-                <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden flex-shrink-0 bg-white">
-                  <img
-                    src="/images/profile.jpg"
-                    alt="Carlo Baclao"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="pb-1">
-                  <h2 className="text-2xl font-bold text-gray-900">Carlo Baclao</h2>
-                  <p className="text-blue-600 font-medium text-sm">Full Stack Developer</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <button className="inline-flex items-center gap-2 px-6 py-2 border border-gray-300 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></svg>
-                  Message
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    const section = document.querySelector('[aria-label="Main navigation"] button:nth-child(5)') as HTMLButtonElement;
+                    if (section) section.click();
+                  }}
+                  className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium text-sm hover:bg-blue-50 transition-colors shadow-sm"
+                >
+                  View Projects
+                </button>
+                <button
+                  onClick={() => {
+                    const section = document.querySelector('[aria-label="Main navigation"] button:nth-child(7)') as HTMLButtonElement;
+                    if (section) section.click();
+                  }}
+                  className="bg-blue-500 bg-opacity-30 border border-blue-400 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-opacity-40 transition-colors"
+                >
+                  Contact Me
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* About Bio Section */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-              </div>
-              <h3 className="text-lg font-bold text-gray-900">About</h3>
-            </div>
-            <p className="text-gray-600 leading-relaxed text-[15px]">
-              Curious and sociable individual with a passion for software engineering. I enjoy learning new technologies
-              and applying them to solve real-world problems. My goal is to become a proficient software engineer and
-              contribute to innovative projects that make a positive impact.
-            </p>
-          </div>
-
-          {/* Certificates Section */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15V3" /><path d="m8 7 4-4 4 4" /><path d="M20 12.5a8.5 8.5 0 1 1-9-8.472" /><path d="M22 22 2 2" /></svg>
-              </div>
-              <h3 className="text-lg font-bold text-gray-900">Certificates</h3>
-            </div>
-
-            <div className="space-y-3">
-              {certificatesData.slice(0, 6).map((cert, idx) => {
-                const style = certIconStyles[idx % certIconStyles.length];
-                return (
-                  <div key={idx} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 group">
-                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm border border-gray-100 overflow-hidden">
-                      <img
-                        src="/images/certification/udemyL.png"
-                        alt="Udemy"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-blue-600 transition-colors">{cert}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">Professional Certificate</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <button className="w-full mt-6 py-2 text-sm font-semibold text-blue-600 hover:underline border-t border-gray-100 pt-4">
-              Show all licenses & certifications
-            </button>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: 'Experience', value: '1+ Yr', icon: <Briefcase size={20} />, color: 'blue' },
+              { label: 'Projects', value: '5+', icon: <Sparkles size={20} />, color: 'emerald' },
+              { label: 'Certificates', value: '16', icon: <Award size={20} />, color: 'orange' },
+              { label: 'Technologies', value: '12+', icon: <Layers size={20} />, color: 'purple' },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center justify-center text-center hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                  stat.color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' :
+                  stat.color === 'emerald' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' :
+                  stat.color === 'orange' ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
+                  'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+                }`}>
+                  {stat.icon}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
-
-        {/* Right Column - Narrower */}
+      )
+    },
+    about: {
+      title: "About Me",
+      content: (
         <div className="space-y-6">
-          {/* Education Section */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-500">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
-              </div>
-              <h3 className="text-lg font-bold text-gray-900">Education</h3>
-            </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+          >
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <User size={18} className="text-blue-500" />
+              Profile
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
+              {summary}
+            </p>
 
-            <div className="space-y-6">
-              {/* College */}
-              <div className="relative group">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center text-xl flex-shrink-0">🎓</div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 text-sm">BSc in Information Technology</h4>
-                    <p className="text-xs text-gray-600 mt-0.5">Quezon City University</p>
-                    <p className="text-xs text-gray-400 mt-1">📅 2023 - Present</p>
-                    <div className="mt-2 space-y-1">
-                      <p className="text-xs text-gray-500 leading-relaxed">• Specializing in Software Engineering</p>
-                      <p className="text-xs text-gray-500 leading-relaxed">• Full-stack development & architecture</p>
+            <div className="flex flex-wrap gap-2 mt-4">
+              {['CURIOUS', 'LEADERSHIP', 'RIGOROUS', 'METICULOUS', 'EMPHATIC', 'SOCIABLE'].map(trait => (
+                <span key={trait} className="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-md text-[10px] font-bold tracking-wider">
+                  {trait}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <Target size={16} className="text-green-500" />
+                Goals & Values
+              </h3>
+              <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                <p><strong>Short-term:</strong> Complete my degree and gain practical experience through internships.</p>
+                <p><strong>Long-term:</strong> Become a senior software engineer and lead projects that make a positive impact on society.</p>
+                <p><strong>Values:</strong> Integrity, collaboration, continuous learning, respect, working together.</p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <FileText size={16} className="text-purple-500" />
+                Hobbies & Interests
+              </h3>
+              <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                <p><strong>Hobbies:</strong> Playing video games, watching movies, exploring new places, reading books about Philosophy and Psychology.</p>
+                <p><strong>Interests:</strong> Web development, mobile app development, artificial intelligence, cybersecurity, networking.</p>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      )
+    },
+    skills: {
+      title: "Skills & Expertise",
+      content: (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {skills.map((skillGroup, index) => (
+            <motion.div
+              key={skillGroup.category}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 uppercase tracking-wider">{skillGroup.category}</h3>
+              <div className="flex flex-wrap gap-2">
+                {skillGroup.skills.map(skill => (
+                  <motion.span
+                    key={skill}
+                    whileHover={{ scale: 1.05 }}
+                    className="px-3 py-1.5 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 rounded-lg text-xs font-medium hover:border-blue-300 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-600 transition-colors"
+                  >
+                    {skill}
+                  </motion.span>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )
+    },
+    experience: {
+      title: "Experience & Education",
+      content: (
+        <div className="space-y-8">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+              <Briefcase size={20} className="text-blue-500" />
+              Work Experience
+            </h3>
+            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 dark:before:via-slate-600 before:to-transparent">
+              {experience.map((exp, index) => (
+                <motion.div
+                  key={exp.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active"
+                >
+                  <div className="flex items-center justify-center w-6 h-6 rounded-full border border-white dark:border-slate-800 bg-blue-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                    <CheckCircle size={12} />
+                  </div>
+                  <div className="w-[calc(100%-2.5rem)] md:w-[calc(50%-1.5rem)] bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all duration-300">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-1">
+                      <div className="font-bold text-slate-900 dark:text-white">{exp.position}</div>
+                      <time className="font-mono text-xs text-slate-500 dark:text-slate-400">
+                        {exp.startDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - {exp.endDate ? exp.endDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Present'}
+                      </time>
+                    </div>
+                    <div className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">{exp.company}</div>
+                    <ul className="list-disc list-inside text-xs text-slate-600 dark:text-slate-300 space-y-1 mb-3 ml-2">
+                      {exp.description.map((desc, i) => <li key={i}>{desc}</li>)}
+                    </ul>
+                    <div className="flex flex-wrap gap-1.5">
+                      {exp.technologies.map(tech => (
+                        <span key={tech} className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-medium text-slate-600 dark:text-slate-300">{tech}</span>
+                      ))}
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* SHS */}
-              <div className="relative group">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center text-xl flex-shrink-0">🏫</div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 text-sm">Information Technology</h4>
-                    <p className="text-xs text-gray-600 mt-0.5">Asian Institute of Computer Studies</p>
-                    <p className="text-xs text-gray-400 mt-1">📅 2021 - 2023</p>
-                    <p className="text-xs text-gray-500 mt-2 leading-relaxed">• Foundational programming & networking</p>
-                  </div>
-                </div>
-              </div>
+                </motion.div>
+              ))}
             </div>
           </div>
 
-          {/* Experience Section */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-500">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
-              </div>
-              <h3 className="text-lg font-bold text-gray-900">Experience</h3>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="w-12 h-12 rounded-lg bg-indigo-100 flex items-center justify-center text-xl flex-shrink-0">📊</div>
-              <div>
-                <h4 className="font-bold text-gray-900 text-sm">Data Encoder</h4>
-                <p className="text-xs text-gray-600 mt-0.5">State Lab Clinics</p>
-                <p className="text-xs text-gray-400 mt-1">📅 Apr 2022 - Jul 2022</p>
-                <p className="text-xs text-gray-500 mt-2 leading-relaxed">Accurately encoded patient info and managed digital files under strict privacy standards.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Get in touch Section */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center text-pink-500">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><path d="m22 6-10 7L2 6" /></svg>
-              </div>
-              <h3 className="text-lg font-bold text-gray-900">Get in touch</h3>
-            </div>
-            <p className="text-xs text-gray-500 leading-relaxed mb-6">
-              Let's build something great together — feel free to connect via social media.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              {socialLinks.map((link, idx) => (
-                <a
-                  key={idx}
-                  href="#"
-                  className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-600 font-bold hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all shadow-sm"
-                  title={link.name}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+              <GraduationCap size={20} className="text-emerald-500" />
+              Education
+            </h3>
+            <div className="space-y-4">
+              {education.map((edu, index) => (
+                <motion.div
+                  key={edu.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + index * 0.1 }}
+                  className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                 >
-                  {link.icon}
-                </a>
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <BookOpen size={20} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white text-sm">{edu.degree} in {edu.field}</h4>
+                    <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">{edu.institution}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                      {edu.startDate.getFullYear()} - {edu.endDate ? edu.endDate.getFullYear() : 'Present'}
+                    </div>
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
         </div>
-      </div>
-    ),
-    metadata: {
-      lastUpdated: new Date(),
-      tags: ['personal', 'background', 'education', 'experience', 'certificates']
-    }
-  },
-
-  certificates: {
-    title: 'Certifications',
-    content: (
-      <div className="space-y-6">
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-100 flex-shrink-0">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15V3" /><path d="m8 7 4-4 4 4" /><path d="M20 12.5a8.5 8.5 0 1 1-9-8.472" /><path d="M22 22 2 2" /></svg>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 leading-none">Professional Certificates</h3>
-              <p className="text-sm text-gray-500 mt-1.5">A full collection of my professional credentials and course completions.</p>
-            </div>
-            <div className="ml-auto">
-              <span className="text-[10px] font-black text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 uppercase tracking-widest">
-                {certificatesData.length} Total
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {certificatesData.map((cert, idx) => {
-              const style = certIconStyles[idx % certIconStyles.length];
-              return (
-                <div key={idx} className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:bg-gray-50 hover:border-gray-200 transition-all group bg-white shadow-sm overflow-hidden">
-                  <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm border border-gray-100 overflow-hidden">
-                    <img
-                      src="/images/certification/udemy.png"
-                      alt="Udemy"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-gray-900 text-sm leading-tight group-hover:text-blue-600 transition-colors uppercase truncate">{cert}</p>
-                    <p className="text-[9px] text-emerald-500 font-bold mt-1 uppercase tracking-widest flex items-center gap-1">
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                      Verified
-                    </p>
+      )
+    },
+    projects: {
+      title: "Projects & Certifications",
+      content: (
+        <div className="space-y-8">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <Code size={20} className="text-indigo-500" />
+              Featured Projects
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm group cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col"
+              >
+                <div className="h-32 bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+                  <FolderOpen size={48} className="text-slate-300 dark:text-slate-500 group-hover:scale-110 transition-transform duration-500" />
+                </div>
+                <div className="p-4 flex flex-col flex-1">
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Portfolio Website</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-300 mb-3 flex-1">A modern, responsive personal portfolio built with Next.js, React, Tailwind CSS, and Framer Motion.</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {['Next.js', 'React', 'Tailwind CSS'].map(tech => (
+                      <span key={tech} className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-medium">{tech}</span>
+                    ))}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    ),
-    metadata: {
-      lastUpdated: new Date(),
-      tags: ['certifications', 'skills']
-    }
-  },
+              </motion.div>
 
-  projects: {
-    title: 'Projects',
-    content: (
-      <div className="space-y-8">
-        <p className="text-lg text-gray-700 leading-relaxed">
-          A showcase of some of my recent work, demonstrating various technologies and problem-solving approaches.
-        </p>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600"></div>
-            <div className="p-6">
-              <h3 className="font-semibold text-gray-900 mb-2">E-Commerce Platform</h3>
-              <p className="text-gray-600 text-sm mb-4">
-                A full-featured e-commerce solution with real-time inventory management,
-                payment processing, and admin dashboard.
-              </p>
-              <div className="flex flex-wrap gap-2 mb-4">
-                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">React</span>
-                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">Node.js</span>
-                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">PostgreSQL</span>
-                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">Stripe</span>
-              </div>
-              <div className="flex gap-3">
-                <a href="#" className="text-blue-600 hover:underline text-sm">Live Demo</a>
-                <a href="#" className="text-gray-600 hover:underline text-sm">GitHub</a>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm group cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col"
+              >
+                <div className="h-32 bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+                  <MessageSquare size={48} className="text-slate-300 dark:text-slate-500 group-hover:scale-110 transition-transform duration-500" />
+                </div>
+                <div className="p-4 flex flex-col flex-1">
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Chat Application</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-300 mb-3 flex-1">A real-time messaging application built with Flutter, Firebase, and Provider state management.</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {['Flutter', 'Dart', 'Firebase'].map(tech => (
+                      <span key={tech} className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-medium">{tech}</span>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </div>
 
-          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            <div className="h-48 bg-gradient-to-br from-green-400 to-green-600"></div>
-            <div className="p-6">
-              <h3 className="font-semibold text-gray-900 mb-2">Task Management App</h3>
-              <p className="text-gray-600 text-sm mb-4">
-                A collaborative project management tool with real-time updates,
-                team collaboration features, and advanced analytics.
-              </p>
-              <div className="flex flex-wrap gap-2 mb-4">
-                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Vue.js</span>
-                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Express</span>
-                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">MongoDB</span>
-                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Socket.io</span>
-              </div>
-              <div className="flex gap-3">
-                <a href="#" className="text-blue-600 hover:underline text-sm">Live Demo</a>
-                <a href="#" className="text-gray-600 hover:underline text-sm">GitHub</a>
-              </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <Award size={20} className="text-orange-500" />
+              Certifications ({certifications.length} Total)
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {certifications.map((cert, index) => (
+                <motion.button
+                  key={cert.id}
+                  onClick={() => openCertModal(cert)}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.03 }}
+                  className="text-left p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/30 text-orange-500 dark:text-orange-400 flex items-center justify-center shrink-0">
+                      <CheckCircle size={14} />
+                    </div>
+                    <div className="min-w-0">
+                      <h5 className="text-sm font-semibold text-gray-900 dark:text-white leading-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors line-clamp-2">{cert.name}</h5>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{cert.issuer}</p>
+                    </div>
+                    <ExternalLink size={14} className="text-gray-300 dark:text-gray-600 group-hover:text-orange-400 transition-colors shrink-0 mt-1" />
+                  </div>
+                </motion.button>
+              ))}
             </div>
           </div>
         </div>
-      </div>
-    ),
-    metadata: {
-      lastUpdated: new Date(),
-      tags: ['portfolio', 'development', 'showcase']
+      )
+    },
+    github: {
+      title: "GitHub Activity",
+      content: <GitHubSection />
+    },
+    contact: {
+      title: "Get In Touch",
+      content: (
+        <div className="max-w-2xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700 mb-6 text-center hover:shadow-lg transition-all duration-300"
+          >
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Phone size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Let's Connect</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+              I'm currently looking for new opportunities, internships, and exciting projects.
+              Whether you have a question or just want to say hi, I'll try my best to get back to you!
+            </p>
+
+            <a
+              href={`mailto:${personalInfo.email}`}
+              className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              <Mail size={18} />
+              Send Me an Email
+            </a>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { name: 'GitHub', url: personalInfo.github, icon: <GithubIcon size={24} /> },
+              { name: 'LinkedIn', url: personalInfo.linkedin, icon: <LinkedinIcon size={24} /> },
+              { name: 'TikTok', url: 'https://www.tiktok.com/@galaxyfrog20', icon: <TiktokIcon size={24} /> },
+              { name: 'Instagram', url: 'https://www.instagram.com/_nous.c/', icon: <InstagramIcon size={24} /> },
+            ].map((social, i) => (
+              <motion.a
+                key={social.name}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + i * 0.1 }}
+                className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group shadow-sm"
+              >
+                <span className="text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  {social.icon}
+                </span>
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{social.name}</span>
+              </motion.a>
+            ))}
+          </div>
+        </div>
+      )
     }
-  },
-
-};
-
-export const projectsData: ProjectData[] = [
-  {
-    id: '1',
-    title: 'E-Commerce Platform',
-    description: 'A full-featured e-commerce solution with real-time inventory management, payment processing, and admin dashboard.',
-    technologies: ['React', 'Node.js', 'PostgreSQL', 'Stripe'],
-    liveUrl: 'https://example.com',
-    githubUrl: 'https://github.com/carlobaclao/ecommerce',
-    imageUrl: '/projects/ecommerce.jpg',
-    featured: true
-  },
-  {
-    id: '2',
-    title: 'Task Management App',
-    description: 'A collaborative project management tool with real-time updates, team collaboration features, and advanced analytics.',
-    technologies: ['Vue.js', 'Express', 'MongoDB', 'Socket.io'],
-    liveUrl: 'https://example.com',
-    githubUrl: 'https://github.com/carlobaclao/taskmanager',
-    imageUrl: '/projects/taskmanager.jpg',
-    featured: true
-  }
-];
-
-export const achievementsData: AchievementData[] = [
-  {
-    id: '1',
-    title: 'Employee of the Year 2023',
-    organization: 'Tech Solutions Inc.',
-    date: new Date('2023-12-01'),
-    description: 'Recognized for outstanding performance and leadership in delivering critical projects.',
-    type: 'award'
-  },
-  {
-    id: '2',
-    title: 'AWS Certified Developer - Associate',
-    organization: 'Amazon Web Services',
-    date: new Date('2023-06-01'),
-    description: 'Demonstrated expertise in developing and maintaining applications on AWS platform.',
-    type: 'certification'
-  }
-];
+  };
+}

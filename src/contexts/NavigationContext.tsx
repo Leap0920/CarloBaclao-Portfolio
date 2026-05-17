@@ -1,13 +1,15 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { NavigationSection, NavigationContextType } from '@/types';
+import { NavigationSection, NavigationContextType, CertificationItem } from '@/types';
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
 
 export function NavigationProvider({ children }: { children: React.ReactNode }) {
   const [currentSection, setCurrentSection] = useState<NavigationSection>('home');
   const [isResumeOpen, setIsResumeOpen] = useState(false);
+  const [selectedCertification, setSelectedCertification] = useState<CertificationItem | null>(null);
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
 
   const handleSectionChange = useCallback((section: NavigationSection) => {
     setCurrentSection(section);
@@ -21,12 +23,26 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     setIsResumeOpen(false);
   }, []);
 
+  const openCertModal = useCallback((cert: CertificationItem) => {
+    setSelectedCertification(cert);
+    setIsCertModalOpen(true);
+  }, []);
+
+  const closeCertModal = useCallback(() => {
+    setIsCertModalOpen(false);
+    setSelectedCertification(null);
+  }, []);
+
   const value: NavigationContextType = {
     currentSection,
     setCurrentSection: handleSectionChange,
     isResumeOpen,
     openResume,
     closeResume,
+    selectedCertification,
+    isCertModalOpen,
+    openCertModal,
+    closeCertModal,
   };
 
   return (

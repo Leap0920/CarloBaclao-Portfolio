@@ -1,55 +1,70 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { NavigationMenuProps } from '@/types/components';
 import { NavigationSection } from '@/types';
+import { Home, User, Code, Briefcase, Calendar, Phone, ChevronRight } from 'lucide-react';
+import { GithubIcon } from './BrandIcons';
 
 const navigationItems: { section: NavigationSection; label: string; icon: React.ReactNode }[] = [
-  { 
-    section: 'home', 
-    label: 'Home', 
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
-  },
-  { 
-    section: 'about', 
-    label: 'About', 
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-  },
-  { 
-    section: 'certificates', 
-    label: 'Certifications', 
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15V3"/><path d="m8 7 4-4 4 4"/><path d="M20 12.5a8.5 8.5 0 1 1-9-8.472"/><path d="M22 22 2 2"/></svg>
-  },
-  { 
-    section: 'projects', 
-    label: 'Projects', 
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-  },
+  { section: 'home', label: 'Home', icon: <Home size={18} /> },
+  { section: 'about', label: 'About', icon: <User size={18} /> },
+  { section: 'skills', label: 'Skills', icon: <Code size={18} /> },
+  { section: 'experience', label: 'Experience', icon: <Briefcase size={18} /> },
+  { section: 'projects', label: 'Projects', icon: <Calendar size={18} /> },
+  { section: 'github', label: 'GitHub', icon: <GithubIcon size={18} /> },
+  { section: 'contact', label: 'Contact', icon: <Phone size={18} /> },
 ];
 
 export function NavigationMenu({ currentSection, onSectionChange }: NavigationMenuProps) {
   return (
-    <nav className="px-4 py-2" role="navigation" aria-label="Main navigation">
-      <ul className="space-y-1">
-        {navigationItems.map(({ section, label, icon }) => {
+    <nav className="px-4 py-1" role="navigation" aria-label="Main navigation">
+      <ul className="space-y-0.5">
+        {navigationItems.map(({ section, label, icon }, index) => {
           const isActive = currentSection === section;
-          
+
           return (
-            <li key={section}>
-              <button
+            <motion.li
+              key={section}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
+            >
+              <motion.button
                 onClick={() => onSectionChange(section)}
-                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                className={`w-full flex items-center px-3 py-2 text-sm text-left rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 relative overflow-hidden ${
                   isActive
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-slate-800 text-white dark:bg-blue-600'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-white'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
               >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeIndicator"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-400 rounded-full"
+                    initial={false}
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                  />
+                )}
                 <span className="mr-3 flex-shrink-0" role="img" aria-hidden="true">
                   {icon}
                 </span>
                 <span className="font-medium">{label}</span>
-              </button>
-            </li>
+                {isActive && (
+                  <motion.div
+                    className="ml-auto text-blue-300"
+                    initial={{ opacity: 0, x: -5 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronRight size={12} />
+                  </motion.div>
+                )}
+              </motion.button>
+            </motion.li>
           );
         })}
       </ul>

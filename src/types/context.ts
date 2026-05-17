@@ -1,6 +1,6 @@
 // Context type definitions for state management
 
-import { NavigationSection, SectionContent, ProjectData, AchievementData, ResumeData } from './index';
+import { NavigationSection, SectionContent, ProjectData, AchievementData, ResumeData, CertificationItem } from './index';
 
 export interface NavigationContextType {
   currentSection: NavigationSection;
@@ -8,6 +8,10 @@ export interface NavigationContextType {
   isResumeOpen: boolean;
   openResume: () => void;
   closeResume: () => void;
+  selectedCertification: CertificationItem | null;
+  isCertModalOpen: boolean;
+  openCertModal: (cert: CertificationItem) => void;
+  closeCertModal: () => void;
 }
 
 export interface ContentContextType {
@@ -25,7 +29,7 @@ export interface AppState {
   ui: {
     isMobileMenuOpen: boolean;
     isLoading: boolean;
-    theme: 'light'; // Fixed to light theme as per requirements
+    theme: 'light' | 'dark';
   };
   content: {
     sections: Record<NavigationSection, SectionContent>;

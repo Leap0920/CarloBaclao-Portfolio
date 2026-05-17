@@ -20,7 +20,7 @@ export function UserProfile({ name, title, photoUrl, onResumeClick }: UserProfil
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       >
         <motion.div
-          className="w-full h-full rounded-full overflow-hidden"
+          className="w-full h-full rounded-full overflow-hidden ring-2 ring-blue-500/30"
           animate={{
             boxShadow: [
               '0 0 0 0px rgba(59, 130, 246, 0.2)',
@@ -51,10 +51,10 @@ export function UserProfile({ name, title, photoUrl, onResumeClick }: UserProfil
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
       >
-        <h1 className="text-base font-semibold text-gray-900 dark:text-white mb-0.5">
+        <h1 className="text-base font-semibold text-white mb-0.5">
           {name}
         </h1>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-gray-400">
           {title}
         </p>
       </motion.div>
@@ -62,7 +62,7 @@ export function UserProfile({ name, title, photoUrl, onResumeClick }: UserProfil
       {/* Resume Button */}
       <motion.button
         onClick={onResumeClick}
-        className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 flex items-center justify-center gap-1.5 mb-4"
+        className="w-full px-3 py-2 bg-slate-700 text-gray-200 text-xs font-medium rounded-lg hover:bg-slate-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 flex items-center justify-center gap-1.5 mb-4"
         aria-label="View resume"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
@@ -71,16 +71,16 @@ export function UserProfile({ name, title, photoUrl, onResumeClick }: UserProfil
         Resume
       </motion.button>
 
-      {/* Contact Info (Compact) */}
+      {/* Contact Info */}
       <motion.div
-        className="w-full space-y-2 text-xs text-gray-500 dark:text-gray-400"
+        className="w-full space-y-2 text-xs text-gray-400"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
         <div className="flex items-center gap-2 truncate">
           <Mail size={12} className="shrink-0" />
-          <a href="mailto:baclao.carlo.cometa@gmail.com" className="hover:text-blue-500 truncate transition-colors" title="baclao.carlo.cometa@gmail.com">baclao.carlo.cometa@gmail.com</a>
+          <a href="mailto:baclao.carlo.cometa@gmail.com" className="hover:text-blue-400 truncate transition-colors" title="baclao.carlo.cometa@gmail.com">baclao.carlo.cometa@gmail.com</a>
         </div>
         <div className="flex items-center gap-2">
           <Phone size={12} className="shrink-0" />

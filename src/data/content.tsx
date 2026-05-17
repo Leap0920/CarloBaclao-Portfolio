@@ -3,16 +3,19 @@ import { motion } from 'framer-motion';
 import { SectionContent, NavigationSection, CertificationItem } from '@/types';
 import { resumeData } from './resume';
 import { GitHubSection } from '@/components/GitHubSection';
+import { ProjectShowcase } from '@/components/ProjectShowcase';
 import {
   Briefcase, Sparkles, Award, Layers, User, Target, FileText,
   GraduationCap, BookOpen, Code, FolderOpen, MessageSquare,
-  CheckCircle, Phone, Mail, ExternalLink,
+  CheckCircle, Phone, Mail, ExternalLink, Eye, Globe, Lock, Monitor,
+  Server, Database, GitBranch,
 } from 'lucide-react';
 import { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from '@/components/BrandIcons';
+import Image from 'next/image';
 
 const { personalInfo, summary, experience, education, skills, certifications } = resumeData;
 
-export function getSectionContent(openCertModal: (cert: CertificationItem) => void): Record<NavigationSection, SectionContent> {
+export function getSectionContent(openCertModal: (cert: CertificationItem) => void, openResume: () => void): Record<NavigationSection, SectionContent> {
   return {
     home: {
       title: "Welcome",
@@ -69,18 +72,17 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center justify-center text-center hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-slate-700 flex flex-col items-center justify-center text-center hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
               >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                  stat.color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' :
-                  stat.color === 'emerald' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' :
-                  stat.color === 'orange' ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
-                  'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
-                }`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${stat.color === 'blue' ? 'bg-blue-900/30 text-blue-400' :
+                  stat.color === 'emerald' ? 'bg-emerald-900/30 text-emerald-400' :
+                    stat.color === 'orange' ? 'bg-orange-900/30 text-orange-400' :
+                      'bg-purple-900/30 text-purple-400'
+                  }`}>
                   {stat.icon}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+                <h3 className="text-xl font-bold text-white">{stat.value}</h3>
+                <p className="text-xs text-gray-400">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -94,19 +96,19 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-5 shadow-sm border border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
           >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
               <User size={18} className="text-blue-500" />
               Profile
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
+            <p className="text-sm text-gray-300 leading-relaxed mb-4">
               {summary}
             </p>
 
             <div className="flex flex-wrap gap-2 mt-4">
               {['CURIOUS', 'LEADERSHIP', 'RIGOROUS', 'METICULOUS', 'EMPHATIC', 'SOCIABLE'].map(trait => (
-                <span key={trait} className="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-md text-[10px] font-bold tracking-wider">
+                <span key={trait} className="px-2.5 py-1 bg-slate-700 text-slate-200 rounded-md text-[10px] font-bold tracking-wider">
                   {trait}
                 </span>
               ))}
@@ -118,13 +120,13 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-5 shadow-sm border border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
             >
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
                 <Target size={16} className="text-green-500" />
                 Goals & Values
               </h3>
-              <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+              <div className="space-y-3 text-sm text-gray-300">
                 <p><strong>Short-term:</strong> Complete my degree and gain practical experience through internships.</p>
                 <p><strong>Long-term:</strong> Become a senior software engineer and lead projects that make a positive impact on society.</p>
                 <p><strong>Values:</strong> Integrity, collaboration, continuous learning, respect, working together.</p>
@@ -135,13 +137,13 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-5 shadow-sm border border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
             >
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
                 <FileText size={16} className="text-purple-500" />
                 Hobbies & Interests
               </h3>
-              <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+              <div className="space-y-3 text-sm text-gray-300">
                 <p><strong>Hobbies:</strong> Playing video games, watching movies, exploring new places, reading books about Philosophy and Psychology.</p>
                 <p><strong>Interests:</strong> Web development, mobile app development, artificial intelligence, cybersecurity, networking.</p>
               </div>
@@ -153,184 +155,144 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
     skills: {
       title: "Skills & Expertise",
       content: (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {skills.map((skillGroup, index) => (
-            <motion.div
-              key={skillGroup.category}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-            >
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 uppercase tracking-wider">{skillGroup.category}</h3>
-              <div className="flex flex-wrap gap-2">
-                {skillGroup.skills.map(skill => (
-                  <motion.span
-                    key={skill}
+        <div className="space-y-6">
+          {/* Resume Preview */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-slate-800/80 backdrop-blur-sm rounded-xl overflow-hidden border border-slate-700 shadow-sm hover:shadow-lg transition-all duration-300 group cursor-pointer"
+            onClick={openResume}
+          >
+            <div className="relative h-48 md:h-56 overflow-hidden">
+              <Image
+                src="/images/cover.jpg"
+                alt="Resume Preview"
+                fill
+                className="object-cover object-top opacity-70 group-hover:opacity-90 group-hover:scale-[1.02] transition-all duration-500"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-white font-bold text-lg">My Resume</h3>
+                    <p className="text-white/70 text-xs">Click to view full resume</p>
+                  </div>
+                  <motion.button
+                    className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-white/30 transition-colors"
                     whileHover={{ scale: 1.05 }}
-                    className="px-3 py-1.5 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 rounded-lg text-xs font-medium hover:border-blue-300 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-600 transition-colors"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => { e.stopPropagation(); openResume(); }}
                   >
-                    {skill}
-                  </motion.span>
-                ))}
+                    <Eye size={16} />
+                    View
+                  </motion.button>
+                </div>
               </div>
-            </motion.div>
-          ))}
+            </div>
+          </motion.div>
+
+          {/* Skill Categories */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {skills.map((skillGroup, index) => (
+              <motion.div
+                key={skillGroup.category}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: (index + 1) * 0.1 }}
+                className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-5 shadow-sm border border-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">{skillGroup.category}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {skillGroup.skills.map(skill => (
+                    <motion.span
+                      key={skill}
+                      whileHover={{ scale: 1.05 }}
+                      className="px-3 py-1.5 bg-slate-700 border border-slate-600 text-gray-200 rounded-lg text-xs font-medium hover:border-blue-500 hover:text-blue-400 hover:bg-slate-600 transition-colors"
+                    >
+                      {skill}
+                    </motion.span>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       )
     },
     experience: {
       title: "Experience & Education",
-      content: (
-        <div className="space-y-8">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-              <Briefcase size={20} className="text-blue-500" />
-              Work Experience
-            </h3>
-            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 dark:before:via-slate-600 before:to-transparent">
-              {experience.map((exp, index) => (
-                <motion.div
-                  key={exp.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active"
-                >
-                  <div className="flex items-center justify-center w-6 h-6 rounded-full border border-white dark:border-slate-800 bg-blue-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
-                    <CheckCircle size={12} />
-                  </div>
-                  <div className="w-[calc(100%-2.5rem)] md:w-[calc(50%-1.5rem)] bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all duration-300">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-1">
-                      <div className="font-bold text-slate-900 dark:text-white">{exp.position}</div>
-                      <time className="font-mono text-xs text-slate-500 dark:text-slate-400">
-                        {exp.startDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - {exp.endDate ? exp.endDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Present'}
-                      </time>
-                    </div>
-                    <div className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">{exp.company}</div>
-                    <ul className="list-disc list-inside text-xs text-slate-600 dark:text-slate-300 space-y-1 mb-3 ml-2">
-                      {exp.description.map((desc, i) => <li key={i}>{desc}</li>)}
-                    </ul>
-                    <div className="flex flex-wrap gap-1.5">
-                      {exp.technologies.map(tech => (
-                        <span key={tech} className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-medium text-slate-600 dark:text-slate-300">{tech}</span>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-              <GraduationCap size={20} className="text-emerald-500" />
-              Education
-            </h3>
-            <div className="space-y-4">
-              {education.map((edu, index) => (
-                <motion.div
-                  key={edu.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
-                  className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <BookOpen size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900 dark:text-white text-sm">{edu.degree} in {edu.field}</h4>
-                    <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">{edu.institution}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">
-                      {edu.startDate.getFullYear()} - {edu.endDate ? edu.endDate.getFullYear() : 'Present'}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )
+      content: <ExperienceSection openCertModal={openCertModal} />
     },
     projects: {
-      title: "Projects & Certifications",
+      title: "Projects",
       content: (
-        <div className="space-y-8">
+        <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
               <Code size={20} className="text-indigo-500" />
               Featured Projects
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm group cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col"
-              >
-                <div className="h-32 bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-                  <FolderOpen size={48} className="text-slate-300 dark:text-slate-500 group-hover:scale-110 transition-transform duration-500" />
-                </div>
-                <div className="p-4 flex flex-col flex-1">
-                  <h4 className="font-bold text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Portfolio Website</h4>
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mb-3 flex-1">A modern, responsive personal portfolio built with Next.js, React, Tailwind CSS, and Framer Motion.</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {['Next.js', 'React', 'Tailwind CSS'].map(tech => (
-                      <span key={tech} className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-medium">{tech}</span>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
+            <div className="space-y-4">
+              <ProjectShowcase
+                name="Attendance Management System"
+                subtitle="Full-Stack IoT Enterprise Solution"
+                description="End-to-end attendance system with Java Spring Boot backend, React (Vite) frontend, and PostgreSQL deployed on Raspberry Pi. Features Flyway migrations, SMTP email automation, security whitelisting, and a standalone Windows .exe installer."
+                techStack={['Java', 'Spring Boot', 'React', 'TypeScript', 'PostgreSQL', 'Raspberry Pi', 'Flyway', 'Linux']}
+                image="/images/projects/attendance/4.png"
+                url="https://github.com/Leap0920/Attendance-management-system"
+                accentText="text-indigo-400"
+                accentBadge="bg-indigo-900/40 text-indigo-300"
+                accentBadgeBorder="border-indigo-800/50"
+              />
 
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1 }}
-                className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm group cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col"
-              >
-                <div className="h-32 bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-                  <MessageSquare size={48} className="text-slate-300 dark:text-slate-500 group-hover:scale-110 transition-transform duration-500" />
-                </div>
-                <div className="p-4 flex flex-col flex-1">
-                  <h4 className="font-bold text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Chat Application</h4>
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mb-3 flex-1">A real-time messaging application built with Flutter, Firebase, and Provider state management.</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {['Flutter', 'Dart', 'Firebase'].map(tech => (
-                      <span key={tech} className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-medium">{tech}</span>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
+              <ProjectShowcase
+                name="Tally DCPH"
+                subtitle="Scoring System"
+                description="A scoring system for tracking and organizing records with an intuitive dashboard."
+                techStack={['JavaScript', 'HTML', 'CSS', 'MySQL']}
+                image="/images/projects/tally/2.png"
+                url="https://github.com/Leap0920/Tally-DCPH"
+                accentText="text-emerald-400"
+                accentBadge="bg-emerald-900/40 text-emerald-300"
+                accentBadgeBorder="border-emerald-800/50"
+              />
 
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Award size={20} className="text-orange-500" />
-              Certifications ({certifications.length} Total)
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {certifications.map((cert, index) => (
-                <motion.button
-                  key={cert.id}
-                  onClick={() => openCertModal(cert)}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.03 }}
-                  className="text-left p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/30 text-orange-500 dark:text-orange-400 flex items-center justify-center shrink-0">
-                      <CheckCircle size={14} />
-                    </div>
-                    <div className="min-w-0">
-                      <h5 className="text-sm font-semibold text-gray-900 dark:text-white leading-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors line-clamp-2">{cert.name}</h5>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{cert.issuer}</p>
-                    </div>
-                    <ExternalLink size={14} className="text-gray-300 dark:text-gray-600 group-hover:text-orange-400 transition-colors shrink-0 mt-1" />
-                  </div>
-                </motion.button>
-              ))}
+              <ProjectShowcase
+                name="Accounting & Finance System"
+                subtitle="Financial Management Application"
+                description="A complete PHP-based accounting and finance management system for tracking transactions, generating reports, and managing financial data."
+                techStack={['PHP', 'MySQL', 'HTML', 'CSS', 'JavaScript']}
+                image="/images/projects/accounting/1.png"
+                url="https://github.com/Leap0920/accounting-and-finance-Sia2-"
+                accentText="text-amber-400"
+                accentBadge="bg-amber-900/40 text-amber-300"
+                accentBadgeBorder="border-amber-800/50"
+              />
+
+              <ProjectShowcase
+                name="Wallet"
+                subtitle="Digital Wallet Application"
+                description="A modern digital wallet application built with Next.js for managing transactions, balances, and payment history with MongoDB as the database."
+                techStack={['Next.js', 'MongoDB', 'Tailwind CSS', 'TypeScript']}
+                image="/images/projects/wallet/Screenshot 2026-05-17 182931.png"
+                url="https://github.com/Leap0920/Wallet"
+                accentText="text-blue-400"
+                accentBadge="bg-blue-900/40 text-blue-300"
+                accentBadgeBorder="border-blue-800/50"
+              />
+
+              <ProjectShowcase
+                name="LECUISINE"
+                subtitle="Web Application"
+                description="A fully designed and deployed web application with responsive UI and modern frontend stack, hosted live on GitHub Pages."
+                techStack={['JavaScript', 'HTML', 'CSS', 'GitHub Pages']}
+                image="/images/projects/lecuisine.png"
+                url="https://leap0920.github.io/LECUISINE/"
+                accentText="text-teal-400"
+                accentBadge="bg-teal-900/40 text-teal-300"
+                accentBadgeBorder="border-teal-800/50"
+              />
             </div>
           </div>
         </div>
@@ -347,13 +309,13 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700 mb-6 text-center hover:shadow-lg transition-all duration-300"
+            className="bg-slate-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-slate-700 mb-6 text-center hover:shadow-lg transition-all duration-300"
           >
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 bg-blue-900/30 text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4">
               <Phone size={24} />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Let's Connect</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+            <h3 className="text-xl font-bold text-white mb-2">Let's Connect</h3>
+            <p className="text-sm text-gray-300 mb-6">
               I'm currently looking for new opportunities, internships, and exciting projects.
               Whether you have a question or just want to say hi, I'll try my best to get back to you!
             </p>
@@ -382,12 +344,12 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + i * 0.1 }}
-                className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group shadow-sm"
+                className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-slate-700 hover:border-slate-600 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group shadow-sm"
               >
-                <span className="text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <span className="text-slate-400 group-hover:text-blue-400 transition-colors">
                   {social.icon}
                 </span>
-                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{social.name}</span>
+                <span className="text-xs font-medium text-slate-300">{social.name}</span>
               </motion.a>
             ))}
           </div>
@@ -395,4 +357,110 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
       )
     }
   };
+}
+
+// Experience section — all sections in one scrollable view
+function ExperienceSection({ openCertModal }: { openCertModal: (cert: CertificationItem) => void }) {
+  return (
+    <div className="space-y-8">
+      {/* Work Experience */}
+      <div>
+        <h3 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
+          <Briefcase size={20} className="text-blue-500" />
+          Work Experience
+        </h3>
+        <div className="space-y-6 pl-3 border-l-2 border-blue-500/40">
+          {experience.map((exp, index) => (
+            <motion.div
+              key={exp.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="relative"
+            >
+              <div className="absolute -left-[1.15rem] top-4 w-2.5 h-2.5 rounded-full bg-blue-500 border-2 border-slate-900 z-10" />
+              <div className="ml-4 bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl border border-slate-700 shadow-sm hover:shadow-lg transition-all duration-300">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-1">
+                  <div className="font-bold text-white">{exp.position}</div>
+                  <time className="font-mono text-xs text-slate-400">
+                    {exp.startDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - {exp.endDate ? exp.endDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Present'}
+                  </time>
+                </div>
+                <div className="text-sm font-medium text-blue-400 mb-2">{exp.company}</div>
+                <ul className="list-disc list-inside text-xs text-slate-300 space-y-1 mb-3 ml-2">
+                  {exp.description.map((desc, i) => <li key={i}>{desc}</li>)}
+                </ul>
+                <div className="flex flex-wrap gap-1.5">
+                  {exp.technologies.map(tech => (
+                    <span key={tech} className="px-2 py-0.5 bg-slate-700 rounded text-[10px] font-medium text-slate-300">{tech}</span>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Education */}
+      <div>
+        <h3 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
+          <GraduationCap size={20} className="text-emerald-500" />
+          Education
+        </h3>
+        <div className="space-y-4">
+          {education.map((edu, index) => (
+            <motion.div
+              key={edu.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+              className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700 shadow-sm flex items-start gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <div className="w-10 h-10 rounded-lg bg-emerald-900/30 text-emerald-400 flex items-center justify-center shrink-0">
+                <BookOpen size={20} />
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-sm">{edu.degree} in {edu.field}</h4>
+                <div className="text-xs font-medium text-emerald-400 mb-1">{edu.institution}</div>
+                <div className="text-xs text-slate-400">
+                  {edu.startDate.getFullYear()} - {edu.endDate ? edu.endDate.getFullYear() : 'Present'}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Certifications */}
+      <div>
+        <h3 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
+          <Award size={20} className="text-orange-500" />
+          Certifications ({certifications.length})
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {certifications.map((cert, index) => (
+            <motion.button
+              key={cert.id}
+              onClick={() => openCertModal(cert)}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.03 }}
+              className="text-left p-4 bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-700 hover:border-orange-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-orange-900/30 text-orange-400 flex items-center justify-center shrink-0">
+                  <CheckCircle size={14} />
+                </div>
+                <div className="min-w-0">
+                  <h5 className="text-sm font-semibold text-white leading-tight group-hover:text-orange-400 transition-colors line-clamp-2">{cert.name}</h5>
+                  <p className="text-xs text-gray-400 mt-0.5">{cert.issuer}</p>
+                </div>
+                <ExternalLink size={14} className="text-slate-600 group-hover:text-orange-400 transition-colors shrink-0 mt-1" />
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }

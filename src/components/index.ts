@@ -9,6 +9,7 @@ export { DarkModeToggle } from './DarkModeToggle';
 export { RightSidebar } from './RightSidebar';
 export { GitHubSection } from './GitHubSection';
 export { CertificationModal } from './CertificationModal';
+export { ProjectShowcase } from './ProjectShowcase';
 export { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from './BrandIcons';
 
 // Animation components

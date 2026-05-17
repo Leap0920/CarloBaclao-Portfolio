@@ -38,7 +38,7 @@ function TypingGreeting() {
 
   return (
     <div className="flex items-center gap-2 mb-6 px-2">
-      <h1 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight" suppressHydrationWarning>
+      <h1 className="text-xl font-black text-white uppercase tracking-tight" suppressHydrationWarning>
         {displayedText}
         {index < greetingText.length && <motion.span
           className="inline-block w-1.5 h-5 bg-blue-500 ml-1 translate-y-1"
@@ -56,10 +56,9 @@ export function ContentArea({ section, content }: ContentAreaProps) {
       <TypingGreeting />
       <motion.div
         key={section}
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-        className="w-full"
+        transition={{ delay: 0.1, duration: 0.3 }}
       >
         {content}
       </motion.div>

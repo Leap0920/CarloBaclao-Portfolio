@@ -25,15 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} h-full dark`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme:dark)').matches;if(d)document.documentElement.classList.add('dark')}catch(e){}})()`,
+            __html: `document.documentElement.classList.add('dark')`,
           }}
         />
       </head>
-      <body className={`${inter.className} min-h-full bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-slate-100 antialiased`} suppressHydrationWarning>
+      <body className={`${inter.className} min-h-full bg-slate-900 text-slate-100 antialiased`} suppressHydrationWarning>
         {children}
       </body>
     </html>

@@ -1,9 +1,12 @@
 'use client';
 
+import { useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { NavigationProvider, useNavigation, ThemeProvider } from '@/contexts';
 import { Sidebar, ContentArea, ResumeModal, RightSidebar, CertificationModal } from '@/components';
 import { CursorGlow } from '@/components/CursorGlow';
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { SwipeHint } from '@/components/SwipeHint';
 import { getSectionContent } from '@/data/content';
 import { resumeData } from '@/data/resume';
 import { NavigationSection } from '@/types';
@@ -15,6 +18,10 @@ const ParticleBackground = dynamic(() => import('@/components/ParticleBackground
 });
 
 function PortfolioContent() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [leftOpen, setLeftOpen] = useState(false);
+  const [rightOpen, setRightOpen] = useState(false);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
   const {
     currentSection, setCurrentSection,
     isResumeOpen, openResume, closeResume,
@@ -22,9 +29,49 @@ function PortfolioContent() {
   } = useNavigation();
 
   const sectionContent = getSectionContent(openCertModal, openResume, setCurrentSection);
+  const handleLoadingComplete = useCallback(() => setIsLoading(false), []);
+
+  const handleNavChange = useCallback((section: NavigationSection) => {
+    setCurrentSection(section);
+    setLeftOpen(false);
+  }, [setCurrentSection]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const dx = e.changedTouches[0].clientX - touchStart.current.x;
+    const dy = e.changedTouches[0].clientY - touchStart.current.y;
+    const startX = touchStart.current.x;
+    const screenWidth = window.innerWidth;
+    touchStart.current = null;
+
+    // Only trigger if horizontal swipe is dominant and significant
+    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
+
+    if (dx > 0 && startX < 30) {
+      // Swiped right from left edge -> open left sidebar
+      setRightOpen(false);
+      setLeftOpen(true);
+    } else if (dx < 0 && startX > screenWidth - 30) {
+      // Swiped left from right edge -> open right sidebar
+      setLeftOpen(false);
+      setRightOpen(true);
+    } else if (dx < 0 && leftOpen) {
+      // Swiped left while left is open -> close it
+      setLeftOpen(false);
+    } else if (dx > 0 && rightOpen) {
+      // Swiped right while right is open -> close it
+      setRightOpen(false);
+    }
+  }, [leftOpen, rightOpen]);
 
   return (
     <>
+      {isLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
+      <SwipeHint />
       <ParticleBackground />
       <CursorGlow />
       <div className="grain-overlay" />
@@ -33,9 +80,12 @@ function PortfolioContent() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
         className="h-screen p-3 sm:p-4 flex flex-col overflow-hidden text-gray-900 dark:text-slate-100"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         <div className="flex-1 flex gap-4 overflow-hidden max-w-7xl mx-auto w-full">
-          {/* Left Sidebar */}
+          {/* Left Sidebar - Desktop: static, Mobile: swipe-in drawer */}
+          {/* Desktop */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -48,6 +98,34 @@ function PortfolioContent() {
               onResumeOpen={openResume}
             />
           </motion.div>
+
+          {/* Mobile drawer */}
+          <AnimatePresence>
+            {leftOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+                  onClick={() => setLeftOpen(false)}
+                />
+                <motion.div
+                  initial={{ x: '-100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '-100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                  className="md:hidden fixed inset-y-0 left-0 w-72 z-50 p-3"
+                >
+                  <Sidebar
+                    currentSection={currentSection}
+                    onSectionChange={handleNavChange}
+                    onResumeOpen={() => { openResume(); setLeftOpen(false); }}
+                  />
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
 
           {/* Main Content Area */}
           <motion.div
@@ -73,7 +151,8 @@ function PortfolioContent() {
             </AnimatePresence>
           </motion.div>
 
-          {/* Right Sidebar */}
+          {/* Right Sidebar - Desktop: static, Mobile: swipe-in drawer */}
+          {/* Desktop */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -82,6 +161,30 @@ function PortfolioContent() {
           >
             <RightSidebar />
           </motion.div>
+
+          {/* Mobile drawer */}
+          <AnimatePresence>
+            {rightOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+                  onClick={() => setRightOpen(false)}
+                />
+                <motion.div
+                  initial={{ x: '100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                  className="lg:hidden fixed inset-y-0 right-0 w-72 z-50 p-3 overflow-y-auto"
+                >
+                  <RightSidebar />
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Resume Modal */}

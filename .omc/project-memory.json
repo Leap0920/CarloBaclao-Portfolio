@@ -152,6 +152,12 @@
       "type": "file"
     },
     {
+      "path": "src\\app\\page.tsx",
+      "accessCount": 18,
+      "lastAccessed": 1779114411252,
+      "type": "file"
+    },
+    {
       "path": "",
       "accessCount": 14,
       "lastAccessed": 1779110835770,
@@ -170,9 +176,9 @@
       "type": "file"
     },
     {
-      "path": "src\\app\\page.tsx",
-      "accessCount": 9,
-      "lastAccessed": 1779110847412,
+      "path": "src\\components\\LoadingScreen.tsx",
+      "accessCount": 10,
+      "lastAccessed": 1779113683155,
       "type": "file"
     },
     {
@@ -200,6 +206,12 @@
       "type": "directory"
     },
     {
+      "path": "src\\components\\SwipeHint.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1779114940902,
+      "type": "file"
+    },
+    {
       "path": "src\\components\\CursorGlow.tsx",
       "accessCount": 4,
       "lastAccessed": 1779026626204,
@@ -213,8 +225,14 @@
     },
     {
       "path": "src\\components\\Sidebar.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1779113877124,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\RightSidebar.tsx",
       "accessCount": 3,
-      "lastAccessed": 1779110846173,
+      "lastAccessed": 1779113877209,
       "type": "file"
     },
     {
@@ -227,12 +245,6 @@
       "path": "src\\components\\CertificationModal.tsx",
       "accessCount": 2,
       "lastAccessed": 1779110845357,
-      "type": "file"
-    },
-    {
-      "path": "src\\components\\RightSidebar.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1779110846083,
       "type": "file"
     },
     {
@@ -317,6 +329,18 @@
       "path": "public\\images\\projects\\lecuisine",
       "accessCount": 1,
       "lastAccessed": 1779112436087,
+      "type": "directory"
+    },
+    {
+      "path": "src\\app\\layout.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1779112822881,
+      "type": "file"
+    },
+    {
+      "path": ".openclaude",
+      "accessCount": 1,
+      "lastAccessed": 1779114301733,
       "type": "directory"
     }
   ],

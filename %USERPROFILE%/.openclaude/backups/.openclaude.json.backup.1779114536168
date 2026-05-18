@@ -1,0 +1,117 @@
+{
+  "numStartups": 4,
+  "tipsHistory": {
+    "atomic-setup-local": 1,
+    "new-user-warmup": 4,
+    "plan-mode-for-complex-tasks": 1,
+    "memory-command": 3,
+    "theme-command": 3,
+    "powershell-tool-env": 3,
+    "shift-enter": 4,
+    "status-line": 4,
+    "prompt-queue": 4,
+    "enter-to-steer-in-relatime": 4,
+    "todo-list": 4,
+    "install-github-app": 4,
+    "install-slack-app": 4,
+    "drag-and-drop-images": 4,
+    "double-esc-code-restore": 4,
+    "continue": 4,
+    "shift-tab": 4,
+    "image-paste": 4,
+    "desktop-app": 4,
+    "web-app": 4
+  },
+  "promptQueueUseCount": 2,
+  "showExpandedTodos": true,
+  "providerProfiles": [
+    {
+      "id": "provider_57f93480578d",
+      "name": "Gitlawb Opengateway",
+      "provider": "gitlawb-opengateway",
+      "baseUrl": "https://opengateway.gitlawb.com/v1",
+      "model": "mimo-v2.5"
+    }
+  ],
+  "firstStartTime": "2026-05-18T00:15:10.605Z",
+  "opusProMigrationComplete": true,
+  "sonnet1m45MigrationComplete": true,
+  "migrationVersion": 11,
+  "changelogLastFetched": 1779063313380,
+  "activeProviderProfileId": "provider_57f93480578d",
+  "openaiAdditionalModelOptionsCache": [],
+  "shiftEnterKeyBindingInstalled": true,
+  "projects": {
+    "C:/codes/Clean-Portfolio": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "projectOnboardingSeenCount": 0,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "hasCompletedProjectOnboarding": true,
+      "lastCost": 0.0019140000000000001,
+      "lastAPIDuration": 3616,
+      "lastAPIDurationWithoutRetries": 3611,
+      "lastToolDuration": 0,
+      "lastDuration": 137321,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 60,
+      "lastTotalOutputTokens": 62,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 128,
+      "lastTotalWebSearchRequests": 0,
+      "lastFpsAverage": 4.34,
+      "lastFpsLow1Pct": 299.79,
+      "lastModelUsage": {
+        "mimo-v2.5-pro": {
+          "inputTokens": 60,
+          "outputTokens": 62,
+          "cacheReadInputTokens": 128,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.0019140000000000001
+        }
+      },
+      "lastSessionId": "13a9f5e3-5a79-40ba-b158-784cf6350836",
+      "lastSessionMetrics": {
+        "frame_duration_ms_count": 591,
+        "frame_duration_ms_min": 0.06869999998889398,
+        "frame_duration_ms_max": 6.948699999999917,
+        "frame_duration_ms_avg": 0.5101492385789103,
+        "frame_duration_ms_p50": 0.4015999999974156,
+        "frame_duration_ms_p95": 0.8864000000030501,
+        "frame_duration_ms_p99": 3.2231100000048203
+      }
+    }
+  },
+  "hasCompletedOnboarding": true,
+  "lastOnboardingVersion": "99.0.0",
+  "githubRepoPaths": {
+    "leap0920/clean-portfolio": [
+      "C:\\codes\\Clean-Portfolio"
+    ]
+  },
+  "userID": "212d88a6d5a2b549ee453450b45aa1e21b1667a6b769333513924faa6736e5ae",
+  "sponsoredTipsHistory": {
+    "lastShownAt": 1,
+    "totalShown": 1
+  },
+  "officialMarketplaceAutoInstallAttempted": true,
+  "officialMarketplaceAutoInstalled": true,
+  "skillUsage": {
+    "autopilot": {
+      "usageCount": 9,
+      "lastUsedAt": 1779114351144
+    },
+    "oh-my-claudecode:cancel": {
+      "usageCount": 1,
+      "lastUsedAt": 1779111352635
+    }
+  },
+  "showSpinnerTree": false
+}

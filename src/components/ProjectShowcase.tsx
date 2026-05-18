@@ -11,6 +11,7 @@ interface ProjectShowcaseProps {
   description: string;
   techStack: string[];
   image: string;
+  secondImage?: string;
   url: string;
   accentText: string;
   accentBadge: string;
@@ -23,6 +24,7 @@ export function ProjectShowcase({
   description,
   techStack,
   image,
+  secondImage,
   url,
   accentText,
   accentBadge,
@@ -39,15 +41,40 @@ export function ProjectShowcase({
         className="block bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden shadow-sm group cursor-pointer hover:border-slate-500 hover:shadow-lg transition-all duration-300"
       >
         {/* Cover image */}
-        <div className="relative h-48 md:h-56 overflow-hidden bg-slate-900">
-          <Image
-            src={image}
-            alt={`${name} cover`}
-            fill
-            className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 768px) 100vw, 768px"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
+        <div className={`relative h-48 md:h-56 overflow-hidden bg-slate-900 ${secondImage ? '[perspective:800px]' : ''}`}>
+          {secondImage ? (
+            <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+              {/* Front */}
+              <div className="absolute inset-0 [backface-visibility:hidden]">
+                <Image
+                  src={image}
+                  alt={`${name} cover`}
+                  fill
+                  className="object-cover object-top"
+                  sizes="(max-width: 768px) 100vw, 768px"
+                />
+              </div>
+              {/* Back */}
+              <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                <Image
+                  src={secondImage}
+                  alt={`${name} detail`}
+                  fill
+                  className="object-cover object-top"
+                  sizes="(max-width: 768px) 100vw, 768px"
+                />
+              </div>
+            </div>
+          ) : (
+            <Image
+              src={image}
+              alt={`${name} cover`}
+              fill
+              className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, 768px"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent pointer-events-none" />
         </div>
 
         {/* Content */}

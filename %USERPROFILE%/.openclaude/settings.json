@@ -1,0 +1,15 @@
+{
+  "env": {},
+  "model": "mimo-v2.5",
+  "enabledPlugins": {
+    "oh-my-claudecode@omc": true
+  },
+  "extraKnownMarketplaces": {
+    "omc": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/Yeachan-Heo/oh-my-claudecode.git"
+      }
+    }
+  }
+}

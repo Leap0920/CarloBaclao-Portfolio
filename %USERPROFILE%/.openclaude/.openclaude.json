@@ -11,7 +11,10 @@
     "status-line": 4,
     "prompt-queue": 4,
     "enter-to-steer-in-relatime": 4,
-    "todo-list": 4
+    "todo-list": 4,
+    "install-github-app": 4,
+    "install-slack-app": 4,
+    "drag-and-drop-images": 4
   },
   "promptQueueUseCount": 2,
   "showExpandedTodos": true,
@@ -96,8 +99,8 @@
   "officialMarketplaceAutoInstalled": true,
   "skillUsage": {
     "autopilot": {
-      "usageCount": 2,
-      "lastUsedAt": 1779110773429
+      "usageCount": 5,
+      "lastUsedAt": 1779112419177
     },
     "oh-my-claudecode:cancel": {
       "usageCount": 1,

@@ -146,16 +146,16 @@
   },
   "hotPaths": [
     {
+      "path": "src\\data\\content.tsx",
+      "accessCount": 18,
+      "lastAccessed": 1779112452773,
+      "type": "file"
+    },
+    {
       "path": "",
       "accessCount": 14,
       "lastAccessed": 1779110835770,
       "type": "directory"
-    },
-    {
-      "path": "src\\data\\content.tsx",
-      "accessCount": 14,
-      "lastAccessed": 1779111232883,
-      "type": "file"
     },
     {
       "path": "src\\components\\animations\\index.tsx",
@@ -176,6 +176,12 @@
       "type": "file"
     },
     {
+      "path": "src\\components\\ProjectShowcase.tsx",
+      "accessCount": 9,
+      "lastAccessed": 1779112435265,
+      "type": "file"
+    },
+    {
       "path": "src\\components\\ContentArea.tsx",
       "accessCount": 8,
       "lastAccessed": 1779110854830,
@@ -188,15 +194,9 @@
       "type": "file"
     },
     {
-      "path": "src\\components\\ProjectShowcase.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1779025901421,
-      "type": "file"
-    },
-    {
       "path": "src",
-      "accessCount": 5,
-      "lastAccessed": 1779110843917,
+      "accessCount": 6,
+      "lastAccessed": 1779112078578,
       "type": "directory"
     },
     {
@@ -305,6 +305,18 @@
       "path": "%USERPROFILE%\\.openclaude\\projects\\C--codes-Clean-Portfolio\\memory",
       "accessCount": 1,
       "lastAccessed": 1779111335591,
+      "type": "directory"
+    },
+    {
+      "path": "public\\images",
+      "accessCount": 1,
+      "lastAccessed": 1779112066656,
+      "type": "directory"
+    },
+    {
+      "path": "public\\images\\projects\\lecuisine",
+      "accessCount": 1,
+      "lastAccessed": 1779112436087,
       "type": "directory"
     }
   ],

@@ -11,6 +11,7 @@ import {
   Server, Database, GitBranch,
 } from 'lucide-react';
 import { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from '@/components/BrandIcons';
+import { CountUp, MagneticButton, TiltCard, RippleButton } from '@/components/animations';
 import Image from 'next/image';
 
 const { personalInfo, summary, experience, education, skills, certifications } = resumeData;
@@ -25,8 +26,9 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-6 md:p-8 text-white shadow-md relative overflow-hidden"
+            className="rounded-2xl p-6 md:p-8 text-white shadow-md relative overflow-hidden"
           >
+            <div className="absolute inset-0 animated-gradient" />
             <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
             <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-blue-400 opacity-20 blur-2xl"></div>
 
@@ -39,18 +41,16 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
               </p>
 
               <div className="flex gap-3">
-                <button
-                  onClick={() => setCurrentSection('projects')}
-                  className="bg-white text-slate-900 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors shadow-sm"
-                >
-                  View Projects
-                </button>
-                <button
-                  onClick={() => setCurrentSection('contact')}
-                  className="bg-white/10 border border-white/20 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-white/20 transition-colors"
-                >
-                  Contact Me
-                </button>
+                <MagneticButton strength={0.25} onClick={() => setCurrentSection('projects')}>
+                  <RippleButton className="bg-white text-slate-900 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors shadow-sm">
+                    View Projects
+                  </RippleButton>
+                </MagneticButton>
+                <MagneticButton strength={0.25} onClick={() => setCurrentSection('contact')}>
+                  <RippleButton className="bg-white/10 border border-white/20 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-white/20 transition-colors">
+                    Contact Me
+                  </RippleButton>
+                </MagneticButton>
               </div>
             </div>
           </motion.div>
@@ -58,28 +58,31 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'Experience', value: '5+ Yrs', icon: <Briefcase size={20} />, color: 'blue' },
-              { label: 'Projects', value: '25+', icon: <Sparkles size={20} />, color: 'emerald' },
-              { label: 'Certificates', value: '15', icon: <Award size={20} />, color: 'orange' },
-              { label: 'Technologies', value: '30+', icon: <Layers size={20} />, color: 'purple' },
+              { label: 'Experience', value: 5, suffix: '+ Yrs', icon: <Briefcase size={20} />, color: 'blue' },
+              { label: 'Projects', value: 25, suffix: '+', icon: <Sparkles size={20} />, color: 'emerald' },
+              { label: 'Certificates', value: 15, suffix: '', icon: <Award size={20} />, color: 'orange' },
+              { label: 'Technologies', value: 30, suffix: '+', icon: <Layers size={20} />, color: 'purple' },
             ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-200 dark:border-slate-700 flex flex-col items-center justify-center text-center hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-              >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${stat.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' :
-                  stat.color === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' :
-                    stat.color === 'orange' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
-                      'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
-                  }`}>
-                  {stat.icon}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
-              </motion.div>
+              <TiltCard key={stat.label} maxTilt={6} className="rounded-xl">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-200 dark:border-slate-700 flex flex-col items-center justify-center text-center hover:shadow-lg transition-all duration-300"
+                >
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${stat.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' :
+                    stat.color === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' :
+                      stat.color === 'orange' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
+                        'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+                    }`}>
+                    {stat.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    <CountUp end={stat.value} suffix={stat.suffix} duration={1.8} />
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+                </motion.div>
+              </TiltCard>
             ))}
           </div>
 
@@ -525,7 +528,7 @@ function ExperienceSection({ openCertModal }: { openCertModal: (cert: Certificat
           <Award size={20} className="text-orange-500" />
           Certifications ({certifications.length})
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {certifications.map((cert, index) => (
             <motion.button
               key={cert.id}
@@ -533,18 +536,37 @@ function ExperienceSection({ openCertModal }: { openCertModal: (cert: Certificat
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.03 }}
-              className="text-left p-4 bg-slate-800/80 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 hover:border-orange-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group"
+              className="text-left bg-slate-800/80 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 hover:border-orange-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group overflow-hidden"
             >
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-                  <CheckCircle size={14} />
+              {cert.imageUrl && (
+                <div className="relative w-full aspect-[4/3] overflow-hidden">
+                  <Image
+                    src={cert.imageUrl}
+                    alt={cert.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <h5 className="text-xs font-semibold text-white leading-tight line-clamp-2 drop-shadow-lg">{cert.name}</h5>
+                    <p className="text-[10px] text-gray-300 mt-0.5">{cert.issuer}</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h5 className="text-sm font-semibold text-gray-900 dark:text-white leading-tight group-hover:text-orange-400 transition-colors line-clamp-2">{cert.name}</h5>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{cert.issuer}</p>
+              )}
+              {!cert.imageUrl && (
+                <div className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                      <CheckCircle size={14} />
+                    </div>
+                    <div className="min-w-0">
+                      <h5 className="text-sm font-semibold text-gray-900 dark:text-white leading-tight group-hover:text-orange-400 transition-colors line-clamp-2">{cert.name}</h5>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{cert.issuer}</p>
+                    </div>
+                  </div>
                 </div>
-                <ExternalLink size={14} className="text-slate-600 group-hover:text-orange-400 transition-colors shrink-0 mt-1" />
-              </div>
+              )}
             </motion.button>
           ))}
         </div>

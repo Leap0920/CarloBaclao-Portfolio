@@ -11,6 +11,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       className="relative w-full h-10 rounded-xl overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       whileTap={{ scale: 0.97 }}
+      whileHover={{ scale: 1.02 }}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {/* Background */}

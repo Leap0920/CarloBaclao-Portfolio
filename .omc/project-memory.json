@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779022770450,
+  "lastScanned": 1779110488381,
   "projectRoot": "C:\\codes\\Clean-Portfolio",
   "techStack": {
     "languages": [
@@ -42,7 +42,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "npm run build 2>&1 | tail -10",
+    "buildCommand": "cd \"C:/codes/Clean-Portfolio\" && npm run build 2>&1 | tail -10",
     "testCommand": null,
     "lintCommand": "npm run lint",
     "devCommand": "npm run dev",
@@ -73,11 +73,18 @@
   },
   "customNotes": [],
   "directoryMap": {
+    "%USERPROFILE%": {
+      "path": "%USERPROFILE%",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1779110488347,
+      "keyFiles": []
+    },
     "public": {
       "path": "public",
       "purpose": "Public files",
       "fileCount": 6,
-      "lastAccessed": 1779022770389,
+      "lastAccessed": 1779110488347,
       "keyFiles": [
         "file.svg",
         "globe.svg",
@@ -90,14 +97,14 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 0,
-      "lastAccessed": 1779022770390,
+      "lastAccessed": 1779110488355,
       "keyFiles": []
     },
     "src\\app": {
       "path": "src\\app",
       "purpose": "Application code",
       "fileCount": 4,
-      "lastAccessed": 1779022770409,
+      "lastAccessed": 1779110488356,
       "keyFiles": [
         "favicon.ico",
         "globals.css",
@@ -107,8 +114,8 @@
     "src\\components": {
       "path": "src\\components",
       "purpose": "UI components",
-      "fileCount": 14,
-      "lastAccessed": 1779022770410,
+      "fileCount": 15,
+      "lastAccessed": 1779110488357,
       "keyFiles": [
         "BrandIcons.tsx",
         "CertificationModal.tsx",
@@ -119,7 +126,7 @@
       "path": "src\\data",
       "purpose": "Data files",
       "fileCount": 2,
-      "lastAccessed": 1779022770410,
+      "lastAccessed": 1779110488357,
       "keyFiles": [
         "content.tsx",
         "resume.ts"
@@ -129,7 +136,7 @@
       "path": "src\\types",
       "purpose": "Type definitions",
       "fileCount": 3,
-      "lastAccessed": 1779022770411,
+      "lastAccessed": 1779110488357,
       "keyFiles": [
         "components.ts",
         "context.ts",
@@ -139,16 +146,166 @@
   },
   "hotPaths": [
     {
+      "path": "",
+      "accessCount": 14,
+      "lastAccessed": 1779110835770,
+      "type": "directory"
+    },
+    {
       "path": "src\\data\\content.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1779023238125,
+      "accessCount": 14,
+      "lastAccessed": 1779111232883,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\animations\\index.tsx",
+      "accessCount": 11,
+      "lastAccessed": 1779026474122,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\ThemeToggle.tsx",
+      "accessCount": 10,
+      "lastAccessed": 1779026037400,
       "type": "file"
     },
     {
       "path": "src\\app\\page.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1779023158744,
+      "accessCount": 9,
+      "lastAccessed": 1779110847412,
       "type": "file"
+    },
+    {
+      "path": "src\\components\\ContentArea.tsx",
+      "accessCount": 8,
+      "lastAccessed": 1779110854830,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\globals.css",
+      "accessCount": 7,
+      "lastAccessed": 1779110854946,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\ProjectShowcase.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1779025901421,
+      "type": "file"
+    },
+    {
+      "path": "src",
+      "accessCount": 5,
+      "lastAccessed": 1779110843917,
+      "type": "directory"
+    },
+    {
+      "path": "src\\components\\CursorGlow.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1779026626204,
+      "type": "file"
+    },
+    {
+      "path": "src\\data\\resume.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779110971887,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\Sidebar.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1779110846173,
+      "type": "file"
+    },
+    {
+      "path": "src\\hooks\\useReducedMotion.ts",
+      "accessCount": 2,
+      "lastAccessed": 1779026410553,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\CertificationModal.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1779110845357,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\RightSidebar.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1779110846083,
+      "type": "file"
+    },
+    {
+      "path": "src\\types\\index.ts",
+      "accessCount": 2,
+      "lastAccessed": 1779110851297,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\ParticleBackground.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1779024318402,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 1,
+      "lastAccessed": 1779025773835,
+      "type": "file"
+    },
+    {
+      "path": "src\\hooks\\useMousePosition.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779025813932,
+      "type": "file"
+    },
+    {
+      "path": "src\\types\\context.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779110845864,
+      "type": "file"
+    },
+    {
+      "path": "src\\types\\components.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779110845917,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779110846042,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\ResumeModal.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1779110846109,
+      "type": "file"
+    },
+    {
+      "path": "src\\contexts\\NavigationContext.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1779110846149,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\NavigationMenu.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1779110854861,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\UserProfile.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1779110854978,
+      "type": "file"
+    },
+    {
+      "path": "%USERPROFILE%\\.openclaude\\projects\\C--codes-Clean-Portfolio\\memory",
+      "accessCount": 1,
+      "lastAccessed": 1779111335591,
+      "type": "directory"
     }
   ],
   "userDirectives": []

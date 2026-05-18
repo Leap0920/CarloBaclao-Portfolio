@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { NavigationProvider, useNavigation, ThemeProvider } from '@/contexts';
 import { Sidebar, ContentArea, ResumeModal, RightSidebar, CertificationModal } from '@/components';
+import { CursorGlow } from '@/components/CursorGlow';
 import { getSectionContent } from '@/data/content';
 import { resumeData } from '@/data/resume';
 import { NavigationSection } from '@/types';
@@ -25,6 +26,8 @@ function PortfolioContent() {
   return (
     <>
       <ParticleBackground />
+      <CursorGlow />
+      <div className="grain-overlay" />
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -36,7 +39,7 @@ function PortfolioContent() {
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.6, delay: 0, ease: [0.25, 0.1, 0.25, 1] }}
             className="hidden md:block shrink-0"
           >
             <Sidebar
@@ -47,7 +50,12 @@ function PortfolioContent() {
           </motion.div>
 
           {/* Main Content Area */}
-          <div className="flex-1 overflow-hidden flex flex-col bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 relative p-4 sm:p-6 transition-colors duration-300">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            className="flex-1 overflow-hidden flex flex-col bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 relative p-4 sm:p-6 transition-colors duration-300"
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentSection}
@@ -63,13 +71,13 @@ function PortfolioContent() {
                 />
               </motion.div>
             </AnimatePresence>
-          </div>
+          </motion.div>
 
           {/* Right Sidebar */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
             className="hidden lg:block shrink-0"
           >
             <RightSidebar />

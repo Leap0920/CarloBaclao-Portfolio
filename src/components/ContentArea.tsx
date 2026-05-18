@@ -1,7 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import React, { useState, useEffect } from 'react';
+import { motion, useScroll, useSpring } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface ContentAreaProps {
   section: string;
@@ -50,9 +51,29 @@ function TypingGreeting() {
   );
 }
 
-export function ContentArea({ section, content }: ContentAreaProps) {
+function ScrollProgressBar({ scrollRef }: { scrollRef: React.RefObject<HTMLElement | null> }) {
+  const prefersReducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    container: scrollRef as React.RefObject<HTMLElement>,
+  });
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
+  if (prefersReducedMotion) return null;
+
   return (
-    <main className="flex-1 overflow-y-auto overflow-x-hidden h-full pr-1 custom-scrollbar pb-6">
+    <motion.div
+      className="scroll-progress-bar"
+      style={{ scaleX }}
+    />
+  );
+}
+
+export function ContentArea({ section, content }: ContentAreaProps) {
+  const scrollRef = useRef<HTMLElement>(null);
+
+  return (
+    <main ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden h-full pr-1 custom-scrollbar pb-6 relative">
+      <ScrollProgressBar scrollRef={scrollRef} />
       <TypingGreeting />
       <motion.div
         key={section}

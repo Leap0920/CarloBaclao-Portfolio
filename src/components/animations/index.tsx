@@ -1,7 +1,114 @@
 'use client';
 
-import { motion, type Variants, type Transition } from 'framer-motion';
-import { type ReactNode } from 'react';
+import { motion, type Variants } from 'framer-motion';
+import { type ReactNode, useRef, useState, useCallback, type MouseEvent } from 'react';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+
+// ─── Magnetic Button ─────────────────────────────────
+interface MagneticButtonProps {
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
+  href?: string;
+  target?: string;
+  rel?: string;
+  strength?: number;
+}
+
+export function MagneticButton({
+  children,
+  className = '',
+  onClick,
+  href,
+  target,
+  rel,
+  strength = 0.3,
+}: MagneticButtonProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const prefersReducedMotion = useReducedMotion();
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!ref.current || prefersReducedMotion) return;
+    const rect = ref.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    setOffset({
+      x: (e.clientX - centerX) * strength,
+      y: (e.clientY - centerY) * strength,
+    });
+  }, [strength, prefersReducedMotion]);
+
+  const handleMouseLeave = useCallback(() => {
+    setOffset({ x: 0, y: 0 });
+  }, []);
+
+  const Tag = href ? 'a' : 'div';
+  const tagProps = href ? { href, target, rel } : {};
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      animate={{ x: offset.x, y: offset.y }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20, mass: 0.5 }}
+      className="inline-block"
+    >
+      <Tag
+        {...tagProps}
+        onClick={onClick}
+        className={className}
+      >
+        {children}
+      </Tag>
+    </motion.div>
+  );
+}
+
+// ─── Ripple Button ───────────────────────────────────
+interface RippleButtonProps {
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
+}
+
+export function RippleButton({ children, className = '', onClick }: RippleButtonProps) {
+  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
+  const prefersReducedMotion = useReducedMotion();
+
+  const handleClick = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    if (!prefersReducedMotion) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const ripple = {
+        id: Date.now(),
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+      setRipples(prev => [...prev, ripple]);
+      setTimeout(() => {
+        setRipples(prev => prev.filter(r => r.id !== ripple.id));
+      }, 600);
+    }
+    onClick?.();
+  }, [onClick, prefersReducedMotion]);
+
+  return (
+    <button onClick={handleClick} className={`relative overflow-hidden ${className}`}>
+      {children}
+      {ripples.map(ripple => (
+        <motion.span
+          key={ripple.id}
+          className="absolute rounded-full bg-white/30 pointer-events-none"
+          style={{ left: ripple.x - 50, top: ripple.y - 50, width: 100, height: 100 }}
+          initial={{ scale: 0, opacity: 1 }}
+          animate={{ scale: 4, opacity: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+        />
+      ))}
+    </button>
+  );
+}
 
 // ─── Fade In ─────────────────────────────────────────
 interface FadeInProps {
@@ -50,16 +157,6 @@ interface StaggerContainerProps {
   staggerDelay?: number;
   className?: string;
 }
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
 
 export const staggerItemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -217,6 +314,61 @@ export function PulseRing({ children, className = '' }: { children: ReactNode; c
   );
 }
 
+// ─── Tilt Card ───────────────────────────────────────
+interface TiltCardProps {
+  children: ReactNode;
+  className?: string;
+  maxTilt?: number;
+}
+
+export function TiltCard({ children, className = '', maxTilt = 8 }: TiltCardProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [style, setStyle] = useState({ transform: 'perspective(800px) rotateX(0deg) rotateY(0deg)', glareOpacity: 0, glareX: 50, glareY: 50 });
+  const prefersReducedMotion = useReducedMotion();
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!ref.current || prefersReducedMotion) return;
+    const rect = ref.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    const rotateX = (0.5 - y) * maxTilt * 2;
+    const rotateY = (x - 0.5) * maxTilt * 2;
+    setStyle({
+      transform: `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+      glareOpacity: 0.15,
+      glareX: x * 100,
+      glareY: y * 100,
+    });
+  }, [maxTilt, prefersReducedMotion]);
+
+  const handleMouseLeave = useCallback(() => {
+    setStyle({ transform: 'perspective(800px) rotateX(0deg) rotateY(0deg)', glareOpacity: 0, glareX: 50, glareY: 50 });
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={`relative overflow-hidden ${className}`}
+      style={{
+        transform: style.transform,
+        transition: prefersReducedMotion ? 'none' : 'transform 0.15s ease-out',
+        transformStyle: 'preserve-3d',
+      }}
+    >
+      {children}
+      <div
+        className="absolute inset-0 pointer-events-none rounded-[inherit]"
+        style={{
+          background: `radial-gradient(circle at ${style.glareX}% ${style.glareY}%, rgba(255,255,255,${style.glareOpacity}) 0%, transparent 60%)`,
+          transition: prefersReducedMotion ? 'none' : 'opacity 0.15s ease-out',
+        }}
+      />
+    </div>
+  );
+}
+
 // ─── Count Up Animation ──────────────────────────────
 interface CountUpProps {
   end: number;
@@ -226,21 +378,102 @@ interface CountUpProps {
 }
 
 export function CountUp({ end, duration = 2, className = '', suffix = '' }: CountUpProps) {
+  const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
+  const handleViewportEnter = useCallback(() => {
+    if (hasAnimated) return;
+    setHasAnimated(true);
+
+    if (prefersReducedMotion) {
+      setCount(end);
+      return;
+    }
+
+    const startTime = performance.now();
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / (duration * 1000), 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * end));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [end, duration, hasAnimated, prefersReducedMotion]);
+
   return (
     <motion.span
       className={className}
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
+      onViewportEnter={handleViewportEnter}
       viewport={{ once: true }}
     >
-      <motion.span
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-      >
-        {end}{suffix}
-      </motion.span>
+      {count}{suffix}
     </motion.span>
+  );
+}
+
+// ─── Skill Radial ────────────────────────────────────
+interface SkillRadialProps {
+  value: number;
+  label: string;
+  size?: number;
+  strokeWidth?: number;
+  className?: string;
+}
+
+export function SkillRadial({ value, label, size = 72, strokeWidth = 6, className = '' }: SkillRadialProps) {
+  const [animatedValue, setAnimatedValue] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+
+  const handleViewportEnter = useCallback(() => {
+    if (hasAnimated) return;
+    setHasAnimated(true);
+    if (prefersReducedMotion) {
+      setAnimatedValue(value);
+      return;
+    }
+    const startTime = performance.now();
+    const animateDuration = 1500;
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / animateDuration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setAnimatedValue(Math.round(eased * value));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [value, hasAnimated, prefersReducedMotion]);
+
+  const offset = circumference - (animatedValue / 100) * circumference;
+
+  return (
+    <motion.div
+      className={`flex flex-col items-center gap-1 ${className}`}
+      onViewportEnter={handleViewportEnter}
+      viewport={{ once: true }}
+    >
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-gray-200 dark:text-slate-700" />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="text-blue-500 transition-none"
+        />
+      </svg>
+      <span className="text-xs font-semibold text-gray-900 dark:text-white">{animatedValue}%</span>
+      <span className="text-[10px] text-gray-500 dark:text-gray-400 text-center">{label}</span>
+    </motion.div>
   );
 }
 

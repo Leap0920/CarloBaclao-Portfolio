@@ -1,0 +1,23 @@
+{
+  "sessions": {
+    "789aedf4-c004-494d-83bd-da7e4ba2f19f": {
+      "tool_counts": {
+        "Agent": 1,
+        "Glob": 15,
+        "Read": 32,
+        "Grep": 4,
+        "TaskCreate": 2,
+        "TaskUpdate": 6,
+        "Edit": 4,
+        "Bash": 12,
+        "Skill": 1,
+        "mcp__plugin_oh-my-claudecode_t__state_list_active": 1,
+        "mcp__plugin_oh-my-claudecode_t__state_clear": 2
+      },
+      "last_tool": "Read",
+      "total_calls": 80,
+      "started_at": 1779110818,
+      "updated_at": 1779111486
+    }
+  }
+}

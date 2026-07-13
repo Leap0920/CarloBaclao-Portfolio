@@ -67,4 +67,4 @@ Modify the content for each section in `src/data/content.tsx`
 
 ## License
 
-© 2024 Carlo Baclao. All rights reserved.
+© 2026 Carlo Baclao. All rights reserved.

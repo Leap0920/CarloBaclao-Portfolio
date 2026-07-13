@@ -388,6 +388,19 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
                 accentBadge="bg-teal-900/40 text-teal-300"
                 accentBadgeBorder="border-teal-800/50"
               />
+
+              <ProjectShowcase
+                name="LoopHabit"
+                subtitle="Habit Tracker Web App"
+                description="A Next.js habit tracking application with a clean, modern UI for building and maintaining daily habits."
+                techStack={['Next.js', 'TypeScript', 'Tailwind CSS']}
+                image="/images/projects/loophabit/logo.png"
+                secondImage="/images/projects/loophabit/darkmode-logo.jpg"
+                url="https://loop-habit-website.vercel.app/"
+                accentText="text-violet-400"
+                accentBadge="bg-violet-900/40 text-violet-300"
+                accentBadgeBorder="border-violet-800/50"
+              />
             </div>
           </div>
         </div>

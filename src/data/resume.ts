@@ -184,5 +184,11 @@ export const resumeData: ResumeData = {
       issuer: 'FreeCodeCamp',
       imageUrl: '/images/Certification/Legacy Responsive Web Design V8 Certification.png',
     },
+    {
+      id: 'microsoft-sci',
+      name: 'Security, Compliance, and Identity Fundamentals',
+      issuer: 'Microsoft',
+      imageUrl: '/images/Certification/Microsoft Cybersecurity Course Security, Compliance, and Identity Fundamentals.jpeg',
+    },
   ]
 };

@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { NavigationProvider, useNavigation, ThemeProvider } from '@/contexts';
 import { Sidebar, ContentArea, ResumeModal, RightSidebar, CertificationModal } from '@/components';
 import { CursorGlow } from '@/components/CursorGlow';
-import { LoadingScreen } from '@/components/LoadingScreen';
 import { SwipeHint } from '@/components/SwipeHint';
 import { getSectionContent } from '@/data/content';
 import { resumeData } from '@/data/resume';
@@ -18,7 +17,6 @@ const ParticleBackground = dynamic(() => import('@/components/ParticleBackground
 });
 
 function PortfolioContent() {
-  const [isLoading, setIsLoading] = useState(true);
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -29,7 +27,6 @@ function PortfolioContent() {
   } = useNavigation();
 
   const sectionContent = getSectionContent(openCertModal, openResume, setCurrentSection);
-  const handleLoadingComplete = useCallback(() => setIsLoading(false), []);
 
   const handleNavChange = useCallback((section: NavigationSection) => {
     setCurrentSection(section);
@@ -69,9 +66,8 @@ function PortfolioContent() {
   }, [leftOpen, rightOpen]);
 
   return (
-    <>
-      {isLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
-      <SwipeHint />
+      <>
+        <SwipeHint />
       <ParticleBackground />
       <CursorGlow />
       <div className="grain-overlay" />

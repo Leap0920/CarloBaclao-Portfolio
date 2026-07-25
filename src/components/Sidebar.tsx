@@ -19,7 +19,7 @@ export function Sidebar({ currentSection, onSectionChange, onResumeOpen }: Sideb
       {/* User Profile Section */}
       <UserProfile
         name="Carlo C. Baclao"
-        title="Software Engineer"
+         title="IT Student seeking opportunities"
         onResumeClick={onResumeOpen}
       />
 

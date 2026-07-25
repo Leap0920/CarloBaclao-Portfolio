@@ -3,33 +3,19 @@ import { ResumeData } from '@/types';
 export const resumeData: ResumeData = {
   personalInfo: {
     name: 'Carlo C. Baclao',
-    title: 'Software Engineer',
+    title: 'IT Student seeking opportunities',
     email: 'baclao.carlo.cometa@gmail.com',
     phone: '09686890263',
     location: 'Quezon City, Philippines',
     linkedin: 'https://www.linkedin.com/in/baclao-carlo-22936435a/',
     github: 'https://github.com/Leap0920',
   },
-  summary: 'A passionate software engineer with 5 years of programming experience. I enjoy building full-stack applications, exploring IoT solutions, and turning ideas into functional systems. Currently pursuing my BS in Information Technology at Quezon City University.',
+  summary: 'A passionate IT student with 5 years of programming experience. I enjoy building full-stack applications, exploring IoT solutions, and turning ideas into functional systems. Currently pursuing my BS in Information Technology at Quezon City University.',
   experience: [
-    {
-      id: 'ams-1',
-      company: 'Quezon City University — Academic Project',
-      position: 'Full-Stack Engineer & System Architect',
-      startDate: new Date('2026-01-01'),
-      endDate: new Date('2026-05-01'),
-      description: [
-        'Architected and built an end-to-end Attendance Management System with a Java Spring Boot backend, React (Vite) frontend, and PostgreSQL database deployed on a Raspberry Pi.',
-        'Implemented Flyway database migrations, custom security whitelisting, automated SMTP email notifications, and real-time user activity tracking.',
-        'Packaged the entire distributed system into a standalone one-click Windows .exe installer using Launch4j and JPackage for seamless deployment.',
-        'Deployed PostgreSQL on Raspberry Pi with Linux configuration, demonstrating IoT/hardware integration and edge computing.'
-      ],
-      technologies: ['Java', 'Spring Boot', 'React', 'TypeScript', 'PostgreSQL', 'Flyway', 'Raspberry Pi', 'Linux']
-    },
     {
       id: 'data-1',
       company: 'State Lab Clinics and Diagnostic Center',
-      position: 'Data Encoder',
+      position: 'Data Encoder (OJT)',
       startDate: new Date('2022-04-01'),
       endDate: new Date('2022-07-31'),
       description: [
@@ -107,6 +93,18 @@ export const resumeData: ResumeData = {
       imageUrl: '/images/Certification/Getting Started in Cybersecurity 3.0 Self-Paced.png',
     },
     {
+      id: 'fcc-responsive',
+      name: 'Legacy Responsive Web Design V8 Certification',
+      issuer: 'FreeCodeCamp',
+      imageUrl: '/images/Certification/Legacy Responsive Web Design V8 Certification.png',
+    },
+    {
+      id: 'tesda-sci',
+      name: 'Security, Compliance, and Identity Fundamentals',
+      issuer: 'TESDA',
+      imageUrl: '/images/Certification/Microsoft Cybersecurity Course Security, Compliance, and Identity Fundamentals.jpeg',
+    },
+    {
       id: 'udemy-mongodb',
       name: 'MongoDB - The Complete MongoDB Developers Course',
       issuer: 'Udemy',
@@ -177,18 +175,6 @@ export const resumeData: ResumeData = {
       name: 'Introduction to Software Engineering',
       issuer: 'Udemy',
       imageUrl: '/images/Certification/Introduction to Software Engineering.jpg',
-    },
-    {
-      id: 'fcc-responsive',
-      name: 'Legacy Responsive Web Design V8 Certification',
-      issuer: 'FreeCodeCamp',
-      imageUrl: '/images/Certification/Legacy Responsive Web Design V8 Certification.png',
-    },
-    {
-      id: 'microsoft-sci',
-      name: 'Security, Compliance, and Identity Fundamentals',
-      issuer: 'Microsoft',
-      imageUrl: '/images/Certification/Microsoft Cybersecurity Course Security, Compliance, and Identity Fundamentals.jpeg',
     },
   ]
 };

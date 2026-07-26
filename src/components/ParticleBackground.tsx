@@ -3,10 +3,12 @@
 import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 function Particles() {
   const meshRef = useRef<THREE.Points>(null);
-  const count = 600;
+  const count = 300;
+  const prefersReducedMotion = useReducedMotion();
 
   const particleTexture = useMemo(() => {
     const canvas = document.createElement('canvas');
@@ -48,8 +50,8 @@ function Particles() {
     return [geo, vel] as const;
   }, []);
 
-  useFrame(() => {
-    if (!meshRef.current) return;
+  useFrame((state) => {
+    if (!meshRef.current || prefersReducedMotion) return;
     const posAttr = meshRef.current.geometry.attributes.position;
     const arr = posAttr.array as Float32Array;
 
@@ -64,8 +66,8 @@ function Particles() {
     }
     posAttr.needsUpdate = true;
 
-    meshRef.current.rotation.y += 0.0003;
-    meshRef.current.rotation.x += 0.0001;
+    meshRef.current.rotation.y += 0.0001;
+    meshRef.current.rotation.x += 0.00005;
   });
 
   return (
@@ -86,9 +88,10 @@ function Particles() {
 
 function FloatingRing({ radius, speed, y, color }: { radius: number; speed: number; y: number; color: string }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   useFrame((state) => {
-    if (!meshRef.current) return;
+    if (!meshRef.current || prefersReducedMotion) return;
     meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * speed) * 0.3;
     meshRef.current.rotation.z = Math.cos(state.clock.elapsedTime * speed * 0.7) * 0.2;
     meshRef.current.position.y = y + Math.sin(state.clock.elapsedTime * speed * 0.5) * 0.3;
@@ -107,7 +110,7 @@ export default function ParticleBackground() {
     <div className="fixed inset-0 -z-10" style={{ pointerEvents: 'none' }}>
       <Canvas
         camera={{ position: [0, 0, 8], fov: 60 }}
-        dpr={[1, 1.5]}
+        dpr={[1, 1]}
         gl={{ antialias: false, alpha: true }}
       >
         <ambientLight intensity={0.5} />

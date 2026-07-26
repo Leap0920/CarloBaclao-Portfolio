@@ -18,19 +18,18 @@ export function CursorGlow() {
 
   if (prefersReducedMotion || isTouchDevice) return null;
 
+  const displayX = Math.round(x);
+  const displayY = Math.round(y);
+
   return (
     <motion.div
       className="fixed pointer-events-none z-[9999] rounded-full mix-blend-screen"
       style={{
         width: 400,
         height: 400,
-        left: x - 200,
-        top: y - 200,
+        left: displayX - 200,
+        top: displayY - 200,
         background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.04) 40%, transparent 70%)',
-      }}
-      animate={{
-        left: x - 200,
-        top: y - 200,
       }}
       transition={{ type: 'spring', stiffness: 150, damping: 25, mass: 0.5 }}
     />

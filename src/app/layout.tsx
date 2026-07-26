@@ -41,12 +41,12 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`,
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){}})()`,
           }}
         />
         <script defer data-domain="carlobaclao.dev" src="https://plausible.io/js/script.js" />
       </head>
-      <body className={`${inter.className} min-h-full bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-slate-100 antialiased transition-colors duration-300`} suppressHydrationWarning>
+      <body className={`${inter.className} min-h-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 antialiased transition-colors duration-300`} suppressHydrationWarning>
         {children}
       </body>
     </html>

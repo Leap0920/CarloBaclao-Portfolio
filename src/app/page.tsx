@@ -45,43 +45,41 @@ function PortfolioContent() {
     const screenWidth = window.innerWidth;
     touchStart.current = null;
 
-    // Only trigger if horizontal swipe is dominant and significant
     if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
 
     if (dx > 0 && startX < 30) {
-      // Swiped right from left edge -> open left sidebar
       setRightOpen(false);
       setLeftOpen(true);
     } else if (dx < 0 && startX > screenWidth - 30) {
-      // Swiped left from right edge -> open right sidebar
       setLeftOpen(false);
       setRightOpen(true);
     } else if (dx < 0 && leftOpen) {
-      // Swiped left while left is open -> close it
       setLeftOpen(false);
     } else if (dx > 0 && rightOpen) {
-      // Swiped right while right is open -> close it
       setRightOpen(false);
     }
   }, [leftOpen, rightOpen]);
 
   return (
-      <>
-        <SwipeHint />
+    <>
+      <SwipeHint />
       <ParticleBackground />
       <CursorGlow />
       <div className="grain-overlay" />
+
+      {/* Edge Dot Grid Pattern */}
+      <div className="edge-dot-grid" />
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="h-screen p-3 sm:p-4 flex flex-col overflow-hidden text-gray-900 dark:text-slate-100"
+        className="h-screen p-3 sm:p-4 flex flex-col overflow-hidden text-slate-900 dark:text-slate-100"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         <div className="flex-1 flex gap-4 overflow-hidden max-w-7xl mx-auto w-full">
           {/* Left Sidebar - Desktop: static, Mobile: swipe-in drawer */}
-          {/* Desktop */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -128,7 +126,7 @@ function PortfolioContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-            className="flex-1 overflow-hidden flex flex-col bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 relative p-4 sm:p-6 transition-colors duration-300"
+            className="flex-1 overflow-hidden flex flex-col bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/90 dark:border-slate-700/80 relative p-4 sm:p-6 transition-colors duration-300"
           >
             <AnimatePresence mode="wait">
               <motion.div
@@ -148,7 +146,6 @@ function PortfolioContent() {
           </motion.div>
 
           {/* Right Sidebar - Desktop: static, Mobile: swipe-in drawer */}
-          {/* Desktop */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}

@@ -119,7 +119,7 @@ export function ResumeModal({ isOpen, onClose, resumeContent }: ResumeModalProps
                   {resumeContent.experience.map((exp, idx) => (
                     <motion.div
                       key={exp.id}
-                      className="border-l-2 border-slate-600 pl-4"
+                      className="border-l-2 border-slate-300 dark:border-slate-600 pl-4"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.35 + idx * 0.1 }}
@@ -130,7 +130,7 @@ export function ResumeModal({ isOpen, onClose, resumeContent }: ResumeModalProps
                           {exp.startDate.toLocaleDateString()} - {exp.endDate ? exp.endDate.toLocaleDateString() : 'Present'}
                         </span>
                       </div>
-                      <p className="text-gray-600 dark:text-gray-300 font-medium mb-2">{exp.company}</p>
+                      <p className="text-blue-600 dark:text-blue-400 font-medium mb-2">{exp.company}</p>
                       <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 text-sm space-y-1 mb-3">
                         {exp.description.map((desc, index) => (
                           <li key={index}>{desc}</li>
@@ -138,7 +138,7 @@ export function ResumeModal({ isOpen, onClose, resumeContent }: ResumeModalProps
                       </ul>
                       <div className="flex flex-wrap gap-2">
                         {exp.technologies.map((tech) => (
-                          <motion.span key={tech} className="px-2 py-1 bg-slate-700 text-gray-600 dark:text-gray-300 text-xs rounded" whileHover={{ scale: 1.05 }}>
+                          <motion.span key={tech} className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-slate-600 text-xs rounded" whileHover={{ scale: 1.05 }}>
                             {tech}
                           </motion.span>
                         ))}
@@ -156,7 +156,7 @@ export function ResumeModal({ isOpen, onClose, resumeContent }: ResumeModalProps
                       <h4 className="font-medium text-gray-900 dark:text-white mb-2">{skillCategory.category}</h4>
                       <div className="flex flex-wrap gap-2">
                         {skillCategory.skills.map((skill) => (
-                          <motion.span key={skill} className="px-2 py-1 bg-blue-900/30 text-blue-300 text-sm rounded" whileHover={{ scale: 1.05 }}>
+                          <motion.span key={skill} className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/50 text-sm rounded" whileHover={{ scale: 1.05 }}>
                             {skill}
                           </motion.span>
                         ))}
@@ -172,7 +172,7 @@ export function ResumeModal({ isOpen, onClose, resumeContent }: ResumeModalProps
                   {resumeContent.education.map((edu, idx) => (
                     <motion.div
                       key={edu.id}
-                      className="border-l-2 border-slate-600 pl-4"
+                      className="border-l-2 border-slate-300 dark:border-slate-600 pl-4"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.55 + idx * 0.1 }}
@@ -202,7 +202,7 @@ export function ResumeModal({ isOpen, onClose, resumeContent }: ResumeModalProps
                     {resumeContent.certifications.map((cert, idx) => (
                       <motion.div
                         key={cert.id}
-                        className="border border-slate-700 rounded-lg p-4"
+                        className="border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 rounded-lg p-4"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.65 + idx * 0.1 }}
@@ -216,7 +216,7 @@ export function ResumeModal({ isOpen, onClose, resumeContent }: ResumeModalProps
                           {cert.expiryDate && `Expires: ${cert.expiryDate.toLocaleDateString()}`}
                         </p>
                         {cert.credentialUrl && (
-                          <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline text-xs">
+                          <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline text-xs">
                             View Credential
                           </a>
                         )}

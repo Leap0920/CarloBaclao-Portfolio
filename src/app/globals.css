@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #f9fafb;
-  --foreground: #111827;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --sidebar-width: 280px;
   --content-padding: 2rem;
 }
@@ -10,6 +13,15 @@
 :root.dark {
   --background: #0f172a;
   --foreground: #f1f5f9;
+}
+
+/* Ensure light mode is strictly white/light when html does not have .dark class */
+html:not(.dark) {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 * {
@@ -76,10 +88,19 @@ body {
   animation: gradientShift 8s ease infinite;
 }
 
+html:not(.dark) .animated-gradient {
+  background: linear-gradient(135deg, #2563eb, #4f46e5, #7c3aed, #2563eb);
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animated-gradient {
     animation: none;
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  }
+  html:not(.dark) .animated-gradient {
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
   }
 }
 
@@ -127,4 +148,20 @@ body {
   .grain-overlay {
     opacity: 0.015;
   }
+}
+
+/* ─── Edge Dot Grid Pattern ───────────────────────── */
+.edge-dot-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -5;
+  background-image: radial-gradient(rgba(148, 163, 184, 0.5) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(ellipse at center, transparent 40%, black 85%);
+  mask-image: radial-gradient(ellipse at center, transparent 40%, black 85%);
+}
+
+.dark .edge-dot-grid {
+  display: none;
 }

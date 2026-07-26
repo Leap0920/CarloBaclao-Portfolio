@@ -74,7 +74,7 @@ export function CertificationModal({ isOpen, onClose, certification }: Certifica
           >
             <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-slate-700">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-orange-900/30 text-orange-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
                   <Award size={20} />
                 </div>
                 <div className="min-w-0">
@@ -100,7 +100,7 @@ export function CertificationModal({ isOpen, onClose, certification }: Certifica
             <div className="p-5 overflow-y-auto max-h-[calc(90vh-80px)]">
               {certification.imageUrl && (
                 <motion.div
-                  className="mb-5 rounded-xl overflow-hidden border border-slate-700 bg-slate-700/50"
+                  className="mb-5 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}

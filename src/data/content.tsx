@@ -438,12 +438,14 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
           </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { name: 'GitHub', url: personalInfo.github, icon: <GithubIcon size={24} /> },
-              { name: 'LinkedIn', url: personalInfo.linkedin, icon: <LinkedinIcon size={24} /> },
-              { name: 'TikTok', url: 'https://www.tiktok.com/@galaxyfrog20', icon: <TiktokIcon size={24} /> },
-              { name: 'Instagram', url: 'https://www.instagram.com/_nous.c/', icon: <InstagramIcon size={24} /> },
-            ].map((social, i) => (
+{[
+               { name: 'GitHub', url: personalInfo.github, icon: <GithubIcon size={24} /> },
+               { name: 'LinkedIn', url: personalInfo.linkedin, icon: <LinkedinIcon size={24} /> },
+               { name: 'Indeed', url: 'https://profile.indeed.com/p/carlob-c5yt782', icon: <Globe size={24} /> },
+               { name: 'Jobstreet', url: 'https://ph.jobstreet.com/profiles/carlo-baclao-CHYbs3Qm5M', icon: <Globe size={24} /> },
+               { name: 'TikTok', url: 'https://www.tiktok.com/@galaxyfrog20', icon: <TiktokIcon size={24} /> },
+               { name: 'Instagram', url: 'https://www.instagram.com/_nous.c/', icon: <InstagramIcon size={24} /> },
+             ].map((social, i) => (
               <motion.a
                 key={social.name}
                 href={social.url}

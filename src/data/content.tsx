@@ -330,6 +330,18 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
             </h3>
             <div className="space-y-4">
               <ProjectShowcase
+                name="LoopHabit"
+                subtitle="Android Habit Tracker"
+                description="A native Android habit tracking app built with Android Studio and Kotlin, featuring a clean, modern UI for building and maintaining daily habits. Download via the website or Google Play."
+                techStack={['Android Studio', 'Kotlin', 'Java']}
+                image="/images/loophabit banner.jpg"
+                url="https://loop-habit-website.vercel.app/"
+                accentText="text-violet-600 dark:text-violet-400"
+                accentBadge="bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300"
+                accentBadgeBorder="border-violet-200 dark:border-violet-800/50"
+              />
+
+              <ProjectShowcase
                 name="Attendance Management System"
                 subtitle="Full-Stack IoT Enterprise Solution"
                 description="End-to-end attendance system with Java Spring Boot backend, React (Vite) frontend, and PostgreSQL deployed on Raspberry Pi. Features Flyway migrations, SMTP email automation, security whitelisting, and a standalone Windows .exe installer."
@@ -340,30 +352,6 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
                 accentText="text-indigo-600 dark:text-indigo-400"
                 accentBadge="bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
                 accentBadgeBorder="border-indigo-200 dark:border-indigo-800/50"
-              />
-
-              <ProjectShowcase
-                name="Tally DCPH"
-                subtitle="Scoring System"
-                description="A scoring system for tracking and organizing records with an intuitive dashboard."
-                techStack={['JavaScript', 'HTML', 'CSS', 'MySQL']}
-                image="/images/projects/tally/2.png"
-                url="https://leap0920.github.io/Tally-DCPH/"
-                accentText="text-emerald-600 dark:text-emerald-400"
-                accentBadge="bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                accentBadgeBorder="border-emerald-200 dark:border-emerald-800/50"
-              />
-
-              <ProjectShowcase
-                name="Accounting & Finance System"
-                subtitle="Financial Management Application"
-                description="A complete PHP-based accounting and finance management system for tracking transactions, generating reports, and managing financial data."
-                techStack={['PHP', 'MySQL', 'HTML', 'CSS', 'JavaScript']}
-                image="/images/projects/accounting/1.png"
-                url="https://github.com/Leap0920/accounting-and-finance-Sia2-"
-                accentText="text-amber-600 dark:text-amber-400"
-                accentBadge="bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"
-                accentBadgeBorder="border-amber-200 dark:border-amber-800/50"
               />
 
               <ProjectShowcase
@@ -379,6 +367,18 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
               />
 
               <ProjectShowcase
+                name="Accounting & Finance System"
+                subtitle="Financial Management Application"
+                description="A complete PHP-based accounting and finance management system for tracking transactions, generating reports, and managing financial data."
+                techStack={['PHP', 'MySQL', 'HTML', 'CSS', 'JavaScript']}
+                image="/images/projects/accounting/1.png"
+                url="https://github.com/Leap0920/accounting-and-finance-Sia2-"
+                accentText="text-amber-600 dark:text-amber-400"
+                accentBadge="bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"
+                accentBadgeBorder="border-amber-200 dark:border-amber-800/50"
+              />
+
+              <ProjectShowcase
                 name="LECUISINE"
                 subtitle="Web Application"
                 description="A fully designed and deployed web application with responsive UI and modern frontend stack, hosted live on GitHub Pages."
@@ -391,15 +391,15 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
               />
 
               <ProjectShowcase
-                name="LoopHabit"
-                subtitle="Habit Tracker Web App"
-                description="A Next.js habit tracking application with a clean, modern UI for building and maintaining daily habits."
-                techStack={['Next.js', 'TypeScript', 'Tailwind CSS']}
-                image="/images/loophabit banner.jpg"
-                url="https://loop-habit-website.vercel.app/"
-                accentText="text-violet-600 dark:text-violet-400"
-                accentBadge="bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300"
-                accentBadgeBorder="border-violet-200 dark:border-violet-800/50"
+                name="Tally DCPH"
+                subtitle="Scoring System"
+                description="A scoring system for tracking and organizing records with an intuitive dashboard."
+                techStack={['JavaScript', 'HTML', 'CSS', 'MySQL']}
+                image="/images/projects/tally/2.png"
+                url="https://leap0920.github.io/Tally-DCPH/"
+                accentText="text-emerald-600 dark:text-emerald-400"
+                accentBadge="bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                accentBadgeBorder="border-emerald-200 dark:border-emerald-800/50"
               />
             </div>
           </div>

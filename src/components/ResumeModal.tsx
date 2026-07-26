@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResumeModalProps } from '@/types/components';
-import { X } from 'lucide-react';
+import { X, Download } from 'lucide-react';
 
 export function ResumeModal({ isOpen, onClose, resumeContent }: ResumeModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -57,175 +57,71 @@ export function ResumeModal({ isOpen, onClose, resumeContent }: ResumeModalProps
 
           <motion.div
             ref={modalRef}
-            className="relative bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden border border-gray-200 dark:border-slate-700"
+            className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-5xl w-full mx-2 sm:mx-4 h-[88vh] flex flex-col overflow-hidden border border-gray-200 dark:border-slate-700"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           >
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
-              <motion.h2
-                id="resume-modal-title"
-                className="text-2xl font-semibold text-gray-900 dark:text-white"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                Resume - {resumeContent.personalInfo.name}
-              </motion.h2>
-              <motion.button
-                ref={closeButtonRef}
-                onClick={onClose}
-                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-                aria-label="Close resume modal"
-                whileHover={{ scale: 1.1, rotate: 90 }}
-                whileTap={{ scale: 0.9 }}
-                initial={{ opacity: 0, rotate: -90 }}
-                animate={{ opacity: 1, rotate: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <X size={24} />
-              </motion.button>
-            </div>
+             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700 shrink-0">
+               <motion.h2
+                 id="resume-modal-title"
+                 className="text-2xl font-semibold text-gray-900 dark:text-white"
+                 initial={{ opacity: 0, x: -20 }}
+                 animate={{ opacity: 1, x: 0 }}
+                 transition={{ delay: 0.1 }}
+               >
+                 Resume - {resumeContent.personalInfo.name}
+               </motion.h2>
+               <div className="flex items-center gap-2">
+                 <motion.a
+                   href="/Carlo_Baclao_Resume.pdf"
+                   download="Carlo_Baclao_Resume.pdf"
+                   className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+                   aria-label="Download resume PDF"
+                   whileHover={{ scale: 1.05 }}
+                   whileTap={{ scale: 0.95 }}
+                 >
+                   <Download size={14} />
+                   Download
+                 </motion.a>
+                 <motion.button
+                   ref={closeButtonRef}
+                   onClick={onClose}
+                   className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+                   aria-label="Close resume modal"
+                   whileHover={{ scale: 1.1, rotate: 90 }}
+                   whileTap={{ scale: 0.9 }}
+                   initial={{ opacity: 0, rotate: -90 }}
+                   animate={{ opacity: 1, rotate: 0 }}
+                   transition={{ delay: 0.2 }}
+                 >
+                   <X size={24} />
+                 </motion.button>
+               </div>
+             </div>
 
-            <motion.div
-              className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-            >
-              <motion.div className="mb-8" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400">Email: <span className="text-gray-900 dark:text-white">{resumeContent.personalInfo.email}</span></p>
-                    <p className="text-gray-500 dark:text-gray-400">Phone: <span className="text-gray-900 dark:text-white">{resumeContent.personalInfo.phone}</span></p>
-                    <p className="text-gray-500 dark:text-gray-400">Location: <span className="text-gray-900 dark:text-white">{resumeContent.personalInfo.location}</span></p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400">LinkedIn: <a href={resumeContent.personalInfo.linkedin} className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">Profile</a></p>
-                    <p className="text-gray-500 dark:text-gray-400">GitHub: <a href={resumeContent.personalInfo.github} className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">Profile</a></p>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div className="mb-8" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Professional Summary</h3>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{resumeContent.summary}</p>
-              </motion.div>
-
-              <motion.div className="mb-8" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Experience</h3>
-                <div className="space-y-6">
-                  {resumeContent.experience.map((exp, idx) => (
-                    <motion.div
-                      key={exp.id}
-                      className="border-l-2 border-slate-300 dark:border-slate-600 pl-4"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.35 + idx * 0.1 }}
-                    >
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
-                        <h4 className="font-semibold text-gray-900 dark:text-white">{exp.position}</h4>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          {exp.startDate.toLocaleDateString()} - {exp.endDate ? exp.endDate.toLocaleDateString() : 'Present'}
-                        </span>
-                      </div>
-                      <p className="text-blue-600 dark:text-blue-400 font-medium mb-2">{exp.company}</p>
-                      <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 text-sm space-y-1 mb-3">
-                        {exp.description.map((desc, index) => (
-                          <li key={index}>{desc}</li>
-                        ))}
-                      </ul>
-                      <div className="flex flex-wrap gap-2">
-                        {exp.technologies.map((tech) => (
-                          <motion.span key={tech} className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-slate-600 text-xs rounded" whileHover={{ scale: 1.05 }}>
-                            {tech}
-                          </motion.span>
-                        ))}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-
-              <motion.div className="mb-8" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Skills</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {resumeContent.skills.map((skillCategory, catIdx) => (
-                    <motion.div key={skillCategory.category} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 + catIdx * 0.1 }}>
-                      <h4 className="font-medium text-gray-900 dark:text-white mb-2">{skillCategory.category}</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {skillCategory.skills.map((skill) => (
-                          <motion.span key={skill} className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/50 text-sm rounded" whileHover={{ scale: 1.05 }}>
-                            {skill}
-                          </motion.span>
-                        ))}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-
-              <motion.div className="mb-8" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Education</h3>
-                <div className="space-y-4">
-                  {resumeContent.education.map((edu, idx) => (
-                    <motion.div
-                      key={edu.id}
-                      className="border-l-2 border-slate-300 dark:border-slate-600 pl-4"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.55 + idx * 0.1 }}
-                    >
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-1">
-                        <h4 className="font-semibold text-gray-900 dark:text-white">{edu.degree} in {edu.field}</h4>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          {edu.startDate.toLocaleDateString()} - {edu.endDate ? edu.endDate.toLocaleDateString() : 'Present'}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-300">{edu.institution}</p>
-                      {edu.gpa && <p className="text-sm text-gray-500 dark:text-gray-400">GPA: {edu.gpa}</p>}
-                      {edu.honors && edu.honors.length > 0 && (
-                        <div className="mt-2">
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Honors: {edu.honors.join(', ')}</p>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {resumeContent.certifications.length > 0 && (
-                <motion.div className="mb-8" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Certifications</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {resumeContent.certifications.map((cert, idx) => (
-                      <motion.div
-                        key={cert.id}
-                        className="border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 rounded-lg p-4"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.65 + idx * 0.1 }}
-                        whileHover={{ scale: 1.02 }}
-                      >
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-1">{cert.name}</h4>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">{cert.issuer}</p>
-                        <p className="text-gray-500 dark:text-gray-400 text-xs">
-                          {cert.issueDate && `Issued: ${cert.issueDate.toLocaleDateString()}`}
-                          {cert.issueDate && cert.expiryDate && ' \u2022 '}
-                          {cert.expiryDate && `Expires: ${cert.expiryDate.toLocaleDateString()}`}
-                        </p>
-                        {cert.credentialUrl && (
-                          <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline text-xs">
-                            View Credential
-                          </a>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
+             <motion.div
+               className="p-4 sm:p-6 flex-1 flex flex-col min-h-0 overflow-hidden"
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ delay: 0.15 }}
+             >
+               {/* PDF Preview */}
+               <motion.div
+                 className="flex-1 w-full h-full border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-inner"
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 0.18 }}
+               >
+                 <iframe
+                   src="/Carlo_Baclao_Resume.pdf#toolbar=0&navpanes=0&pagemode=none&view=FitH"
+                   className="w-full h-full border-0"
+                   title="Resume PDF Preview"
+                   loading="lazy"
+                 />
+               </motion.div>
+             </motion.div>
           </motion.div>
         </motion.div>
       )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FileCode2, Coffee, Database, GitBranch, Code, Monitor, Smartphone, Shield, Palette, Target, Server, Box } from 'lucide-react';
+import { FileCode2, Coffee, Database, GitBranch, Code, Monitor, Smartphone, Shield, Palette, Target, Server, Box, Globe } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './BrandIcons';
 
 const skillIcons: Record<string, React.ReactNode> = {
@@ -38,6 +38,8 @@ export function RightSidebar() {
   const socialLinks = [
     { name: 'GitHub', icon: <GithubIcon size={18} />, url: 'https://github.com/Leap0920' },
     { name: 'LinkedIn', icon: <LinkedinIcon size={18} />, url: 'https://www.linkedin.com/in/baclao-carlo-22936435a/' },
+    { name: 'Indeed', icon: <Globe size={18} />, url: 'https://profile.indeed.com/p/carlob-c5yt782' },
+    { name: 'Jobstreet', icon: <Globe size={18} />, url: 'https://ph.jobstreet.com/profiles/carlo-baclao-CHYbs3Qm5M' },
   ];
 
   return (

@@ -62,9 +62,9 @@ function terminalReducer(state: TerminalState, action: TerminalAction): Terminal
     case 'OPEN':
       return { ...state, isOpen: true };
     case 'CLOSE':
-      return { ...state, isOpen: false, inputValue: '', typingTestState: null };
+      return { ...state, isOpen: false, inputValue: '', typingTestState: null, matrixActive: false };
     case 'TOGGLE':
-      return { ...state, isOpen: !state.isOpen, inputValue: '', typingTestState: null };
+      return { ...state, isOpen: !state.isOpen, inputValue: '', typingTestState: null, matrixActive: state.isOpen ? false : state.matrixActive };
     case 'OPEN_TYPING_MODAL':
       return { ...state, isTypingModalOpen: true, isTypingLoading: false };
     case 'CLOSE_TYPING_MODAL':

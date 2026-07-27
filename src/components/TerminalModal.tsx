@@ -26,13 +26,21 @@ import {
   ChevronRight,
   CheckCircle2,
   Sparkles,
+  Cpu,
+  Quote,
+  Smile,
+  Palette,
 } from 'lucide-react';
 
 const QUICK_COMMANDS = [
   { cmd: '/help', desc: 'List all commands', icon: HelpCircle },
+  { cmd: '/fetch', desc: 'Neofetch Windows system specs', icon: Cpu },
   { cmd: '/about', desc: 'Developer summary', icon: UserCheck },
   { cmd: '/skills', desc: 'Technical stack & skills', icon: Code2 },
   { cmd: '/projects', desc: 'Featured projects & links', icon: FolderGit2 },
+  { cmd: '/quote', desc: 'Marcus Aurelius & wisdom quotes', icon: Quote },
+  { cmd: '/joke', desc: 'Random developer joke', icon: Smile },
+  { cmd: '/theme', desc: 'Switch terminal color scheme', icon: Palette },
   { cmd: '/resume', desc: 'Download PDF resume', icon: FileText },
   { cmd: '/contact', desc: 'Direct contact info', icon: Mail },
   { cmd: '/sudo hire carlo', desc: 'Hire command', icon: Award },
@@ -44,6 +52,44 @@ const QUICK_COMMANDS = [
   { cmd: '/exit', desc: 'Close terminal window', icon: X },
 ];
 
+const THEME_MAP = {
+  default: {
+    prompt: 'text-emerald-400',
+    caret: 'caret-emerald-400',
+    btn: 'bg-emerald-500 hover:bg-emerald-400 text-slate-950',
+    icon: 'text-emerald-400',
+    border: 'border-emerald-500/30',
+  },
+  dracula: {
+    prompt: 'text-purple-400',
+    caret: 'caret-purple-400',
+    btn: 'bg-purple-500 hover:bg-purple-400 text-slate-950',
+    icon: 'text-purple-400',
+    border: 'border-purple-500/30',
+  },
+  matrix: {
+    prompt: 'text-green-400',
+    caret: 'caret-green-400',
+    btn: 'bg-green-500 hover:bg-green-400 text-slate-950',
+    icon: 'text-green-400',
+    border: 'border-green-500/30',
+  },
+  cyber: {
+    prompt: 'text-cyan-400',
+    caret: 'caret-cyan-400',
+    btn: 'bg-cyan-500 hover:bg-cyan-400 text-slate-950',
+    icon: 'text-cyan-400',
+    border: 'border-cyan-500/30',
+  },
+  monokai: {
+    prompt: 'text-amber-400',
+    caret: 'caret-amber-400',
+    btn: 'bg-amber-500 hover:bg-amber-400 text-slate-950',
+    icon: 'text-amber-400',
+    border: 'border-amber-500/30',
+  },
+};
+
 export function TerminalModal() {
   const { state, dispatch, closeTerminal, openTypingModal, openTicTacToeModal, openSnakeModal } = useTerminal();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,6 +97,9 @@ export function TerminalModal() {
 
   const [cmdHistory, setCmdHistory] = useState<string[]>([]);
   const [historyIdx, setHistoryIdx] = useState<number>(-1);
+  const [terminalTheme, setTerminalTheme] = useState<'default' | 'dracula' | 'matrix' | 'cyber' | 'monokai'>('default');
+
+  const theme = THEME_MAP[terminalTheme];
 
   useEffect(() => {
     if (state.isOpen) {
@@ -76,6 +125,43 @@ export function TerminalModal() {
         type: 'ADD_HISTORY',
         payload: { type: 'output', text: 'CMD_HELP' },
       });
+    } else if (cmd === 'fetch' || cmd === 'neofetch' || cmd === 'fastfetch') {
+      dispatch({
+        type: 'ADD_HISTORY',
+        payload: { type: 'output', text: 'CMD_FETCH' },
+      });
+    } else if (cmd === 'quote' || cmd === 'marcus' || cmd === 'stoic') {
+      dispatch({
+        type: 'ADD_HISTORY',
+        payload: { type: 'output', text: 'CMD_QUOTE' },
+      });
+    } else if (cmd === 'joke') {
+      dispatch({
+        type: 'ADD_HISTORY',
+        payload: { type: 'output', text: 'CMD_JOKE' },
+      });
+    } else if (cmd.startsWith('theme')) {
+      const parts = raw.split(' ');
+      if (parts.length > 1) {
+        const themeName = parts[1].toLowerCase();
+        if (['dracula', 'matrix', 'cyber', 'monokai', 'default'].includes(themeName)) {
+          setTerminalTheme(themeName as any);
+          dispatch({
+            type: 'ADD_HISTORY',
+            payload: { type: 'output', text: `CMD_THEME_SET_${themeName.toUpperCase()}` },
+          });
+        } else {
+          dispatch({
+            type: 'ADD_HISTORY',
+            payload: { type: 'output', text: 'CMD_THEME_HELP' },
+          });
+        }
+      } else {
+        dispatch({
+          type: 'ADD_HISTORY',
+          payload: { type: 'output', text: 'CMD_THEME_HELP' },
+        });
+      }
     } else if (cmd === 'about') {
       dispatch({
         type: 'ADD_HISTORY',
@@ -106,6 +192,11 @@ export function TerminalModal() {
       dispatch({
         type: 'ADD_HISTORY',
         payload: { type: 'output', text: 'CMD_HIRE' },
+      });
+    } else if (cmd.startsWith('sudo')) {
+      dispatch({
+        type: 'ADD_HISTORY',
+        payload: { type: 'output', text: 'CMD_SUDO_PROTECTED' },
       });
     } else if (cmd === 'matrix') {
       dispatch({ type: 'TOGGLE_MATRIX' });
@@ -215,18 +306,38 @@ export function TerminalModal() {
         }
       }
 
-      if (e.key === 'Tab') {
+      const currentInput = state.inputValue.trim().toLowerCase();
+      const matchObj = currentInput
+        ? QUICK_COMMANDS.find(
+            (c) => c.cmd.startsWith(currentInput) || c.cmd.slice(1).startsWith(currentInput)
+          )
+        : null;
+
+      if ((e.key === 'Tab' || e.key === 'ArrowRight') && matchObj) {
         e.preventDefault();
-        const current = state.inputValue.trim();
-        if (!current) return;
-        const matches = QUICK_COMMANDS.filter((c) => c.cmd.startsWith(current) || c.cmd.slice(1).startsWith(current));
-        if (matches.length === 1) {
-          dispatch({ type: 'SET_INPUT', payload: matches[0].cmd });
-        }
+        dispatch({ type: 'SET_INPUT', payload: matchObj.cmd });
+        return;
       }
     },
     [handleSubmit, closeTerminal, state.mode, handleTypingKey, cmdHistory, historyIdx, state.inputValue, dispatch],
   );
+
+  const currentInputVal = state.inputValue.trim().toLowerCase();
+  const matchCmd = currentInputVal
+    ? QUICK_COMMANDS.find(
+        (c) => c.cmd.startsWith(currentInputVal) || c.cmd.slice(1).startsWith(currentInputVal)
+      )
+    : null;
+
+  let ghostText = '';
+  if (matchCmd && state.inputValue) {
+    const fullCmd = matchCmd.cmd;
+    if (fullCmd.toLowerCase().startsWith(state.inputValue.toLowerCase())) {
+      ghostText = fullCmd.slice(state.inputValue.length);
+    } else if (fullCmd.toLowerCase().slice(1).startsWith(state.inputValue.toLowerCase())) {
+      ghostText = fullCmd.slice(state.inputValue.length + 1);
+    }
+  }
 
   const displayValue =
     state.mode === 'typing-test' && state.typingTestState
@@ -261,6 +372,100 @@ export function TerminalModal() {
                 <span className="text-zinc-500 text-[11px] truncate">{item.desc}</span>
               </button>
             ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (text === 'CMD_FETCH') {
+      return (
+        <div key={index} className="my-3 p-3.5 bg-zinc-950/70 border border-zinc-800/80 rounded-xl font-mono text-xs text-zinc-300 shadow-inner">
+          <div className="flex flex-col sm:flex-row gap-4 items-start">
+            <pre className={`${theme.prompt} font-bold leading-none select-none hidden sm:block text-[11px] shrink-0`}>
+{`
+  ██████╗  ██████╗  ██████╗ 
+  ██╔══██╗ ██╔══██╗ ██╔══██╗
+  ██████╔╝ ██║  ██║ ██║  ██║
+  ██╔══██╗ ██║  ██║ ██║  ██║
+  ██████╔╝ ██████╔╝ ██████╔╝
+  ╚═════╝  ╚═════╝  ╚═════╝ 
+`}
+            </pre>
+            <div className="space-y-1.5 w-full">
+              <div className={`${theme.prompt} font-bold border-b border-zinc-800 pb-1 flex items-center justify-between`}>
+                <span>carlo@windows-pc</span>
+                <span className="text-[10px] text-zinc-500 font-normal">v4.2.0</span>
+              </div>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">OS:</span> <span className="text-zinc-200">Windows 11 Home / Pro x64 (Carlo OS)</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Host:</span> <span className="text-zinc-200">Quezon City University (4th Yr BS IT)</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Uptime:</span> <span className="text-amber-400 font-semibold">5+ Years Coding Experience</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Shell:</span> <span className={theme.prompt}>PowerShell 7.4 / Zsh Terminal</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Stack:</span> <span className="text-cyan-400">React 19 • Next.js 16 • TypeScript • Tailwind</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Location:</span> <span className="text-zinc-300">Quezon City, Metro Manila, PH 🇵🇭</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Status:</span> <span className={`${theme.prompt} font-semibold`}>🟢 Open for Web Dev / IT Roles</span></p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (text === 'CMD_QUOTE') {
+      return (
+        <div key={index} className="my-2 p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-xl text-xs font-mono text-zinc-200 space-y-1.5 shadow-inner">
+          <p className="text-amber-300 italic font-medium leading-relaxed text-sm">
+            “The happiness of your life depends upon the quality of your thoughts.”
+          </p>
+          <p className="text-zinc-400 text-[11px] text-right font-semibold">
+            ― Marcus Aurelius, Meditations
+          </p>
+        </div>
+      );
+    }
+
+    if (text === 'CMD_JOKE') {
+      const jokes = [
+        "Why do programmers prefer dark mode? Because light attracts bugs.",
+        "There are 10 types of people in the world: those who understand binary, and those who don't.",
+        "A SQL query walks into a bar, walks up to two tables and asks... 'Can I join you?'",
+        "How many programmers does it take to change a light bulb? None, that's a hardware problem.",
+        "Real programmers count from 0.",
+      ];
+      const j = jokes[Math.floor(Math.random() * jokes.length)];
+      return (
+        <div key={index} className="my-2 p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-xl text-xs font-mono text-cyan-300 space-y-1">
+          <p className="font-medium">⚡ {j}</p>
+        </div>
+      );
+    }
+
+    if (text === 'CMD_SUDO_PROTECTED') {
+      return (
+        <div key={index} className="my-2 text-xs font-mono text-rose-400 flex items-center gap-1.5">
+          <span>Permission denied: Carlo&apos;s portfolio system is immutable &amp; protected 🛡️</span>
+        </div>
+      );
+    }
+
+    if (text.startsWith('CMD_THEME_SET_')) {
+      const tName = text.replace('CMD_THEME_SET_', '').toLowerCase();
+      return (
+        <div key={index} className="my-2 text-xs font-mono text-emerald-400">
+          <span>Terminal theme updated to: <strong>{tName}</strong></span>
+        </div>
+      );
+    }
+
+    if (text === 'CMD_THEME_HELP') {
+      return (
+        <div key={index} className="my-2 text-xs font-mono space-y-1 text-zinc-300">
+          <p className="text-amber-400 font-bold">Usage: /theme &lt;name&gt;</p>
+          <p className="text-zinc-400">Available themes:</p>
+          <div className="pl-4 space-y-0.5">
+            <p><span className="text-emerald-400">/theme default</span> - Classic Emerald Unix</p>
+            <p><span className="text-purple-400">/theme dracula</span> - Dracula Purple &amp; Pink</p>
+            <p><span className="text-green-400">/theme matrix</span> - Matrix Neon Green</p>
+            <p><span className="text-cyan-400">/theme cyber</span> - Cyberpunk Cyan &amp; Magenta</p>
+            <p><span className="text-amber-400">/theme monokai</span> - Monokai Warm Gold</p>
           </div>
         </div>
       );
@@ -424,7 +629,7 @@ export function TerminalModal() {
                 <span className="w-3 h-3 rounded-full bg-emerald-500" />
 
                 <div className="ml-3 flex items-center gap-2 text-xs font-mono text-zinc-400">
-                  <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                  <Terminal className={`w-3.5 h-3.5 ${theme.icon}`} />
                   <span>carlo@portfolio:~ — zsh</span>
                 </div>
               </div>
@@ -456,7 +661,7 @@ export function TerminalModal() {
                   onClick={() => executeCommand(item.cmd)}
                   className="px-2 py-1 rounded bg-zinc-800/60 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-white text-[11px] font-mono flex items-center gap-1.5 whitespace-nowrap transition-colors"
                 >
-                  <item.icon className="w-3 h-3 text-emerald-400 shrink-0" />
+                  <item.icon className={`w-3 h-3 ${theme.icon} shrink-0`} />
                   <span>{item.cmd}</span>
                 </button>
               ))}
@@ -468,7 +673,7 @@ export function TerminalModal() {
             >
               {state.history.length === 0 && (
                 <div className="space-y-4 mb-4">
-                  <pre className="text-emerald-400 text-[8px] sm:text-[10px] leading-none font-mono font-bold select-none overflow-x-auto">
+                  <pre className={`${theme.prompt} text-[8px] sm:text-[10px] leading-none font-mono font-bold select-none overflow-x-auto`}>
 {`  ____    _    ____  _     ___    ____    _    ____ _     _    ___  
  / ___|  / \\  |  _ \\| |   / _ \\  | __ )  / \\  / ___| |   / \\  / _ \\ 
 | |     / _ \\ | |_) | |  | | | | |  _ \\ / _ \\| |   | |  / _ \\| | | |
@@ -476,9 +681,9 @@ export function TerminalModal() {
  \\____/_/   \\_\\_| \\_\\_____\\___/  |____/_/   \\_\\____|____/_/   \\_\\___/ `}
                   </pre>
 
-                  <div className="p-3.5 bg-slate-900/60 border border-emerald-500/20 rounded-xl space-y-2">
+                  <div className={`p-3.5 bg-slate-900/60 border ${theme.border} rounded-xl space-y-2`}>
                     <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                      <div className={`flex items-center gap-1.5 ${theme.prompt} font-bold`}>
                         <Sparkles className="w-3.5 h-3.5" />
                         <span>CARLO.OS Interactive Shell v2.4</span>
                       </div>
@@ -496,16 +701,16 @@ export function TerminalModal() {
                       </div>
                       <div className="p-1.5 rounded bg-slate-800/40 border border-slate-800">
                         <span className="text-slate-500 block text-[10px]">Stack</span>
-                        <span className="text-emerald-400 font-semibold">Full-Stack Dev</span>
+                        <span className={`${theme.prompt} font-semibold`}>Full-Stack Dev</span>
                       </div>
                       <div className="p-1.5 rounded bg-slate-800/40 border border-slate-800">
                         <span className="text-slate-500 block text-[10px]">Status</span>
-                        <span className="text-emerald-400 font-semibold">Open for Work 🚀</span>
+                        <span className={`${theme.prompt} font-semibold`}>Open for Work 🚀</span>
                       </div>
                     </div>
 
                     <p className="text-[11px] text-slate-400 pt-1">
-                      Type <button onClick={() => executeCommand('/help')} className="text-emerald-400 underline hover:text-emerald-300 font-bold">/help</button> to view commands or click any button above. Use <kbd className="px-1 py-0.5 bg-slate-800 rounded text-[10px]">↑</kbd> <kbd className="px-1 py-0.5 bg-slate-800 rounded text-[10px]">↓</kbd> for history and <kbd className="px-1 py-0.5 bg-slate-800 rounded text-[10px]">Tab</kbd> to autocomplete.
+                      Type <button onClick={() => executeCommand('/help')} className={`${theme.prompt} underline font-bold`}>/help</button> to view commands or click any button above. Use <kbd className="px-1 py-0.5 bg-slate-800 rounded text-[10px]">↑</kbd> <kbd className="px-1 py-0.5 bg-slate-800 rounded text-[10px]">↓</kbd> for history and <kbd className="px-1 py-0.5 bg-slate-800 rounded text-[10px]">Tab</kbd> to autocomplete.
                     </p>
                   </div>
                 </div>
@@ -516,8 +721,8 @@ export function TerminalModal() {
                 <div key={i} className="my-1">
                   {entry.type === 'input' ? (
                     <div className="flex items-center gap-2 text-xs font-mono py-1">
-                      <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                        <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className={`${theme.prompt} font-semibold flex items-center gap-1`}>
+                        <ChevronRight className={`w-3.5 h-3.5 ${theme.prompt}`} />
                         carlo@portfolio:~$
                       </span>
                       <span className="text-slate-100 font-bold">{entry.text}</span>
@@ -532,9 +737,9 @@ export function TerminalModal() {
               {state.mode === 'typing-test' && state.typingTestState && !state.typingTestState.result && (() => {
                 const tt = state.typingTestState!;
                 return (
-                  <div className="mt-3 mb-2 p-3 bg-slate-900/80 border border-emerald-500/30 rounded-xl space-y-2">
+                  <div className={`mt-3 mb-2 p-3 bg-slate-900/80 border ${theme.border} rounded-xl space-y-2`}>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                      <span className={`${theme.prompt} font-bold flex items-center gap-1.5`}>
                         <Keyboard className="w-3.5 h-3.5" /> Typing Speed Challenge
                       </span>
                       <span className="text-[10px] text-slate-400">Type exact sentence below</span>
@@ -544,7 +749,7 @@ export function TerminalModal() {
                         const typedChar = tt.typedText[i];
                         if (i < tt.typedText.length) {
                           if (typedChar === char) {
-                            return <span key={i} className="text-emerald-400 bg-emerald-500/10 rounded-sm">{char}</span>;
+                            return <span key={i} className={`${theme.prompt} bg-slate-800 rounded-sm`}>{char}</span>;
                           }
                           return <span key={i} className="text-red-400 bg-red-500/20 rounded-sm underline decoration-red-500">{typedChar}</span>;
                         }
@@ -553,7 +758,7 @@ export function TerminalModal() {
                         }
                         return <span key={i} className="text-slate-600">{char}</span>;
                       })}
-                      <span className="inline-block w-[2px] h-[1.1em] bg-emerald-400 animate-pulse ml-[1px] align-text-bottom" />
+                      <span className={`inline-block w-[2px] h-[1.1em] ${theme.btn} animate-pulse ml-[1px] align-text-bottom`} />
                     </div>
                   </div>
                 );
@@ -561,18 +766,18 @@ export function TerminalModal() {
 
               {/* Typing Test Result */}
               {state.mode === 'typing-test' && state.typingTestState?.result && (
-                <div className="mt-3 mb-2 p-4 bg-emerald-950/40 border border-emerald-500/40 rounded-xl text-center space-y-2">
-                  <p className="text-emerald-400 font-bold text-sm flex items-center justify-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Challenge Completed!
+                <div className={`mt-3 mb-2 p-4 bg-slate-950/60 border ${theme.border} rounded-xl text-center space-y-2`}>
+                  <p className={`${theme.prompt} font-bold text-sm flex items-center justify-center gap-1.5`}>
+                    <CheckCircle2 className="w-4 h-4" /> Challenge Completed!
                   </p>
                   <div className="flex justify-center gap-4 text-xs font-mono pt-1">
-                    <span className="px-2.5 py-1 bg-slate-900 rounded border border-emerald-500/30 text-emerald-300">
+                    <span className="px-2.5 py-1 bg-slate-900 rounded border border-slate-800 text-slate-200">
                       WPM: <strong>{state.typingTestState!.result.wpm}</strong>
                     </span>
-                    <span className="px-2.5 py-1 bg-slate-900 rounded border border-emerald-500/30 text-emerald-300">
+                    <span className="px-2.5 py-1 bg-slate-900 rounded border border-slate-800 text-slate-200">
                       Accuracy: <strong>{state.typingTestState!.result.accuracy}%</strong>
                     </span>
-                    <span className="px-2.5 py-1 bg-slate-900 rounded border border-emerald-500/30 text-emerald-300">
+                    <span className="px-2.5 py-1 bg-slate-900 rounded border border-slate-800 text-slate-200">
                       Time: <strong>{state.typingTestState!.result.time}s</strong>
                     </span>
                   </div>
@@ -582,25 +787,37 @@ export function TerminalModal() {
 
             {/* Input Line */}
             <div className="flex items-center px-4 py-3 border-t border-slate-800/80 bg-slate-900/90">
-              <span className="text-emerald-400 text-xs font-mono mr-2 shrink-0 select-none flex items-center gap-1 font-semibold">
+              <span className={`${theme.prompt} text-xs font-mono mr-2 shrink-0 select-none flex items-center gap-1 font-semibold`}>
                 <span>carlo@portfolio:~$</span>
               </span>
-              <input
-                ref={inputRef}
-                type="text"
-                value={displayValue}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                className="flex-1 bg-transparent text-slate-100 text-xs font-mono outline-none caret-emerald-400 placeholder:text-slate-600"
-                placeholder={state.mode === 'typing-test' ? 'Start typing the sentence above...' : 'Type a command... (e.g. /help)'}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck={false}
-              />
+              <div className="relative flex-1 flex items-center overflow-hidden">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={displayValue}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  className={`w-full bg-transparent text-slate-100 text-xs font-mono outline-none ${theme.caret} placeholder:text-slate-600 z-10`}
+                  placeholder={state.mode === 'typing-test' ? 'Start typing the sentence above...' : 'Type a command... (e.g. /help)'}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                />
+                {/* Translucent Ghost Text Autocomplete */}
+                {ghostText && state.mode !== 'typing-test' && (
+                  <div className="absolute left-0 top-0 bottom-0 flex items-center text-xs font-mono pointer-events-none select-none z-0">
+                    <span className="opacity-0">{state.inputValue}</span>
+                    <span className="text-zinc-500/80 font-normal">{ghostText}</span>
+                    <span className="ml-2 text-[10px] text-zinc-400 bg-zinc-800/80 px-1 py-0.2 rounded border border-zinc-700/60 hidden sm:inline">
+                      Tab ↹
+                    </span>
+                  </div>
+                )}
+              </div>
               <button
                 onClick={handleSubmit}
-                className="ml-2 px-2.5 py-1 text-xs font-mono bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded transition-colors shrink-0"
+                className={`ml-2 px-2.5 py-1 text-xs font-mono ${theme.btn} font-bold rounded transition-colors shrink-0`}
               >
                 Run
               </button>

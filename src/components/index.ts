@@ -13,6 +13,7 @@ export { ProjectShowcase } from './ProjectShowcase';
 export { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from './BrandIcons';
 export { TerminalButton } from './TerminalButton';
 export { TerminalModal } from './TerminalModal';
+export { TypingModal } from './TypingModal';
 
 // Animation components
 export {

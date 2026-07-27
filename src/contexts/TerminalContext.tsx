@@ -6,6 +6,8 @@ import React, { createContext, useContext, useReducer, useCallback } from 'react
 
 export interface TerminalState {
   isOpen: boolean;
+  isTypingModalOpen: boolean;
+  isTypingLoading: boolean;
   mode: 'prompt' | 'typing-test';
   history: { type: 'input' | 'output'; text: string }[];
   inputValue: string;
@@ -22,6 +24,9 @@ type TerminalAction =
   | { type: 'OPEN' }
   | { type: 'CLOSE' }
   | { type: 'TOGGLE' }
+  | { type: 'OPEN_TYPING_MODAL' }
+  | { type: 'CLOSE_TYPING_MODAL' }
+  | { type: 'SET_TYPING_LOADING'; payload: boolean }
   | { type: 'ADD_HISTORY'; payload: { type: 'input' | 'output'; text: string } }
   | { type: 'CLEAR_HISTORY' }
   | { type: 'SET_INPUT'; payload: string }
@@ -33,6 +38,8 @@ type TerminalAction =
 
 const initialState: TerminalState = {
   isOpen: false,
+  isTypingModalOpen: false,
+  isTypingLoading: false,
   mode: 'prompt',
   history: [],
   inputValue: '',
@@ -50,6 +57,12 @@ function terminalReducer(state: TerminalState, action: TerminalAction): Terminal
       return { ...state, isOpen: false, inputValue: '', typingTestState: null };
     case 'TOGGLE':
       return { ...state, isOpen: !state.isOpen, inputValue: '', typingTestState: null };
+    case 'OPEN_TYPING_MODAL':
+      return { ...state, isTypingModalOpen: true, isTypingLoading: true };
+    case 'CLOSE_TYPING_MODAL':
+      return { ...state, isTypingModalOpen: false, isTypingLoading: false };
+    case 'SET_TYPING_LOADING':
+      return { ...state, isTypingLoading: action.payload };
     case 'ADD_HISTORY':
       return { ...state, history: [...state.history, action.payload] };
     case 'CLEAR_HISTORY':
@@ -75,6 +88,8 @@ interface TerminalContextType {
   openTerminal: () => void;
   closeTerminal: () => void;
   toggleTerminal: () => void;
+  openTypingModal: () => void;
+  closeTypingModal: () => void;
   addOutput: (text: string) => void;
   addInput: (text: string) => void;
   clearHistory: () => void;
@@ -90,6 +105,8 @@ export function TerminalProvider({ children }: { children: React.ReactNode }) {
   const openTerminal = useCallback(() => dispatch({ type: 'OPEN' }), []);
   const closeTerminal = useCallback(() => dispatch({ type: 'CLOSE' }), []);
   const toggleTerminal = useCallback(() => dispatch({ type: 'TOGGLE' }), []);
+  const openTypingModal = useCallback(() => dispatch({ type: 'OPEN_TYPING_MODAL' }), []);
+  const closeTypingModal = useCallback(() => dispatch({ type: 'CLOSE_TYPING_MODAL' }), []);
   const addOutput = useCallback(
     (text: string) => dispatch({ type: 'ADD_HISTORY', payload: { type: 'output', text } }),
     [],
@@ -102,7 +119,18 @@ export function TerminalProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <TerminalContext.Provider
-      value={{ state, dispatch, openTerminal, closeTerminal, toggleTerminal, addOutput, addInput, clearHistory }}
+      value={{
+        state,
+        dispatch,
+        openTerminal,
+        closeTerminal,
+        toggleTerminal,
+        openTypingModal,
+        closeTypingModal,
+        addOutput,
+        addInput,
+        clearHistory,
+      }}
     >
       {children}
     </TerminalContext.Provider>
@@ -116,3 +144,4 @@ export function useTerminal() {
   if (!ctx) throw new Error('useTerminal must be used within TerminalProvider');
   return ctx;
 }
+

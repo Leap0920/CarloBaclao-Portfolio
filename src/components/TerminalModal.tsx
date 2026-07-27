@@ -3,50 +3,49 @@
 import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTerminal } from '@/contexts/TerminalContext';
-import { 
-  Terminal, 
-  Sparkles, 
-  HelpCircle, 
-  User, 
-  Code2, 
-  FolderGit2, 
-  FileText, 
-  Mail, 
-  Award, 
-  Eye, 
-  Keyboard, 
-  Trash2, 
-  X, 
+import {
+  Terminal,
+  HelpCircle,
+  User,
+  Code2,
+  FolderGit2,
+  FileText,
+  Mail,
+  Award,
+  Eye,
+  Keyboard,
+  Trash2,
+  X,
   ExternalLink,
-  CheckCircle2,
+  Phone,
+  MapPin,
   ChevronRight,
-  ShieldCheck
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 
 const AVAILABLE_COMMANDS = [
-  { cmd: '/help', desc: 'Show all available commands', icon: HelpCircle },
-  { cmd: '/about', desc: 'Display developer profile info', icon: User },
-  { cmd: '/skills', desc: 'List technical skills & stack', icon: Code2 },
-  { cmd: '/projects', desc: 'View featured projects', icon: FolderGit2 },
+  { cmd: '/help', desc: 'Show available commands', icon: HelpCircle },
+  { cmd: '/about', desc: 'Developer profile info', icon: User },
+  { cmd: '/skills', desc: 'Technical stack & skills', icon: Code2 },
+  { cmd: '/projects', desc: 'Featured projects & links', icon: FolderGit2 },
   { cmd: '/resume', desc: 'Download PDF resume', icon: FileText },
-  { cmd: '/contact', desc: 'Get contact info & email', icon: Mail },
-  { cmd: '/sudo hire carlo', desc: 'Unlock instant recruitment access', icon: Award },
-  { cmd: '/matrix', desc: 'Toggle digital code rain effect', icon: Eye },
-  { cmd: '/play typing', desc: 'Start speed typing test game', icon: Keyboard },
+  { cmd: '/contact', desc: 'Direct contact info', icon: Mail },
+  { cmd: '/sudo hire carlo', desc: 'Hire command', icon: Award },
+  { cmd: '/matrix', desc: 'Toggle matrix code rain', icon: Eye },
+  { cmd: '/play typing', desc: 'Speed typing test', icon: Keyboard },
   { cmd: '/clear', desc: 'Clear terminal screen', icon: Trash2 },
   { cmd: '/exit', desc: 'Close terminal window', icon: X },
 ];
 
 export function TerminalModal() {
-  const { state, dispatch, closeTerminal } = useTerminal();
+  const { state, dispatch, closeTerminal, openTypingModal } = useTerminal();
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
-  
-  // History navigation (Arrow Up / Arrow Down)
+
   const [cmdHistory, setCmdHistory] = useState<string[]>([]);
   const [historyIdx, setHistoryIdx] = useState<number>(-1);
 
-  // Auto-focus input when opened
   useEffect(() => {
     if (state.isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -69,10 +68,7 @@ export function TerminalModal() {
     if (cmd === 'help') {
       dispatch({
         type: 'ADD_HISTORY',
-        payload: {
-          type: 'output',
-          text: 'CMD_HELP',
-        },
+        payload: { type: 'output', text: 'CMD_HELP' },
       });
     } else if (cmd === 'about') {
       dispatch({
@@ -109,22 +105,13 @@ export function TerminalModal() {
       dispatch({ type: 'TOGGLE_MATRIX' });
       dispatch({
         type: 'ADD_HISTORY',
-        payload: { type: 'output', text: state.matrixActive ? '⚡ Matrix rain mode disabled.' : '❇️ Matrix rain mode activated!' },
+        payload: { type: 'output', text: state.matrixActive ? 'Matrix code rain effect: OFF' : 'Matrix code rain effect: ON' },
       });
     } else if (cmd === 'play typing') {
-      const sentences = [
-        "The quick brown fox jumps over the lazy dog.",
-        "To be or not to be that is the question.",
-        "All that glitters is not gold.",
-        "Four score and seven years ago.",
-        "It was the best of times it was the worst of times.",
-      ];
-      const sentence = sentences[Math.floor(Math.random() * sentences.length)];
-      dispatch({ type: 'SET_MODE', payload: 'typing-test' });
-      dispatch({ type: 'SET_TYPING_TEST', payload: { sentence, typedText: '', startTime: Date.now(), result: null }});
+      openTypingModal();
       dispatch({
         type: 'ADD_HISTORY',
-        payload: { type: 'output', text: '🎮 Typing speed test started! Type the sentence displayed below.' },
+        payload: { type: 'output', text: 'Interactive Monkeytype speed test modal launched.' },
       });
     } else if (cmd === 'clear') {
       dispatch({ type: 'CLEAR_HISTORY' });
@@ -133,7 +120,7 @@ export function TerminalModal() {
     } else {
       dispatch({
         type: 'ADD_HISTORY',
-        payload: { type: 'output', text: `ERROR: command not found: "${raw}". Type /help for available commands.` },
+        payload: { type: 'output', text: `zsh: command not found: ${raw}. Type 'help' for available commands.` },
       });
     }
 
@@ -153,7 +140,7 @@ export function TerminalModal() {
 
       if (e.key === 'Backspace') {
         e.preventDefault();
-        dispatch({ type: 'SET_TYPING_TEST', payload: { sentence, typedText: typedText.slice(0, -1), startTime: state.typingTestState.startTime, result: null }});
+        dispatch({ type: 'SET_TYPING_TEST', payload: { sentence, typedText: typedText.slice(0, -1), startTime: state.typingTestState.startTime, result: null } });
       } else if (e.key === 'Enter') {
         if (typedText === sentence && typedText.length > 0) {
           const elapsed = (Date.now() - state.typingTestState.startTime) / 1000;
@@ -161,13 +148,13 @@ export function TerminalModal() {
           const wpm = Math.round((typedText.length / 5) / Math.max(minutes, 0.01));
           const correct = typedText.split('').filter((c, i) => c === sentence[i]).length;
           const accuracy = Math.round((correct / typedText.length) * 100);
-          dispatch({ type: 'SET_TYPING_TEST', payload: { sentence, typedText, startTime: state.typingTestState.startTime, result: { wpm, accuracy, time: Math.round(elapsed) }}});
-          dispatch({ type: 'ADD_HISTORY', payload: { type: 'output', text: `✅ Completed! WPM: ${wpm} | Accuracy: ${accuracy}% | Time: ${Math.round(elapsed)}s` }});
+          dispatch({ type: 'SET_TYPING_TEST', payload: { sentence, typedText, startTime: state.typingTestState.startTime, result: { wpm, accuracy, time: Math.round(elapsed) } } });
+          dispatch({ type: 'ADD_HISTORY', payload: { type: 'output', text: `Result: ${wpm} WPM | Accuracy: ${accuracy}% | Time: ${Math.round(elapsed)}s` } });
           setTimeout(() => dispatch({ type: 'SET_MODE', payload: 'prompt' }), 3000);
         }
       } else if (e.key.length === 1) {
         e.preventDefault();
-        dispatch({ type: 'SET_TYPING_TEST', payload: { sentence, typedText: typedText + e.key, startTime: state.typingTestState.startTime, result: null }});
+        dispatch({ type: 'SET_TYPING_TEST', payload: { sentence, typedText: typedText + e.key, startTime: state.typingTestState.startTime, result: null } });
       }
     },
     [state.typingTestState, dispatch],
@@ -191,7 +178,6 @@ export function TerminalModal() {
         return;
       }
 
-      // History navigation (Up arrow / Down arrow)
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         if (cmdHistory.length === 0) return;
@@ -211,7 +197,6 @@ export function TerminalModal() {
         }
       }
 
-      // Tab autocomplete
       if (e.key === 'Tab') {
         e.preventDefault();
         const current = state.inputValue.trim();
@@ -236,26 +221,26 @@ export function TerminalModal() {
     }
   };
 
-  // Render styled output content for standard commands
   const renderOutputItem = (text: string, index: number) => {
     if (text === 'CMD_HELP') {
       return (
-        <div key={index} className="my-2 p-3 bg-slate-900/60 border border-emerald-500/20 rounded-lg space-y-2">
-          <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider border-b border-slate-800 pb-1.5">
-            <HelpCircle className="w-4 h-4" /> Available Commands Catalog
+        <div key={index} className="my-2 space-y-1.5 text-xs">
+          <div className="flex items-center gap-1.5 text-zinc-400 font-bold mb-1">
+            <HelpCircle className="w-3.5 h-3.5 text-emerald-400" />
+            <span>AVAILABLE COMMANDS:</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 font-mono">
             {AVAILABLE_COMMANDS.map((item) => (
               <button
                 key={item.cmd}
                 onClick={() => executeCommand(item.cmd)}
-                className="flex items-center justify-between gap-2 p-2 rounded bg-slate-800/40 hover:bg-emerald-500/15 border border-slate-800 hover:border-emerald-500/30 text-left transition-all group"
+                className="flex items-center justify-between py-1 px-1.5 rounded hover:bg-zinc-900 text-left transition-colors group"
               >
-                <div className="flex items-center gap-2 shrink-0">
-                  <item.icon className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
-                  <span className="font-mono text-emerald-300 font-medium text-[11px]">{item.cmd}</span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <item.icon className="w-3 h-3 text-emerald-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-emerald-400 group-hover:underline">{item.cmd}</span>
                 </div>
-                <span className="text-[10px] text-slate-400 group-hover:text-slate-200 truncate">{item.desc}</span>
+                <span className="text-zinc-500 text-[11px] truncate">{item.desc}</span>
               </button>
             ))}
           </div>
@@ -265,177 +250,122 @@ export function TerminalModal() {
 
     if (text === 'CMD_ABOUT') {
       return (
-        <div key={index} className="my-2 p-3.5 bg-slate-900/60 border border-blue-500/20 rounded-lg space-y-2 text-xs">
-          <div className="flex items-center gap-2 text-blue-400 font-bold uppercase tracking-wider border-b border-slate-800 pb-1.5">
-            <User className="w-4 h-4" /> Developer Profile
+        <div key={index} className="my-2 text-xs space-y-1 leading-relaxed text-zinc-300 font-mono">
+          <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+            <User className="w-3.5 h-3.5" />
+            <span>Carlo C. Baclao — 4th Year BS IT Student @ Quezon City University</span>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 items-start pt-1">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-slate-950 font-bold text-lg shadow-lg shrink-0">
-              CB
-            </div>
-            <div className="space-y-1 text-slate-300 leading-relaxed">
-              <p className="font-semibold text-sm text-slate-100">Carlo C. Baclao</p>
-              <p className="text-emerald-400 text-[11px]">4th Year BS IT Student — Quezon City University</p>
-              <p className="text-slate-400 text-xs pt-1">
-                Passionate full-stack developer with 5+ years of hands-on coding experience building scalable web apps, intuitive UI design systems, and backend RESTful architectures.
-              </p>
-            </div>
-          </div>
+          <p className="text-zinc-400 pl-5">
+            Full-stack developer with 5+ years of hands-on coding experience building web applications, backend REST APIs, and responsive user interfaces.
+          </p>
         </div>
       );
     }
 
     if (text === 'CMD_SKILLS') {
       return (
-        <div key={index} className="my-2 p-3.5 bg-slate-900/60 border border-teal-500/20 rounded-lg space-y-3 text-xs">
-          <div className="flex items-center gap-2 text-teal-400 font-bold uppercase tracking-wider border-b border-slate-800 pb-1.5">
-            <Code2 className="w-4 h-4" /> Tech Stack & Capabilities
+        <div key={index} className="my-2 text-xs space-y-1.5 font-mono text-zinc-300">
+          <div className="flex items-center gap-1.5 text-zinc-400 font-bold mb-1">
+            <Code2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span>TECHNICAL CAPABILITIES:</span>
           </div>
-          <div className="space-y-2.5">
-            <div>
-              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Languages</p>
-              <div className="flex flex-wrap gap-1.5">
-                {['JavaScript', 'TypeScript', 'Java', 'Python', 'C++', 'SQL', 'Dart'].map((s) => (
-                  <span key={s} className="px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 font-mono text-[11px]">
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Frameworks & Frontend</p>
-              <div className="flex flex-wrap gap-1.5">
-                {['React', 'Next.js', 'Spring Boot', 'Flutter', 'Tailwind CSS', 'Framer Motion'].map((s) => (
-                  <span key={s} className="px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-mono text-[11px]">
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Tools & Databases</p>
-              <div className="flex flex-wrap gap-1.5">
-                {['PostgreSQL', 'Git', 'Docker', 'Flyway', 'Raspberry Pi', 'Linux'].map((s) => (
-                  <span key={s} className="px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700 text-slate-300 font-mono text-[11px]">
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+          <p className="pl-5"><span className="text-zinc-400 w-24 inline-block font-semibold">Languages:</span> <span className="text-emerald-400">JavaScript, TypeScript, Java, Python, C++, SQL, Dart</span></p>
+          <p className="pl-5"><span className="text-zinc-400 w-24 inline-block font-semibold">Frameworks:</span> <span className="text-cyan-400">React, Next.js, Spring Boot, Flutter, Tailwind CSS, Framer Motion</span></p>
+          <p className="pl-5"><span className="text-zinc-400 w-24 inline-block font-semibold">Tools & Infra:</span> <span className="text-zinc-300">PostgreSQL, Git, Docker, Flyway, Raspberry Pi, Linux</span></p>
         </div>
       );
     }
 
     if (text === 'CMD_PROJECTS') {
       const projects = [
-        { name: 'Attendance Management System', url: 'https://Eattendease.vercel.app', tag: 'Full-stack' },
-        { name: 'Tally DCPH', url: 'https://leap0920.github.io/Tally-DCPH', tag: 'Web App' },
-        { name: 'Wallet', url: 'https://nothingwallet.vercel.app', tag: 'FinTech UI' },
-        { name: 'LECUISINE', url: 'https://leap0920.github.io/LECUISINE', tag: 'Culinary Web' },
-        { name: 'LoopHabit', url: 'https://loop-habit-website.vercel.app', tag: 'Productivity' },
+        { name: 'Attendance Management System', url: 'https://Eattendease.vercel.app' },
+        { name: 'Tally DCPH', url: 'https://leap0920.github.io/Tally-DCPH' },
+        { name: 'Wallet', url: 'https://nothingwallet.vercel.app' },
+        { name: 'LECUISINE', url: 'https://leap0920.github.io/LECUISINE' },
+        { name: 'LoopHabit', url: 'https://loop-habit-website.vercel.app' },
       ];
       return (
-        <div key={index} className="my-2 p-3.5 bg-slate-900/60 border border-purple-500/20 rounded-lg space-y-2 text-xs">
-          <div className="flex items-center gap-2 text-purple-400 font-bold uppercase tracking-wider border-b border-slate-800 pb-1.5">
-            <FolderGit2 className="w-4 h-4" /> Featured Projects
+        <div key={index} className="my-2 text-xs space-y-1.5 font-mono">
+          <div className="flex items-center gap-1.5 text-zinc-400 font-bold">
+            <FolderGit2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span>FEATURED PROJECTS:</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-            {projects.map((p) => (
+          {projects.map((p) => (
+            <div key={p.name} className="flex items-center justify-between text-zinc-300 py-0.5 border-b border-zinc-900 pl-5">
+              <span>{p.name}</span>
               <a
-                key={p.name}
                 href={p.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2.5 rounded bg-slate-800/40 hover:bg-purple-950/30 border border-slate-800 hover:border-purple-500/40 transition-all flex items-center justify-between group"
+                className="text-emerald-400 hover:underline flex items-center gap-1 text-[11px]"
               >
-                <div>
-                  <p className="font-semibold text-slate-200 group-hover:text-purple-300 text-xs">{p.name}</p>
-                  <span className="text-[10px] text-purple-400 font-mono">{p.tag}</span>
-                </div>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-purple-400 transition-colors" />
+                <span>{p.url.replace('https://', '')}</span>
+                <ExternalLink className="w-3 h-3 shrink-0" />
               </a>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       );
     }
 
     if (text === 'CMD_RESUME') {
       return (
-        <div key={index} className="my-2 p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-lg flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 text-emerald-300">
-            <FileText className="w-4 h-4 text-emerald-400" />
-            <span>Downloading <strong>Carlo_Baclao_Resume.pdf</strong>...</span>
-          </div>
-          <span className="text-[10px] px-2 py-0.5 bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/40 font-mono">PDF</span>
+        <div key={index} className="my-2 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <FileText className="w-3.5 h-3.5" />
+          <span>Resume download initiated (Carlo_Baclao_Resume.pdf)...</span>
         </div>
       );
     }
 
     if (text === 'CMD_CONTACT') {
       return (
-        <div key={index} className="my-2 p-3.5 bg-slate-900/60 border border-amber-500/20 rounded-lg space-y-2 text-xs">
-          <div className="flex items-center gap-2 text-amber-400 font-bold uppercase tracking-wider border-b border-slate-800 pb-1.5">
-            <Mail className="w-4 h-4" /> Direct Contact Info
+        <div key={index} className="my-2 text-xs font-mono space-y-1 text-zinc-300">
+          <div className="flex items-center gap-1.5 text-zinc-400 font-bold mb-1">
+            <Mail className="w-3.5 h-3.5 text-emerald-400" />
+            <span>CONTACT DETAILS:</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 font-mono text-[11px]">
-            <a href="mailto:baclao.carlo.cometa@gmail.com" className="p-2 rounded bg-slate-800/40 border border-slate-800 hover:border-amber-500/40 text-slate-300 hover:text-amber-300 transition-all flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span className="truncate">baclao.carlo.cometa@gmail.com</span>
-            </a>
-            <div className="p-2 rounded bg-slate-800/40 border border-slate-800 text-slate-300 flex items-center gap-2">
-              <span className="text-amber-400 font-bold text-xs shrink-0">📞</span>
-              <span>09686890263</span>
-            </div>
-            <div className="p-2 rounded bg-slate-800/40 border border-slate-800 text-slate-300 flex items-center gap-2">
-              <span className="text-amber-400 font-bold text-xs shrink-0">📍</span>
-              <span>Quezon City, PH</span>
-            </div>
-          </div>
+          <p className="pl-5 flex items-center gap-2">
+            <Mail className="w-3 h-3 text-zinc-500 shrink-0" />
+            <span className="text-zinc-400 w-16 inline-block">Email:</span>
+            <a href="mailto:baclao.carlo.cometa@gmail.com" className="text-emerald-400 hover:underline">baclao.carlo.cometa@gmail.com</a>
+          </p>
+          <p className="pl-5 flex items-center gap-2">
+            <Phone className="w-3 h-3 text-zinc-500 shrink-0" />
+            <span className="text-zinc-400 w-16 inline-block">Phone:</span>
+            <span>09686890263</span>
+          </p>
+          <p className="pl-5 flex items-center gap-2">
+            <MapPin className="w-3 h-3 text-zinc-500 shrink-0" />
+            <span className="text-zinc-400 w-16 inline-block">Location:</span>
+            <span>Quezon City, Philippines</span>
+          </p>
         </div>
       );
     }
 
     if (text === 'CMD_HIRE') {
       return (
-        <div key={index} className="my-2 p-4 bg-gradient-to-r from-emerald-950/80 via-teal-950/80 to-slate-900 border border-emerald-400/40 rounded-xl shadow-lg shadow-emerald-950/40 space-y-2">
-          <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-            <ShieldCheck className="w-5 h-5 text-emerald-400 animate-bounce" />
-            <span>Access Granted — Offer Confirmation</span>
+        <div key={index} className="my-2 text-xs font-mono p-3 bg-zinc-900 border border-zinc-800 rounded space-y-1 text-zinc-200">
+          <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+            <Award className="w-4 h-4" />
+            <span>[SUCCESS] Offer Access Granted</span>
           </div>
-          <p className="text-xs text-emerald-200 leading-relaxed">
-            🚀 You just recruited one of the top software engineering candidates at Quezon City University! Passionate, high-performing, and ready to contribute from day one.
-          </p>
-          <div className="pt-1 flex gap-2">
-            <a href="mailto:baclao.carlo.cometa@gmail.com?subject=Job%20Offer%20-%20Carlo%20Baclao" className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded text-xs transition-colors shadow">
-              Send Official Email Offer ✉️
-            </a>
-          </div>
+          <p>You are viewing Carlo Baclao&apos;s recruitment profile. Ready for full-stack engineering roles.</p>
+          <p className="text-zinc-400 pt-1">Contact: <a href="mailto:baclao.carlo.cometa@gmail.com" className="text-emerald-400 underline">baclao.carlo.cometa@gmail.com</a></p>
         </div>
       );
     }
 
-    if (text.startsWith('ERROR:')) {
+    if (text.startsWith('zsh:')) {
       return (
-        <p key={index} className="text-red-400 text-xs py-0.5 flex items-center gap-1.5">
-          <span className="text-red-500 font-bold">✕</span>
-          {text.replace('ERROR: ', '')}
-        </p>
-      );
-    }
-
-    if (text.startsWith('✅')) {
-      return (
-        <p key={index} className="text-emerald-300 font-semibold text-xs py-0.5 flex items-center gap-1.5">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-          {text.replace('✅ ', '')}
+        <p key={index} className="text-red-400 text-xs py-0.5 font-mono">
+          {text}
         </p>
       );
     }
 
     return (
-      <p key={index} className="text-slate-300 text-xs py-0.5 leading-relaxed font-mono">
+      <p key={index} className="text-zinc-300 text-xs py-0.5 leading-relaxed font-mono">
         {text}
       </p>
     );
@@ -449,95 +379,85 @@ export function TerminalModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.15 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) closeTerminal();
           }}
         >
-          {/* Backdrop Blur */}
-          <motion.div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
+          <motion.div className="absolute inset-0 bg-black/75" />
 
-          {/* Terminal Window */}
           <motion.div
-            className="relative bg-slate-950/95 rounded-2xl border border-slate-800/80 w-full max-w-[760px] h-[85vh] max-h-[680px] flex flex-col shadow-[0_0_50px_-10px_rgba(16,185,129,0.15)] overflow-hidden terminal-scanlines backdrop-blur-2xl"
-            initial={{ opacity: 0, scale: 0.94, y: 15 }}
+            className="relative bg-zinc-950 rounded-xl border border-zinc-800 w-full max-w-[740px] h-[80vh] max-h-[640px] flex flex-col shadow-2xl overflow-hidden"
+            initial={{ opacity: 0, scale: 0.96, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           >
-            {/* Title Bar */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/80 bg-slate-900/80 select-none">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800 bg-zinc-900/90 select-none">
               <div className="flex items-center gap-2">
                 <button
                   onClick={closeTerminal}
-                  className="w-3 h-3 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors flex items-center justify-center group"
-                  title="Close Terminal"
+                  className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors flex items-center justify-center group"
+                  title="Close"
                 >
-                  <span className="opacity-0 group-hover:opacity-100 text-[9px] text-slate-950 font-bold leading-none">✕</span>
+                  <span className="opacity-0 group-hover:opacity-100 text-[8px] text-black font-bold">✕</span>
                 </button>
-                <span className="w-3 h-3 rounded-full bg-amber-500/80 hover:bg-amber-500 transition-colors" />
-                <span className="w-3 h-3 rounded-full bg-emerald-500/80 hover:bg-emerald-500 transition-colors" />
-                
-                <div className="ml-3 flex items-center gap-2 text-xs font-mono text-slate-400">
+                <span className="w-3 h-3 rounded-full bg-amber-500" />
+                <span className="w-3 h-3 rounded-full bg-emerald-500" />
+
+                <div className="ml-3 flex items-center gap-2 text-xs font-mono text-zinc-400">
                   <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>carlo@portfolio:~ (zsh)</span>
-                  <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> ONLINE
-                  </span>
+                  <span>carlo@portfolio:~ — zsh</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => dispatch({ type: 'CLEAR_HISTORY' })}
-                  className="px-2 py-1 text-[11px] font-mono text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 rounded transition-colors flex items-center gap-1"
-                  title="Clear Screen"
+                  className="px-2 py-1 text-[11px] font-mono text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded transition-colors flex items-center gap-1"
+                  title="Clear output"
                 >
                   <Trash2 className="w-3 h-3" />
                   <span className="hidden sm:inline">Clear</span>
                 </button>
                 <button
                   onClick={closeTerminal}
-                  className="text-slate-500 hover:text-slate-200 p-1 hover:bg-slate-800/60 rounded transition-colors"
-                  aria-label="Close terminal"
+                  className="text-zinc-500 hover:text-zinc-200 p-1 hover:bg-zinc-800 rounded transition-colors"
+                  aria-label="Close"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* Quick Command Bar */}
-            <div className="px-4 py-2 bg-slate-900/40 border-b border-slate-800/50 flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
-              <span className="text-[11px] font-mono text-slate-500 shrink-0 mr-1 hidden sm:inline">Quick:</span>
-              {['/help', '/about', '/skills', '/projects', '/contact', '/sudo hire carlo'].map((cmd) => (
+            <div className="px-4 py-2 bg-zinc-900/40 border-b border-zinc-800/60 flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
+              <span className="text-[11px] font-mono text-zinc-500 shrink-0 mr-1 hidden sm:inline">Quick:</span>
+              {AVAILABLE_COMMANDS.slice(0, 7).map((item) => (
                 <button
-                  key={cmd}
-                  onClick={() => executeCommand(cmd)}
-                  className="px-2 py-0.5 rounded-md bg-slate-800/50 hover:bg-emerald-500/20 border border-slate-700/50 hover:border-emerald-500/40 text-slate-300 hover:text-emerald-300 text-[11px] font-mono whitespace-nowrap transition-all"
+                  key={item.cmd}
+                  onClick={() => executeCommand(item.cmd)}
+                  className="px-2 py-1 rounded bg-zinc-800/60 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-white text-[11px] font-mono flex items-center gap-1.5 whitespace-nowrap transition-colors"
                 >
-                  {cmd}
+                  <item.icon className="w-3 h-3 text-emerald-400 shrink-0" />
+                  <span>{item.cmd}</span>
                 </button>
               ))}
             </div>
 
-            {/* Output Area */}
             <div
               ref={outputRef}
-              className="flex-1 overflow-y-auto overflow-x-hidden p-4 font-mono min-h-0 leading-relaxed scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent"
+              className="flex-1 overflow-y-auto overflow-x-hidden p-4 font-mono text-xs min-h-0 leading-relaxed scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent"
             >
-              {/* Default Welcome Banner */}
               {state.history.length === 0 && (
                 <div className="space-y-4 mb-4">
-                  {/* ASCII Header */}
-                  <pre className="text-emerald-400 text-[10px] sm:text-[11px] leading-none font-mono font-bold select-none overflow-x-auto">
-{`  ____    _    ____  _     ___    ____  ____
- / ___|  / \\  |  _ \\| |   / _ \\  / ___||  _ \\
-| |     / _ \\ | |_) | |  | | | | \\___ \\| |_) |
-| |___ / ___ \\|  _ <| |__| |_| |  ___) |  __/
- \\____/_/   \\_\\_| \\_\\_____\\___/  |____/|_|`}
+                  <pre className="text-emerald-400 text-[8px] sm:text-[10px] leading-none font-mono font-bold select-none overflow-x-auto">
+{`  ____    _    ____  _     ___    ____    _    ____ _     _    ___  
+ / ___|  / \\  |  _ \\| |   / _ \\  | __ )  / \\  / ___| |   / \\  / _ \\ 
+| |     / _ \\ | |_) | |  | | | | |  _ \\ / _ \\| |   | |  / _ \\| | | |
+| |___ / ___ \\|  _ <| |__| |_| | | |_) / ___ \\ |___| |_/ ___ \\ |_| |
+ \\____/_/   \\_\\_| \\_\\_____\\___/  |____/_/   \\_\\____|____/_/   \\_\\___/ `}
                   </pre>
 
-                  {/* System Specs Card */}
                   <div className="p-3.5 bg-slate-900/60 border border-emerald-500/20 rounded-xl space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5 text-emerald-400 font-bold">

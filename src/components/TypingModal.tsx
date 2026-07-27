@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTerminal } from '@/contexts/TerminalContext';
-import { Loader2 } from 'lucide-react';
+import { useTerminal, useTheme } from '@/contexts';
 
 const WORD_POOL = [
   'because', 'any', 'change', 'than', 'real', 'go', 'who', 'life', 'this', 'early',
@@ -31,7 +30,8 @@ const KEYBOARD_ROWS = [
 ];
 
 export function TypingModal() {
-  const { state, dispatch, closeTypingModal } = useTerminal();
+  const { state, closeTypingModal } = useTerminal();
+  const { isDark } = useTheme();
   
   // Test state
   const [words, setWords] = useState<string[]>([]);
@@ -40,7 +40,6 @@ export function TypingModal() {
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
   const [isFinished, setIsFinished] = useState<boolean>(false);
-  const hiddenInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize random non-repeating words
   const initTest = useCallback(() => {
@@ -50,7 +49,6 @@ export function TypingModal() {
     setElapsedSeconds(0);
     setIsFinished(false);
     setActiveKeys(new Set());
-    setTimeout(() => hiddenInputRef.current?.focus(), 100);
   }, []);
 
   // Initialize test when modal opens
@@ -73,6 +71,69 @@ export function TypingModal() {
 
   const targetSentence = words.join(' ');
 
+  // Global window key listeners for Tab, Esc, and character typing
+  useEffect(() => {
+    if (!state.isTypingModalOpen) return;
+
+    const handleWindowKeyDown = (e: KeyboardEvent) => {
+      // TAB key -> Restart test
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        e.stopPropagation();
+        initTest();
+        return;
+      }
+
+      // ESC key -> Close modal
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        closeTypingModal();
+        return;
+      }
+
+      // Start timer on first character typed
+      if (!startTime && e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+        setStartTime(Date.now());
+      }
+
+      // Active key lighting animation
+      const keyLower = e.key.toLowerCase();
+      setActiveKeys((prev) => new Set(prev).add(keyLower === ' ' ? 'space' : keyLower));
+
+      if (e.key === 'Backspace') {
+        setTypedText((prev) => prev.slice(0, -1));
+      } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+        setTypedText((prev) => {
+          if (prev.length < targetSentence.length) {
+            const next = prev + e.key;
+            if (next.length === targetSentence.length) {
+              setIsFinished(true);
+            }
+            return next;
+          }
+          return prev;
+        });
+      }
+    };
+
+    const handleWindowKeyUp = (e: KeyboardEvent) => {
+      const keyLower = e.key.toLowerCase();
+      setActiveKeys((prev) => {
+        const next = new Set(prev);
+        next.delete(keyLower === ' ' ? 'space' : keyLower);
+        return next;
+      });
+    };
+
+    window.addEventListener('keydown', handleWindowKeyDown, true);
+    window.addEventListener('keyup', handleWindowKeyUp, true);
+    return () => {
+      window.removeEventListener('keydown', handleWindowKeyDown, true);
+      window.removeEventListener('keyup', handleWindowKeyUp, true);
+    };
+  }, [state.isTypingModalOpen, initTest, closeTypingModal, startTime, targetSentence.length]);
+
   // Live Metrics Calculations
   const calculateMetrics = useCallback(() => {
     const totalTyped = typedText.length;
@@ -87,53 +148,6 @@ export function TypingModal() {
     const accuracy = totalTyped === 0 ? 100 : Math.round((correctChars / totalTyped) * 100);
     return { wpm, accuracy, correctChars, totalTyped };
   }, [typedText, targetSentence, elapsedSeconds]);
-
-  // Handle Physical Key Presses
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (state.isTypingLoading) return;
-
-    if (e.key === 'Escape') {
-      closeTypingModal();
-      return;
-    }
-
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      initTest();
-      return;
-    }
-
-    // Start timer on first character typed
-    if (!startTime && e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
-      setStartTime(Date.now());
-    }
-
-    // Active key lighting animation
-    const keyLower = e.key.toLowerCase();
-    setActiveKeys((prev) => new Set(prev).add(keyLower === ' ' ? 'space' : keyLower));
-
-    if (e.key === 'Backspace') {
-      setTypedText((prev) => prev.slice(0, -1));
-    } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
-      if (typedText.length < targetSentence.length) {
-        const nextText = typedText + e.key;
-        setTypedText(nextText);
-
-        if (nextText.length === targetSentence.length) {
-          setIsFinished(true);
-        }
-      }
-    }
-  }, [state.isTypingLoading, closeTypingModal, initTest, startTime, typedText, targetSentence]);
-
-  const handleKeyUp = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    const keyLower = e.key.toLowerCase();
-    setActiveKeys((prev) => {
-      const next = new Set(prev);
-      next.delete(keyLower === ' ' ? 'space' : keyLower);
-      return next;
-    });
-  }, []);
 
   const { wpm, accuracy } = calculateMetrics();
 
@@ -152,147 +166,161 @@ export function TypingModal() {
             if (e.target === e.currentTarget) closeTypingModal();
           }}
         >
-          {/* Transparent Backdrop Blur over entire background */}
-          <motion.div className="absolute inset-0 bg-slate-950/85 backdrop-blur-2xl" />
-
-          {/* Hidden input to capture physical keyboard events */}
-          <input
-            ref={hiddenInputRef}
-            type="text"
-            className="absolute opacity-0 pointer-events-none w-0 h-0"
-            onKeyDown={handleKeyDown}
-            onKeyUp={handleKeyUp}
-            autoFocus
+          {/* Theme-Aware Transparent Backdrop Blur */}
+          <motion.div
+            className={`absolute inset-0 transition-colors duration-300 ${
+              isDark ? 'bg-slate-950/85 backdrop-blur-2xl' : 'bg-slate-100/85 backdrop-blur-2xl'
+            }`}
           />
 
-          {/* Transparent Outer Floating Wrapper (No Box / No Border / No Title Bar) */}
+          {/* Transparent Outer Floating Wrapper */}
           <motion.div
-            className="relative w-full max-w-[860px] flex flex-col items-center justify-center text-slate-100 font-mono"
+            className={`relative w-full max-w-[860px] flex flex-col items-center justify-center font-mono ${
+              isDark ? 'text-slate-100' : 'text-slate-900'
+            }`}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-            onClick={() => hiddenInputRef.current?.focus()}
           >
-            {/* WPM, ACC, TIME Metrics Display (Only Numbers & Labels, No Box) */}
-                <div className="flex justify-center items-baseline gap-12 sm:gap-24 mb-10 select-none">
-                  <div className="text-center">
-                    <span className="text-4xl sm:text-5xl font-bold text-slate-100 block tracking-tight">
-                      {wpm}
-                    </span>
-                    <span className="text-[11px] text-slate-400/80 uppercase tracking-widest font-medium">
-                      WPM
-                    </span>
-                  </div>
+            {/* WPM, ACC, TIME Metrics Display */}
+            <div className="flex justify-center items-baseline gap-12 sm:gap-24 mb-10 select-none">
+              <div className="text-center">
+                <span className={`text-4xl sm:text-5xl font-bold block tracking-tight ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+                  {wpm}
+                </span>
+                <span className={`text-[11px] uppercase tracking-widest font-medium ${isDark ? 'text-slate-400/80' : 'text-slate-500'}`}>
+                  WPM
+                </span>
+              </div>
 
-                  <div className="text-center">
-                    <span className="text-4xl sm:text-5xl font-bold text-slate-100 block tracking-tight">
-                      {accuracy}<span className="text-lg text-slate-400 font-normal">%</span>
-                    </span>
-                    <span className="text-[11px] text-slate-400/80 uppercase tracking-widest font-medium">
-                      ACC
-                    </span>
-                  </div>
+              <div className="text-center">
+                <span className={`text-4xl sm:text-5xl font-bold block tracking-tight ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+                  {accuracy}<span className={`text-lg font-normal ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>%</span>
+                </span>
+                <span className={`text-[11px] uppercase tracking-widest font-medium ${isDark ? 'text-slate-400/80' : 'text-slate-500'}`}>
+                  ACC
+                </span>
+              </div>
 
-                  <div className="text-center">
-                    <span className="text-4xl sm:text-5xl font-bold text-slate-100 block tracking-tight">
-                      {elapsedSeconds}<span className="text-lg text-slate-400 font-normal">s</span>
+              <div className="text-center">
+                <span className={`text-4xl sm:text-5xl font-bold block tracking-tight ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+                  {elapsedSeconds}<span className={`text-lg font-normal ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>s</span>
+                </span>
+                <span className={`text-[11px] uppercase tracking-widest font-medium ${isDark ? 'text-slate-400/80' : 'text-slate-500'}`}>
+                  TIME
+                </span>
+              </div>
+            </div>
+
+            {/* Floating Words Paragraph Stream */}
+            <div className="w-full mb-10 px-4 min-h-[120px] flex items-center justify-center cursor-text">
+              <p className="font-mono text-lg sm:text-xl leading-relaxed tracking-wider text-left w-full select-none break-words">
+                {targetSentence.split('').map((char, index) => {
+                  const isTyped = index < typedText.length;
+                  const isCorrect = isTyped && typedText[index] === char;
+                  const isCurrent = index === typedText.length;
+
+                  let colorClass = isDark ? 'text-slate-500' : 'text-slate-400';
+                  if (isTyped) {
+                    colorClass = isCorrect
+                      ? isDark ? 'text-white font-bold' : 'text-slate-950 font-bold'
+                      : isDark ? 'text-red-400 bg-red-500/25 rounded-sm font-bold' : 'text-red-600 bg-red-100 rounded-sm font-bold';
+                  }
+
+                  return (
+                    <span key={index} className={`relative transition-colors ${colorClass}`}>
+                      {isCurrent && (
+                        <span className={`absolute -left-[1px] top-0 bottom-0 w-[2.5px] animate-pulse ${isDark ? 'bg-emerald-400' : 'bg-slate-950'}`} />
+                      )}
+                      {char}
                     </span>
-                    <span className="text-[11px] text-slate-400/80 uppercase tracking-widest font-medium">
-                      TIME
-                    </span>
-                  </div>
+                  );
+                })}
+              </p>
+            </div>
+
+            {/* Floating Interactive Virtual Keyboard Keys */}
+            <div className="space-y-2 max-w-[560px] mx-auto mb-10 select-none">
+              {KEYBOARD_ROWS.map((row, rIdx) => (
+                <div key={rIdx} className="flex justify-center gap-1.5 sm:gap-2">
+                  {row.map((key) => {
+                    const isPressed = activeKeys.has(key);
+                    return (
+                      <div
+                        key={key}
+                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-xs font-semibold lowercase transition-all duration-75 border ${
+                          isPressed
+                            ? isDark
+                              ? 'bg-white text-slate-950 border-white shadow-[0_0_15px_rgba(255,255,255,0.4)] scale-95 font-bold'
+                              : 'bg-slate-900 text-white border-slate-900 shadow-[0_0_15px_rgba(0,0,0,0.25)] scale-95 font-bold'
+                            : isDark
+                              ? 'bg-slate-800/50 border-slate-700/50 text-slate-300 hover:border-slate-500/60'
+                              : 'bg-white border-slate-300 text-slate-800 hover:border-slate-400 font-medium shadow-xs'
+                        }`}
+                      >
+                        {key}
+                      </div>
+                    );
+                  })}
                 </div>
+              ))}
 
-                {/* Floating Words Paragraph Stream (No Bounding Box / No Container Border) */}
-                <div className="w-full mb-10 px-4 min-h-[120px] flex items-center justify-center cursor-text">
-                  <p className="font-mono text-lg sm:text-xl leading-relaxed tracking-wider text-left w-full select-none break-words">
-                    {targetSentence.split('').map((char, index) => {
-                      const isTyped = index < typedText.length;
-                      const isCorrect = isTyped && typedText[index] === char;
-                      const isCurrent = index === typedText.length;
-
-                      let colorClass = 'text-slate-400/35'; // Dimmed un-typed words matching screenshot
-                      if (isTyped) {
-                        colorClass = isCorrect
-                          ? 'text-slate-100 font-medium'
-                          : 'text-red-400 bg-red-500/20 rounded-sm underline decoration-red-400';
-                      }
-
-                      return (
-                        <span key={index} className={`relative transition-colors ${colorClass}`}>
-                          {isCurrent && (
-                            <span className="absolute -left-[1px] top-0 bottom-0 w-[2px] bg-slate-100 animate-pulse" />
-                          )}
-                          {char}
-                        </span>
-                      );
-                    })}
-                  </p>
+              {/* Space Bar Key */}
+              <div className="flex justify-center pt-1">
+                <div
+                  className={`w-64 sm:w-80 h-9 rounded-xl flex items-center justify-center text-[10px] font-semibold tracking-wider uppercase transition-all duration-75 border ${
+                    activeKeys.has('space')
+                      ? isDark
+                        ? 'bg-white text-slate-950 border-white shadow-[0_0_15px_rgba(255,255,255,0.4)] scale-95 font-bold'
+                        : 'bg-slate-900 text-white border-slate-900 shadow-[0_0_15px_rgba(0,0,0,0.25)] scale-95 font-bold'
+                      : isDark
+                        ? 'bg-slate-800/50 border-slate-700/50 text-slate-400 hover:border-slate-500/60'
+                        : 'bg-white border-slate-300 text-slate-700 hover:border-slate-400 font-medium shadow-xs'
+                  }`}
+                >
+                  SPACE
                 </div>
+              </div>
+            </div>
 
-                {/* Floating Interactive Virtual Keyboard Keys */}
-                <div className="space-y-2 max-w-[560px] mx-auto mb-10 select-none">
-                  {KEYBOARD_ROWS.map((row, rIdx) => (
-                    <div key={rIdx} className="flex justify-center gap-1.5 sm:gap-2">
-                      {row.map((key) => {
-                        const isPressed = activeKeys.has(key);
-                        return (
-                          <div
-                            key={key}
-                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-xs font-semibold lowercase transition-all duration-75 border ${
-                              isPressed
-                                ? 'bg-slate-100 text-slate-950 border-white shadow-[0_0_15px_rgba(255,255,255,0.4)] scale-95 font-bold'
-                                : 'bg-slate-800/40 border-slate-700/40 text-slate-300 hover:border-slate-500/60'
-                            }`}
-                          >
-                            {key}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
+            {/* Hotkeys Footer Controls */}
+            <div className="flex items-center justify-center gap-8 text-xs font-mono select-none">
+              <button
+                onClick={initTest}
+                className={`flex items-center gap-2 transition-colors group cursor-pointer ${
+                  isDark ? 'text-slate-400 hover:text-slate-100' : 'text-slate-600 hover:text-slate-900 font-medium'
+                }`}
+              >
+                <kbd className={`px-1.5 py-0.5 border rounded text-[10px] ${
+                  isDark
+                    ? 'bg-slate-800/80 border-slate-700/80 text-slate-300 group-hover:border-slate-400'
+                    : 'bg-white border-slate-300 text-slate-800 font-semibold group-hover:border-slate-500 shadow-xs'
+                }`}>
+                  tab
+                </kbd>
+                <span>restart</span>
+              </button>
 
-                  {/* Space Bar Key */}
-                  <div className="flex justify-center pt-1">
-                    <div
-                      className={`w-64 sm:w-80 h-9 rounded-xl flex items-center justify-center text-[10px] font-semibold tracking-wider uppercase transition-all duration-75 border ${
-                        activeKeys.has('space')
-                          ? 'bg-slate-100 text-slate-950 border-white shadow-[0_0_15px_rgba(255,255,255,0.4)] scale-95 font-bold'
-                          : 'bg-slate-800/40 border-slate-700/40 text-slate-400 hover:border-slate-500/60'
-                      }`}
-                    >
-                      SPACE
-                    </div>
-                  </div>
-                </div>
-
-                {/* Hotkeys Footer Controls (Floating text without box) */}
-                <div className="flex items-center justify-center gap-8 text-xs font-mono text-slate-400/80 select-none">
-                  <button
-                    onClick={initTest}
-                    className="flex items-center gap-2 hover:text-slate-100 transition-colors group"
-                  >
-                    <kbd className="px-1.5 py-0.5 bg-slate-800/60 border border-slate-700/60 rounded text-[10px] text-slate-300 group-hover:border-slate-400">
-                      tab
-                    </kbd>
-                    <span>restart</span>
-                  </button>
-
-                  <button
-                    onClick={closeTypingModal}
-                    className="flex items-center gap-2 hover:text-slate-100 transition-colors group"
-                  >
-                    <kbd className="px-1.5 py-0.5 bg-slate-800/60 border border-slate-700/60 rounded text-[10px] text-slate-300 group-hover:border-slate-400">
-                      esc
-                    </kbd>
-                    <span>close</span>
-                  </button>
-                </div>
+              <button
+                onClick={closeTypingModal}
+                className={`flex items-center gap-2 transition-colors group cursor-pointer ${
+                  isDark ? 'text-slate-400 hover:text-slate-100' : 'text-slate-600 hover:text-slate-900 font-medium'
+                }`}
+              >
+                <kbd className={`px-1.5 py-0.5 border rounded text-[10px] ${
+                  isDark
+                    ? 'bg-slate-800/80 border-slate-700/80 text-slate-300 group-hover:border-slate-400'
+                    : 'bg-white border-slate-300 text-slate-800 font-semibold group-hover:border-slate-500 shadow-xs'
+                }`}>
+                  esc
+                </kbd>
+                <span>close</span>
+              </button>
+            </div>
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 }
-

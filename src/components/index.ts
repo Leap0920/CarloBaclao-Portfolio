@@ -14,6 +14,8 @@ export { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from './BrandIcon
 export { TerminalButton } from './TerminalButton';
 export { TerminalModal } from './TerminalModal';
 export { TypingModal } from './TypingModal';
+export { TicTacToeModal } from './TicTacToeModal';
+export { SnakeModal } from './SnakeModal';
 
 // Animation components
 export {

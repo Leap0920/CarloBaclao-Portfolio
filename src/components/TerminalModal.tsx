@@ -5,8 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTerminal } from '@/contexts/TerminalContext';
 import {
   Terminal,
+  X,
+  Minus,
+  Square,
   HelpCircle,
   User,
+  UserCheck,
   Code2,
   FolderGit2,
   FileText,
@@ -14,19 +18,19 @@ import {
   Award,
   Eye,
   Keyboard,
+  Gamepad2,
   Trash2,
-  X,
   ExternalLink,
   Phone,
   MapPin,
   ChevronRight,
   CheckCircle2,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 
-const AVAILABLE_COMMANDS = [
-  { cmd: '/help', desc: 'Show available commands', icon: HelpCircle },
-  { cmd: '/about', desc: 'Developer profile info', icon: User },
+const QUICK_COMMANDS = [
+  { cmd: '/help', desc: 'List all commands', icon: HelpCircle },
+  { cmd: '/about', desc: 'Developer summary', icon: UserCheck },
   { cmd: '/skills', desc: 'Technical stack & skills', icon: Code2 },
   { cmd: '/projects', desc: 'Featured projects & links', icon: FolderGit2 },
   { cmd: '/resume', desc: 'Download PDF resume', icon: FileText },
@@ -34,12 +38,14 @@ const AVAILABLE_COMMANDS = [
   { cmd: '/sudo hire carlo', desc: 'Hire command', icon: Award },
   { cmd: '/matrix', desc: 'Toggle matrix code rain', icon: Eye },
   { cmd: '/play typing', desc: 'Speed typing test', icon: Keyboard },
+  { cmd: '/play tictactoe', desc: 'Tic Tac Toe game vs AI', icon: Gamepad2 },
+  { cmd: '/play snake', desc: 'Retro snake game', icon: Gamepad2 },
   { cmd: '/clear', desc: 'Clear terminal screen', icon: Trash2 },
   { cmd: '/exit', desc: 'Close terminal window', icon: X },
 ];
 
 export function TerminalModal() {
-  const { state, dispatch, closeTerminal, openTypingModal } = useTerminal();
+  const { state, dispatch, closeTerminal, openTypingModal, openTicTacToeModal, openSnakeModal } = useTerminal();
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
 
@@ -112,6 +118,18 @@ export function TerminalModal() {
       dispatch({
         type: 'ADD_HISTORY',
         payload: { type: 'output', text: 'Interactive Monkeytype speed test modal launched.' },
+      });
+    } else if (cmd === 'play tictactoe' || cmd === 'play ttt' || cmd === 'play tic-tac-toe') {
+      openTicTacToeModal();
+      dispatch({
+        type: 'ADD_HISTORY',
+        payload: { type: 'output', text: 'Interactive Tic Tac Toe game modal launched.' },
+      });
+    } else if (cmd === 'play snake' || cmd === 'play snakes') {
+      openSnakeModal();
+      dispatch({
+        type: 'ADD_HISTORY',
+        payload: { type: 'output', text: 'Retro Snake arcade game modal launched.' },
       });
     } else if (cmd === 'clear') {
       dispatch({ type: 'CLEAR_HISTORY' });
@@ -201,7 +219,7 @@ export function TerminalModal() {
         e.preventDefault();
         const current = state.inputValue.trim();
         if (!current) return;
-        const matches = AVAILABLE_COMMANDS.filter((c) => c.cmd.startsWith(current) || c.cmd.slice(1).startsWith(current));
+        const matches = QUICK_COMMANDS.filter((c) => c.cmd.startsWith(current) || c.cmd.slice(1).startsWith(current));
         if (matches.length === 1) {
           dispatch({ type: 'SET_INPUT', payload: matches[0].cmd });
         }
@@ -230,7 +248,7 @@ export function TerminalModal() {
             <span>AVAILABLE COMMANDS:</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 font-mono">
-            {AVAILABLE_COMMANDS.map((item) => (
+            {QUICK_COMMANDS.map((item) => (
               <button
                 key={item.cmd}
                 onClick={() => executeCommand(item.cmd)}
@@ -432,7 +450,7 @@ export function TerminalModal() {
 
             <div className="px-4 py-2 bg-zinc-900/40 border-b border-zinc-800/60 flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
               <span className="text-[11px] font-mono text-zinc-500 shrink-0 mr-1 hidden sm:inline">Quick:</span>
-              {AVAILABLE_COMMANDS.slice(0, 7).map((item) => (
+              {QUICK_COMMANDS.slice(0, 7).map((item) => (
                 <button
                   key={item.cmd}
                   onClick={() => executeCommand(item.cmd)}

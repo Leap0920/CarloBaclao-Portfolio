@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { NavigationProvider, useNavigation, ThemeProvider, TerminalProvider, useTerminal } from '@/contexts';
-import { Sidebar, ContentArea, ResumeModal, RightSidebar, CertificationModal, TerminalButton, TerminalModal, TypingModal } from '@/components';
+import { Sidebar, ContentArea, ResumeModal, RightSidebar, CertificationModal, TerminalButton, TerminalModal, TypingModal, TicTacToeModal, SnakeModal } from '@/components';
 import { CursorGlow } from '@/components/CursorGlow';
 import { SwipeHint } from '@/components/SwipeHint';
 import { getSectionContent } from '@/data/content';
@@ -216,10 +216,12 @@ function PortfolioContent() {
           )}
         </AnimatePresence>
 
-        {/* Terminal & Typing Test Modals */}
+        {/* Terminal & Game Modals */}
         <TerminalButton />
         <TerminalModal />
         <TypingModal />
+        <TicTacToeModal />
+        <SnakeModal />
       </motion.div>
     </>
   );

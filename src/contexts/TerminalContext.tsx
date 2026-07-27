@@ -8,6 +8,8 @@ export interface TerminalState {
   isOpen: boolean;
   isTypingModalOpen: boolean;
   isTypingLoading: boolean;
+  isTicTacToeModalOpen: boolean;
+  isSnakeModalOpen: boolean;
   mode: 'prompt' | 'typing-test';
   history: { type: 'input' | 'output'; text: string }[];
   inputValue: string;
@@ -26,6 +28,10 @@ type TerminalAction =
   | { type: 'TOGGLE' }
   | { type: 'OPEN_TYPING_MODAL' }
   | { type: 'CLOSE_TYPING_MODAL' }
+  | { type: 'OPEN_TICTACTOE_MODAL' }
+  | { type: 'CLOSE_TICTACTOE_MODAL' }
+  | { type: 'OPEN_SNAKE_MODAL' }
+  | { type: 'CLOSE_SNAKE_MODAL' }
   | { type: 'SET_TYPING_LOADING'; payload: boolean }
   | { type: 'ADD_HISTORY'; payload: { type: 'input' | 'output'; text: string } }
   | { type: 'CLEAR_HISTORY' }
@@ -40,6 +46,8 @@ const initialState: TerminalState = {
   isOpen: false,
   isTypingModalOpen: false,
   isTypingLoading: false,
+  isTicTacToeModalOpen: false,
+  isSnakeModalOpen: false,
   mode: 'prompt',
   history: [],
   inputValue: '',
@@ -58,9 +66,17 @@ function terminalReducer(state: TerminalState, action: TerminalAction): Terminal
     case 'TOGGLE':
       return { ...state, isOpen: !state.isOpen, inputValue: '', typingTestState: null };
     case 'OPEN_TYPING_MODAL':
-      return { ...state, isTypingModalOpen: true, isTypingLoading: true };
+      return { ...state, isTypingModalOpen: true, isTypingLoading: false };
     case 'CLOSE_TYPING_MODAL':
       return { ...state, isTypingModalOpen: false, isTypingLoading: false };
+    case 'OPEN_TICTACTOE_MODAL':
+      return { ...state, isTicTacToeModalOpen: true };
+    case 'CLOSE_TICTACTOE_MODAL':
+      return { ...state, isTicTacToeModalOpen: false };
+    case 'OPEN_SNAKE_MODAL':
+      return { ...state, isSnakeModalOpen: true };
+    case 'CLOSE_SNAKE_MODAL':
+      return { ...state, isSnakeModalOpen: false };
     case 'SET_TYPING_LOADING':
       return { ...state, isTypingLoading: action.payload };
     case 'ADD_HISTORY':
@@ -90,6 +106,10 @@ interface TerminalContextType {
   toggleTerminal: () => void;
   openTypingModal: () => void;
   closeTypingModal: () => void;
+  openTicTacToeModal: () => void;
+  closeTicTacToeModal: () => void;
+  openSnakeModal: () => void;
+  closeSnakeModal: () => void;
   addOutput: (text: string) => void;
   addInput: (text: string) => void;
   clearHistory: () => void;
@@ -107,6 +127,10 @@ export function TerminalProvider({ children }: { children: React.ReactNode }) {
   const toggleTerminal = useCallback(() => dispatch({ type: 'TOGGLE' }), []);
   const openTypingModal = useCallback(() => dispatch({ type: 'OPEN_TYPING_MODAL' }), []);
   const closeTypingModal = useCallback(() => dispatch({ type: 'CLOSE_TYPING_MODAL' }), []);
+  const openTicTacToeModal = useCallback(() => dispatch({ type: 'OPEN_TICTACTOE_MODAL' }), []);
+  const closeTicTacToeModal = useCallback(() => dispatch({ type: 'CLOSE_TICTACTOE_MODAL' }), []);
+  const openSnakeModal = useCallback(() => dispatch({ type: 'OPEN_SNAKE_MODAL' }), []);
+  const closeSnakeModal = useCallback(() => dispatch({ type: 'CLOSE_SNAKE_MODAL' }), []);
   const addOutput = useCallback(
     (text: string) => dispatch({ type: 'ADD_HISTORY', payload: { type: 'output', text } }),
     [],
@@ -127,6 +151,10 @@ export function TerminalProvider({ children }: { children: React.ReactNode }) {
         toggleTerminal,
         openTypingModal,
         closeTypingModal,
+        openTicTacToeModal,
+        closeTicTacToeModal,
+        openSnakeModal,
+        closeSnakeModal,
         addOutput,
         addInput,
         clearHistory,

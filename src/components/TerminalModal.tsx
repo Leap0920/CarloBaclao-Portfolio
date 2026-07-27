@@ -380,17 +380,18 @@ export function TerminalModal() {
     if (text === 'CMD_FETCH') {
       return (
         <div key={index} className="my-3 p-3.5 bg-zinc-950/70 border border-zinc-800/80 rounded-xl font-mono text-xs text-zinc-300 shadow-inner">
-          <div className="flex flex-col sm:flex-row gap-4 items-start">
-            <pre className={`${theme.prompt} font-bold leading-none select-none hidden sm:block text-[11px] shrink-0`}>
+          <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start">
+            <pre className={`${theme.prompt} font-bold leading-none select-none hidden sm:block text-[9px] shrink-0 font-mono tracking-tight`}>
 {`
-  ██████╗  ██████╗  ██████╗ 
-  ██╔══██╗ ██╔══██╗ ██╔══██╗
-  ██████╔╝ ██║  ██║ ██║  ██║
-  ██╔══██╗ ██║  ██║ ██║  ██║
-  ██████╔╝ ██████╔╝ ██████╔╝
-  ╚═════╝  ╚═════╝  ╚═════╝ 
+██╗  ██╗  ██╗ ██████╗ ███╗   ██╗
+██║  ██║  ██║   ██║   ████╗  ██║
+██║  ██║  ██║   ██║   ██╔██╗ ██║
+██║  ██║  ██║   ██║   ██║╚██╗██║
+╚█████╔█████╔╝██████╗ ██║ ╚████║
+ ╚════╝╚════╝ ╚═════╝ ╚═╝  ╚═══╝
 `}
             </pre>
+
             <div className="space-y-1.5 w-full">
               <div className={`${theme.prompt} font-bold border-b border-zinc-800 pb-1 flex items-center justify-between`}>
                 <span>carlo@windows-pc</span>

@@ -4,6 +4,7 @@ import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useTerminal } from '@/contexts/TerminalContext';
 
 function Particles() {
   const meshRef = useRef<THREE.Points>(null);
@@ -106,6 +107,10 @@ function FloatingRing({ radius, speed, y, color }: { radius: number; speed: numb
 }
 
 export default function ParticleBackground() {
+  const { state } = useTerminal();
+
+  if (!state.matrixActive) return null;
+
   return (
     <div className="fixed inset-0 -z-10" style={{ pointerEvents: 'none' }}>
       <Canvas

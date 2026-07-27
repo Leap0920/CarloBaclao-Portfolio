@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { NavigationProvider, useNavigation, ThemeProvider } from '@/contexts';
-import { Sidebar, ContentArea, ResumeModal, RightSidebar, CertificationModal } from '@/components';
+import { NavigationProvider, useNavigation, ThemeProvider, TerminalProvider, useTerminal } from '@/contexts';
+import { Sidebar, ContentArea, ResumeModal, RightSidebar, CertificationModal, TerminalButton, TerminalModal } from '@/components';
 import { CursorGlow } from '@/components/CursorGlow';
 import { SwipeHint } from '@/components/SwipeHint';
 import { getSectionContent } from '@/data/content';
@@ -20,6 +20,7 @@ function PortfolioContent() {
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const { openTerminal } = useTerminal();
   const {
     currentSection, setCurrentSection,
     isResumeOpen, openResume, closeResume,
@@ -36,6 +37,19 @@ function PortfolioContent() {
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   }, []);
+
+  // Ctrl+K / Cmd+K shortcut
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openTerminal();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [openTerminal]);
+
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (!touchStart.current) return;
@@ -201,6 +215,10 @@ function PortfolioContent() {
             />
           )}
         </AnimatePresence>
+
+        {/* Terminal */}
+        <TerminalButton />
+        <TerminalModal />
       </motion.div>
     </>
   );
@@ -210,7 +228,9 @@ export default function Home() {
   return (
     <ThemeProvider>
       <NavigationProvider>
-        <PortfolioContent />
+        <TerminalProvider>
+          <PortfolioContent />
+        </TerminalProvider>
       </NavigationProvider>
     </ThemeProvider>
   );

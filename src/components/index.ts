@@ -11,6 +11,8 @@ export { GitHubSection } from './GitHubSection';
 export { CertificationModal } from './CertificationModal';
 export { ProjectShowcase } from './ProjectShowcase';
 export { GithubIcon, LinkedinIcon, InstagramIcon, TiktokIcon } from './BrandIcons';
+export { TerminalButton } from './TerminalButton';
+export { TerminalModal } from './TerminalModal';
 
 // Animation components
 export {

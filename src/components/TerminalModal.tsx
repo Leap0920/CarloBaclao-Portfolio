@@ -655,7 +655,7 @@ export function TerminalModal() {
 
             <div className="px-4 py-2 bg-zinc-900/40 border-b border-zinc-800/60 flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
               <span className="text-[11px] font-mono text-zinc-500 shrink-0 mr-1 hidden sm:inline">Quick:</span>
-              {QUICK_COMMANDS.slice(0, 7).map((item) => (
+              {QUICK_COMMANDS.filter((c) => c.cmd === '/help' || c.cmd === '/fetch').map((item) => (
                 <button
                   key={item.cmd}
                   onClick={() => executeCommand(item.cmd)}

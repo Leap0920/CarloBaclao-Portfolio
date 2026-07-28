@@ -17,6 +17,7 @@ export { TypingModal } from './TypingModal';
 export { TicTacToeModal } from './TicTacToeModal';
 export { SnakeModal } from './SnakeModal';
 export { MatrixRain } from './MatrixRain';
+export { ChessModal } from './ChessModal';
 
 // Animation components
 export {

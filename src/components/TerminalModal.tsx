@@ -3,6 +3,7 @@
 import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTerminal } from '@/contexts/TerminalContext';
+import { VIRTUAL_FS, VDirectory, VFile, VNode } from '@/utils/virtualFS';
 import {
   Terminal,
   X,
@@ -30,11 +31,20 @@ import {
   Quote,
   Smile,
   Palette,
+  Crown,
+  Folder,
+  File,
+  Rocket,
+  Coffee,
+  Zap,
+  ShieldAlert,
 } from 'lucide-react';
 
 const QUICK_COMMANDS = [
   { cmd: '/help', desc: 'List all commands', icon: HelpCircle },
   { cmd: '/fetch', desc: 'Neofetch Windows system specs', icon: Cpu },
+  { cmd: '/ls', desc: 'Developer joke', icon: Folder },
+  { cmd: '/whoami', desc: 'Display current user info', icon: User },
   { cmd: '/about', desc: 'Developer summary', icon: UserCheck },
   { cmd: '/skills', desc: 'Technical stack & skills', icon: Code2 },
   { cmd: '/projects', desc: 'Featured projects & links', icon: FolderGit2 },
@@ -45,6 +55,7 @@ const QUICK_COMMANDS = [
   { cmd: '/contact', desc: 'Direct contact info', icon: Mail },
   { cmd: '/sudo hire carlo', desc: 'Hire command', icon: Award },
   { cmd: '/matrix', desc: 'Toggle matrix code rain', icon: Eye },
+  { cmd: '/play chess', desc: 'Interactive Chess arcade vs AI', icon: Crown },
   { cmd: '/play typing', desc: 'Speed typing test', icon: Keyboard },
   { cmd: '/play tictactoe', desc: 'Tic Tac Toe game vs AI', icon: Gamepad2 },
   { cmd: '/play snake', desc: 'Retro snake game', icon: Gamepad2 },
@@ -90,14 +101,56 @@ const THEME_MAP = {
   },
 };
 
+function getNodeAtPath(path: string): VNode | null {
+  if (path === '~' || path === '/home/carlo') return VIRTUAL_FS;
+  const rel = path.replace(/^~\/?/, '').replace(/^\/home\/carlo\/?/, '');
+  if (!rel) return VIRTUAL_FS;
+  const parts = rel.split('/').filter(Boolean);
+  let curr: VNode = VIRTUAL_FS;
+  for (const p of parts) {
+    if (curr.type === 'dir' && curr.children[p]) {
+      curr = curr.children[p];
+    } else {
+      return null;
+    }
+  }
+  return curr;
+}
+
+function getTabSuggestion(input: string): { full: string; ghost: string } | null {
+  if (!input) return null;
+
+  const lowerInput = input.trim().toLowerCase();
+  const matchObj = lowerInput
+    ? QUICK_COMMANDS.find(
+        (c) => c.cmd.startsWith(lowerInput) || c.cmd.slice(1).startsWith(lowerInput)
+      )
+    : null;
+
+  if (matchObj) {
+    let full = matchObj.cmd;
+    if (!input.startsWith('/') && matchObj.cmd.startsWith('/')) {
+      full = matchObj.cmd.slice(1);
+    }
+    let ghost = '';
+    if (full.toLowerCase().startsWith(input.toLowerCase())) {
+      ghost = full.slice(input.length);
+    }
+    return { full, ghost };
+  }
+
+  return null;
+}
+
 export function TerminalModal() {
-  const { state, dispatch, closeTerminal, openTypingModal, openTicTacToeModal, openSnakeModal } = useTerminal();
+  const { state, dispatch, closeTerminal, openTypingModal, openTicTacToeModal, openSnakeModal, openChessModal } = useTerminal();
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
 
   const [cmdHistory, setCmdHistory] = useState<string[]>([]);
   const [historyIdx, setHistoryIdx] = useState<number>(-1);
   const [terminalTheme, setTerminalTheme] = useState<'default' | 'dracula' | 'matrix' | 'cyber' | 'monokai'>('default');
+  const [currentPath, setCurrentPath] = useState<string>('~');
 
   const theme = THEME_MAP[terminalTheme];
 
@@ -119,11 +172,22 @@ export function TerminalModal() {
 
     const stripped = raw.startsWith('/') ? raw.slice(1) : raw;
     const cmd = stripped.toLowerCase();
+    const parts = raw.split(' ');
 
     if (cmd === 'help') {
       dispatch({
         type: 'ADD_HISTORY',
         payload: { type: 'output', text: 'CMD_HELP' },
+      });
+    } else if (cmd === 'whoami') {
+      dispatch({
+        type: 'ADD_HISTORY',
+        payload: { type: 'output', text: 'CMD_WHOAMI' },
+      });
+    } else if (cmd === 'ls' || cmd === 'dir' || cmd === 'ls -l' || cmd === 'ls -a') {
+      dispatch({
+        type: 'ADD_HISTORY',
+        payload: { type: 'output', text: 'CMD_LS_JOKE' },
       });
     } else if (cmd === 'fetch' || cmd === 'neofetch' || cmd === 'fastfetch') {
       dispatch({
@@ -141,7 +205,6 @@ export function TerminalModal() {
         payload: { type: 'output', text: 'CMD_JOKE' },
       });
     } else if (cmd.startsWith('theme')) {
-      const parts = raw.split(' ');
       if (parts.length > 1) {
         const themeName = parts[1].toLowerCase();
         if (['dracula', 'matrix', 'cyber', 'monokai', 'default'].includes(themeName)) {
@@ -204,19 +267,25 @@ export function TerminalModal() {
         type: 'ADD_HISTORY',
         payload: { type: 'output', text: state.matrixActive ? 'Matrix code rain effect: OFF' : 'Matrix code rain effect: ON' },
       });
-    } else if (cmd === 'play typing') {
+    } else if (cmd === 'play chess' || cmd === 'chess') {
+      openChessModal();
+      dispatch({
+        type: 'ADD_HISTORY',
+        payload: { type: 'output', text: 'Interactive Chess arcade game modal launched.' },
+      });
+    } else if (cmd === 'play typing' || cmd === 'typing') {
       openTypingModal();
       dispatch({
         type: 'ADD_HISTORY',
         payload: { type: 'output', text: 'Interactive Monkeytype speed test modal launched.' },
       });
-    } else if (cmd === 'play tictactoe' || cmd === 'play ttt' || cmd === 'play tic-tac-toe') {
+    } else if (cmd === 'play tictactoe' || cmd === 'play ttt' || cmd === 'tictactoe') {
       openTicTacToeModal();
       dispatch({
         type: 'ADD_HISTORY',
         payload: { type: 'output', text: 'Interactive Tic Tac Toe game modal launched.' },
       });
-    } else if (cmd === 'play snake' || cmd === 'play snakes') {
+    } else if (cmd === 'play snake' || cmd === 'play snakes' || cmd === 'snake') {
       openSnakeModal();
       dispatch({
         type: 'ADD_HISTORY',
@@ -306,38 +375,19 @@ export function TerminalModal() {
         }
       }
 
-      const currentInput = state.inputValue.trim().toLowerCase();
-      const matchObj = currentInput
-        ? QUICK_COMMANDS.find(
-            (c) => c.cmd.startsWith(currentInput) || c.cmd.slice(1).startsWith(currentInput)
-          )
-        : null;
+      const suggestion = getTabSuggestion(state.inputValue);
 
-      if ((e.key === 'Tab' || e.key === 'ArrowRight') && matchObj) {
+      if ((e.key === 'Tab' || e.key === 'ArrowRight') && suggestion) {
         e.preventDefault();
-        dispatch({ type: 'SET_INPUT', payload: matchObj.cmd });
+        dispatch({ type: 'SET_INPUT', payload: suggestion.full });
         return;
       }
     },
     [handleSubmit, closeTerminal, state.mode, handleTypingKey, cmdHistory, historyIdx, state.inputValue, dispatch],
   );
 
-  const currentInputVal = state.inputValue.trim().toLowerCase();
-  const matchCmd = currentInputVal
-    ? QUICK_COMMANDS.find(
-        (c) => c.cmd.startsWith(currentInputVal) || c.cmd.slice(1).startsWith(currentInputVal)
-      )
-    : null;
-
-  let ghostText = '';
-  if (matchCmd && state.inputValue) {
-    const fullCmd = matchCmd.cmd;
-    if (fullCmd.toLowerCase().startsWith(state.inputValue.toLowerCase())) {
-      ghostText = fullCmd.slice(state.inputValue.length);
-    } else if (fullCmd.toLowerCase().slice(1).startsWith(state.inputValue.toLowerCase())) {
-      ghostText = fullCmd.slice(state.inputValue.length + 1);
-    }
-  }
+  const suggestion = getTabSuggestion(state.inputValue);
+  const ghostText = suggestion ? suggestion.ghost : '';
 
   const displayValue =
     state.mode === 'typing-test' && state.typingTestState
@@ -351,6 +401,27 @@ export function TerminalModal() {
   };
 
   const renderOutputItem = (text: string, index: number) => {
+    if (text === 'CMD_LS_JOKE') {
+      return (
+        <div key={index} className="my-2 p-3 bg-zinc-950/70 border border-zinc-800/80 rounded-xl font-mono text-xs text-amber-300 shadow-inner flex items-start gap-2">
+          <Coffee className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <span className="font-bold text-amber-400">ls: permission denied</span>
+            <p className="text-zinc-300 text-[11px] mt-0.5">No raw files here, only 100% bug-free React code and coffee grounds!</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (text === 'CMD_WHOAMI') {
+      return (
+        <div key={index} className="my-1.5 font-mono text-xs text-zinc-200">
+          <span className="text-emerald-400 font-bold">carlo</span>
+          <span className="text-zinc-400"> (Full-Stack Developer &amp; 4th Year BS IT Student @ Quezon City University)</span>
+        </div>
+      );
+    }
+
     if (text === 'CMD_HELP') {
       return (
         <div key={index} className="my-2 space-y-1.5 text-xs">
@@ -402,8 +473,8 @@ export function TerminalModal() {
               <p><span className="text-zinc-500 w-20 inline-block font-semibold">Uptime:</span> <span className="text-amber-400 font-semibold">5+ Years Coding Experience</span></p>
               <p><span className="text-zinc-500 w-20 inline-block font-semibold">Shell:</span> <span className={theme.prompt}>PowerShell 7.4 / Zsh Terminal</span></p>
               <p><span className="text-zinc-500 w-20 inline-block font-semibold">Stack:</span> <span className="text-cyan-400">React 19 • Next.js 16 • TypeScript • Tailwind</span></p>
-              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Location:</span> <span className="text-zinc-300">Quezon City, Metro Manila, PH 🇵🇭</span></p>
-              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Status:</span> <span className={`${theme.prompt} font-semibold`}>🟢 Open for Web Dev / IT Roles</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Location:</span> <span className="text-zinc-300 flex items-center gap-1 inline-flex"><MapPin className="w-3 h-3 text-cyan-400" /> Quezon City, Metro Manila, PH</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Status:</span> <span className={`${theme.prompt} font-semibold flex items-center gap-1.5 inline-flex`}><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Open for Web Dev / IT Roles</span></p>
             </div>
           </div>
         </div>
@@ -434,7 +505,7 @@ export function TerminalModal() {
       const j = jokes[Math.floor(Math.random() * jokes.length)];
       return (
         <div key={index} className="my-2 p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-xl text-xs font-mono text-cyan-300 space-y-1">
-          <p className="font-medium">⚡ {j}</p>
+          <p className="font-medium flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-yellow-400" /> {j}</p>
         </div>
       );
     }
@@ -442,7 +513,8 @@ export function TerminalModal() {
     if (text === 'CMD_SUDO_PROTECTED') {
       return (
         <div key={index} className="my-2 text-xs font-mono text-rose-400 flex items-center gap-1.5">
-          <span>Permission denied: Carlo&apos;s portfolio system is immutable &amp; protected 🛡️</span>
+          <ShieldAlert className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+          <span>Permission denied: Carlo&apos;s portfolio system is immutable &amp; protected</span>
         </div>
       );
     }
@@ -706,7 +778,10 @@ export function TerminalModal() {
                       </div>
                       <div className="p-1.5 rounded bg-slate-800/40 border border-slate-800">
                         <span className="text-slate-500 block text-[10px]">Status</span>
-                        <span className={`${theme.prompt} font-semibold`}>Open for Work 🚀</span>
+                        <span className={`${theme.prompt} font-semibold flex items-center gap-1`}>
+                          <span>Open for Work</span>
+                          <Rocket className="w-3 h-3 text-emerald-400 inline shrink-0" />
+                        </span>
                       </div>
                     </div>
 
@@ -789,7 +864,7 @@ export function TerminalModal() {
             {/* Input Line */}
             <div className="flex items-center px-4 py-3 border-t border-slate-800/80 bg-slate-900/90">
               <span className={`${theme.prompt} text-xs font-mono mr-2 shrink-0 select-none flex items-center gap-1 font-semibold`}>
-                <span>carlo@portfolio:~$</span>
+                <span>carlo@portfolio:{currentPath}$</span>
               </span>
               <div className="relative flex-1 flex items-center overflow-hidden">
                 <input

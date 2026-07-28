@@ -263,7 +263,7 @@ export function SnakeModal() {
               {isGameOver && (
                 <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center space-y-3">
                   <p className="text-rose-400 font-extrabold text-xl tracking-wider">
-                    GAME OVER! 🐍
+                    GAME OVER!
                   </p>
                   <p className="text-xs text-slate-300 font-mono">
                     Final Score: <strong className="text-emerald-400">{score}</strong>

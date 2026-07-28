@@ -239,11 +239,11 @@ export function TicTacToeModal() {
             {/* Turn Status Banner */}
             <div className="mb-6 h-6 text-sm font-semibold tracking-wider uppercase text-center select-none">
               {winner ? (
-                <span className={winner === 'X' ? 'text-emerald-400' : 'text-cyan-400'}>
-                  PLAYER {winner} WINS! 🎉
+                <span className={winner === 'X' ? 'text-emerald-400 font-bold' : 'text-cyan-400 font-bold'}>
+                  PLAYER {winner} WINS!
                 </span>
               ) : isDraw ? (
-                <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>IT&apos;S A DRAW! 🤝</span>
+                <span className={isDark ? 'text-slate-400 font-bold' : 'text-slate-600 font-bold'}>IT&apos;S A DRAW!</span>
               ) : (
                 <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
                   {isXNext ? 'PLAYER X TURN' : vsAI ? 'AI BOT THINKING...' : 'PLAYER O TURN'}

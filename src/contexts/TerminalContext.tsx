@@ -10,6 +10,7 @@ export interface TerminalState {
   isTypingLoading: boolean;
   isTicTacToeModalOpen: boolean;
   isSnakeModalOpen: boolean;
+  isChessModalOpen: boolean;
   mode: 'prompt' | 'typing-test';
   history: { type: 'input' | 'output'; text: string }[];
   inputValue: string;
@@ -32,6 +33,8 @@ type TerminalAction =
   | { type: 'CLOSE_TICTACTOE_MODAL' }
   | { type: 'OPEN_SNAKE_MODAL' }
   | { type: 'CLOSE_SNAKE_MODAL' }
+  | { type: 'OPEN_CHESS_MODAL' }
+  | { type: 'CLOSE_CHESS_MODAL' }
   | { type: 'SET_TYPING_LOADING'; payload: boolean }
   | { type: 'ADD_HISTORY'; payload: { type: 'input' | 'output'; text: string } }
   | { type: 'CLEAR_HISTORY' }
@@ -48,6 +51,7 @@ const initialState: TerminalState = {
   isTypingLoading: false,
   isTicTacToeModalOpen: false,
   isSnakeModalOpen: false,
+  isChessModalOpen: false,
   mode: 'prompt',
   history: [],
   inputValue: '',
@@ -77,6 +81,10 @@ function terminalReducer(state: TerminalState, action: TerminalAction): Terminal
       return { ...state, isSnakeModalOpen: true };
     case 'CLOSE_SNAKE_MODAL':
       return { ...state, isSnakeModalOpen: false };
+    case 'OPEN_CHESS_MODAL':
+      return { ...state, isChessModalOpen: true };
+    case 'CLOSE_CHESS_MODAL':
+      return { ...state, isChessModalOpen: false };
     case 'SET_TYPING_LOADING':
       return { ...state, isTypingLoading: action.payload };
     case 'ADD_HISTORY':
@@ -110,6 +118,8 @@ interface TerminalContextType {
   closeTicTacToeModal: () => void;
   openSnakeModal: () => void;
   closeSnakeModal: () => void;
+  openChessModal: () => void;
+  closeChessModal: () => void;
   addOutput: (text: string) => void;
   addInput: (text: string) => void;
   clearHistory: () => void;
@@ -131,6 +141,8 @@ export function TerminalProvider({ children }: { children: React.ReactNode }) {
   const closeTicTacToeModal = useCallback(() => dispatch({ type: 'CLOSE_TICTACTOE_MODAL' }), []);
   const openSnakeModal = useCallback(() => dispatch({ type: 'OPEN_SNAKE_MODAL' }), []);
   const closeSnakeModal = useCallback(() => dispatch({ type: 'CLOSE_SNAKE_MODAL' }), []);
+  const openChessModal = useCallback(() => dispatch({ type: 'OPEN_CHESS_MODAL' }), []);
+  const closeChessModal = useCallback(() => dispatch({ type: 'CLOSE_CHESS_MODAL' }), []);
   const addOutput = useCallback(
     (text: string) => dispatch({ type: 'ADD_HISTORY', payload: { type: 'output', text } }),
     [],
@@ -155,6 +167,8 @@ export function TerminalProvider({ children }: { children: React.ReactNode }) {
         closeTicTacToeModal,
         openSnakeModal,
         closeSnakeModal,
+        openChessModal,
+        closeChessModal,
         addOutput,
         addInput,
         clearHistory,

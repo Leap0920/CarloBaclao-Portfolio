@@ -468,8 +468,12 @@ export function TerminalModal() {
                 <span>carlo@windows-pc</span>
                 <span className="text-[10px] text-zinc-500 font-normal">v4.2.0</span>
               </div>
-              <p><span className="text-zinc-500 w-20 inline-block font-semibold">OS:</span> <span className="text-zinc-200">Windows 11 Home / Pro x64 (Carlo OS)</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">OS:</span> <span className="text-zinc-200">Windows 11 Home x64</span></p>
               <p><span className="text-zinc-500 w-20 inline-block font-semibold">Host:</span> <span className="text-zinc-200">Quezon City University (4th Yr BS IT)</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">CPU:</span> <span className="text-cyan-400">AMD Ryzen 7 7735HS with Radeon Graphics</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">GPU:</span> <span className="text-emerald-400">NVIDIA GeForce RTX 4050</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Memory:</span> <span className="text-amber-300">16GB DDR5 RAM</span></p>
+              <p><span className="text-zinc-500 w-20 inline-block font-semibold">Disk:</span> <span className="text-zinc-300">512GB SSD</span></p>
               <p><span className="text-zinc-500 w-20 inline-block font-semibold">Uptime:</span> <span className="text-amber-400 font-semibold">5+ Years Coding Experience</span></p>
               <p><span className="text-zinc-500 w-20 inline-block font-semibold">Shell:</span> <span className={theme.prompt}>PowerShell 7.4 / Zsh Terminal</span></p>
               <p><span className="text-zinc-500 w-20 inline-block font-semibold">Stack:</span> <span className="text-cyan-400">React 19 • Next.js 16 • TypeScript • Tailwind</span></p>

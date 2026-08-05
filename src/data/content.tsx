@@ -330,6 +330,18 @@ export function getSectionContent(openCertModal: (cert: CertificationItem) => vo
             </h3>
             <div className="space-y-4">
               <ProjectShowcase
+                name="DevCard"
+                subtitle="GitHub Profile README Builder"
+                description="A visual builder for GitHub Profile READMEs. Pick your tech stack, drag sections into place, and watch the markdown render live exactly as GitHub will display it. Copy or download the finished README in one click."
+                techStack={['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Zustand']}
+                image="/images/projects/devcard/Screenshot 2026-08-05 204249.png"
+                url="https://hubgenerator.vercel.app/"
+                accentText="text-cyan-600 dark:text-cyan-400"
+                accentBadge="bg-cyan-50 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300"
+                accentBadgeBorder="border-cyan-200 dark:border-cyan-800/50"
+              />
+
+              <ProjectShowcase
                 name="LoopHabit"
                 subtitle="Android Habit Tracker"
                 description="A native Android habit tracking app built with Android Studio and Kotlin, featuring a clean, modern UI for building and maintaining daily habits. Download via the website or Google Play."

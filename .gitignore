@@ -51,6 +51,7 @@ next-env.d.ts
 .omc/
 .openclaude/
 .playwright-mcp/
+.sisyphus/
 AGENTS.md
 CLAUDE.md
 

@@ -63,6 +63,12 @@ export const resumeData: ResumeData = {
   ],
   certifications: [
     {
+      id: 'hackerrank-java-basic',
+      name: 'Java (Basic) Certificate',
+      issuer: 'HackerRank',
+      imageUrl: '/images/Certification/Java (Basic) Certificate.png',
+    },
+    {
       id: 'fortinet-1',
       name: 'NSE 1 Network Security Associate',
       issuer: 'Fortinet',

@@ -63,6 +63,12 @@ export const resumeData: ResumeData = {
   ],
   certifications: [
     {
+      id: 'hackerrank-sql-advanced',
+      name: 'SQL (Advanced) Certificate',
+      issuer: 'HackerRank',
+      imageUrl: '/images/Certification/SQL (Advanced) Certificate.png',
+    },
+    {
       id: 'hackerrank-java-basic',
       name: 'Java (Basic) Certificate',
       issuer: 'HackerRank',

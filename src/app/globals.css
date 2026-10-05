@@ -7,8 +7,20 @@
    ══════════════════════════════════════════════════════════════════ */
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: var(--font-instrument-serif), ui-serif, Georgia, "Times New Roman", serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Neutrals — the label greys were raised so 11px text clears 4.5:1 */
+  --color-ink: #18181b;
+  --color-ink-soft: #3f3f46;
+  --color-muted: #52525b;
+  /* Faint carries 11-13px labels over the hero wash (#eef1ff at full
+     strength), not just over white. zinc-500 (#71717a) measured 4.30:1
+     against that wash — under the 4.5:1 floor — so it was darkened one
+     step. #6b6b74 measures 4.69:1 there and 5.01:1 on the measured wash. */
+  --color-faint: #6b6b74;
+  --color-hairline: #e4e4e7;
+  --color-surface: #ffffff;
+  --color-surface-2: #fafafa;
 
   /* Accent — one hue, no gradients */
   --color-accent-50: #eef1ff;

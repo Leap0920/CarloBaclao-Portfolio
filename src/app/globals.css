@@ -1,193 +1,192 @@
 @import "tailwindcss";
 
-@variant dark (&:where(.dark, .dark *));
-@custom-variant dark (&:where(.dark, .dark *));
+/* ══════════════════════════════════════════════════════════════════
+   Design tokens
+   A light, editorial system: near-white surfaces, cool ink text, and
+   one confident indigo accent used sparingly. The rest is type + space.
+   ══════════════════════════════════════════════════════════════════ */
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
-:root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --sidebar-width: 280px;
-  --content-padding: 2rem;
+  /* Accent — one hue, no gradients */
+  --color-accent-50: #eef1ff;
+  --color-accent-100: #e0e5ff;
+  --color-accent-200: #c6cffe;
+  --color-accent-300: #a3b0fc;
+  --color-accent-400: #7d8bf7;
+  --color-accent-500: #4f5bd5;
+  --color-accent-600: #3a41c0;
+  --color-accent-700: #2f34a0;
+  --color-accent-800: #282c81;
+  --color-accent-900: #232766;
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-:root.dark {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
+/* ══════════════════════════════════════════════════════════════════
+   Base
+   ══════════════════════════════════════════════════════════════════ */
+@layer base {
+  html {
+    color-scheme: light;
+    scroll-behavior: smooth;
+    /* Keeps anchored sections clear of the sticky header */
+    scroll-padding-top: 5.5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #18181b;
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: #e0e5ff;
+    color: #232766;
+  }
+
+  /* Visible focus for keyboard users only */
+  :focus-visible {
+    outline: 2px solid #4f5bd5;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #d4d4d8;
+    border: 3px solid #ffffff;
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #a1a1aa;
+  }
+
+  dialog {
+    margin: auto;
+  }
+
+  dialog::backdrop {
+    background-color: rgb(9 9 11 / 0.5);
+    backdrop-filter: blur(3px);
+  }
 }
 
-/* Ensure light mode is strictly white/light when html does not have .dark class */
-html:not(.dark) {
-  color-scheme: light;
+/* ══════════════════════════════════════════════════════════════════
+   Utilities
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Faint blueprint grid, behind the hero and section headers */
+@utility bg-grid {
+  background-image: linear-gradient(to right, rgb(24 24 27 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(24 24 27 / 0.045) 1px, transparent 1px);
+  background-size: 60px 60px;
 }
 
-html.dark {
-  color-scheme: dark;
+/* Frosted panel for the sticky header and lightboxes */
+@utility glass {
+  background-color: rgb(255 255 255 / 0.76);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
 }
 
-* {
-  box-sizing: border-box;
+/* Horizontal rail that hides its scrollbar */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-html {
-  scroll-behavior: smooth;
+/* ══════════════════════════════════════════════════════════════════
+   Scroll reveal
+   The markup ships `data-reveal="hidden"` on every animated block, but
+   only `js-reveal` on <html> gives that state any effect. The boot
+   script in the layout adds the class before the first paint, so the
+   page never flashes its unwrapped content — and takes it back off if
+   React never boots, so a broken bundle still leaves a readable page.
+   ══════════════════════════════════════════════════════════════════ */
+[data-reveal] {
+  transition-property: opacity, transform;
+  transition-duration: 0.75s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
-  line-height: 1.6;
+.js-reveal [data-reveal='hidden'] {
+  opacity: 0;
+  transform: translateY(var(--reveal-y, 20px));
 }
 
-/* Custom scrollbar for webkit browsers */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #94a3b8;
-  border-radius: 3px;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #475569;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-
-/* Focus styles for accessibility */
-.focus-visible:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* Line clamp utility */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* ─── Animated Gradient Hero ─────────────────────── */
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animated-gradient {
-  background: linear-gradient(135deg, #1e293b, #0f172a, #1e3a5f, #1a365d, #1e293b);
-  background-size: 400% 400%;
-  animation: gradientShift 8s ease infinite;
-}
-
-html:not(.dark) .animated-gradient {
-  background: linear-gradient(135deg, #2563eb, #4f46e5, #7c3aed, #2563eb);
-  background-size: 400% 400%;
-  animation: gradientShift 8s ease infinite;
+[data-reveal='shown'] {
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animated-gradient {
-    animation: none;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  }
-  html:not(.dark) .animated-gradient {
-    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  .js-reveal [data-reveal='hidden'] {
+    opacity: 1;
+    transform: none;
   }
 }
 
-/* ─── Animated Gradient Text ────────────────────── */
-.gradient-text {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
-  background-size: 300% 300%;
-  animation: gradientShift 4s ease infinite;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
+/* ══════════════════════════════════════════════════════════════════
+   Motion preferences
+   ══════════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
-  .gradient-text {
-    animation: none;
-    -webkit-text-fill-color: #3b82f6;
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-/* ─── Scroll Progress Bar ───────────────────────── */
-.scroll-progress-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  border-radius: 1px;
-  transform-origin: left;
-}
-
-/* ─── Grain Texture Overlay ─────────────────────── */
-.grain-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9998;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px 256px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .grain-overlay {
-    opacity: 0.015;
+/* ══════════════════════════════════════════════════════════════════
+   Print — a clean fallback for the résumé-facing content
+   ══════════════════════════════════════════════════════════════════ */
+@media print {
+  .print-hide {
+    display: none !important;
   }
-}
 
-/* ─── Scanline Overlay (CRT effect) ─────────────── */
-.terminal-scanlines {
-  position: relative;
-}
-
-.terminal-scanlines::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent 0px,
-    transparent 2px,
-    rgba(0, 0, 0, 0.05) 2px,
-    rgba(0, 0, 0, 0.05) 4px
-  );
-}
-
-/* Terminal green text glow */
-.terminal-glow {
-  text-shadow: 0 0 6px rgba(74, 222, 128, 0.15);
-}
-
-/* ─── Edge Dot Grid Pattern ───────────────────────── */
-.edge-dot-grid {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -5;
-  background-image: radial-gradient(rgba(148, 163, 184, 0.5) 1.5px, transparent 1.5px);
-  background-size: 24px 24px;
-  -webkit-mask-image: radial-gradient(ellipse at center, transparent 40%, black 85%);
-  mask-image: radial-gradient(ellipse at center, transparent 40%, black 85%);
-}
-
-.dark .edge-dot-grid {
-  display: none;
+  body {
+    background: #fff;
+    color: #000;
+  }
 }

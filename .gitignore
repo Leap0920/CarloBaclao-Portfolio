@@ -65,3 +65,7 @@ skills-section.png
 
 # Windows path artifacts
 %USERPROFILE%/
+
+# Isolated production build output + dev tooling logs
+/.next-build/
+/cp-*.log

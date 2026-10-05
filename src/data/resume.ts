@@ -12,10 +12,10 @@ export const experience: ExperienceItem[] = [
     id: 'state-lab-clinics',
     company: 'State Lab Clinics and Diagnostic Center',
     position: 'Data Encoder',
-    range: { start: '2022-04', end: '2022-07' },
+    range: { start: '2022-04', end: '2022-06' },
     location: 'Philippines',
     description: [
-      'Encoded and updated patient information, laboratory results, and other critical records into the clinic management system, keeping the data accurate enough to be relied on for diagnosis and billing.',
+      'Encoded patient records, lab results, and billing data into the clinic system for diagnosis and billing.',
       'Organized digital and physical files while holding to strict confidentiality rules under data privacy standards.',
     ],
     technologies: ['Data Entry', 'Database Management', 'Information Security'],
@@ -28,7 +28,7 @@ export const education: EducationItem[] = [
     institution: 'Quezon City University',
     degree: 'Bachelor of Science',
     field: 'Information Technology',
-    range: { start: '2022-08', end: '2028-06' },
+    range: { start: '2023-08' },
     note: 'Coursework in systems integration, database management, networking, and software engineering.',
   },
   {
@@ -91,18 +91,16 @@ export const skills: SkillCategory[] = [
 export const focusAreas: FocusArea[] = [
   {
     title: 'Full-stack web',
-    detail:
-      'React and Next.js on the front, Spring Boot or Next API routes behind it, PostgreSQL or MongoDB underneath.',
+    detail: 'React and Next.js up front, Spring Boot APIs behind, PostgreSQL or MongoDB underneath.',
   },
   {
     title: 'Android & cross-platform',
-    detail:
-      'Native Android in Kotlin, and Flutter when a project needs one codebase for both platforms.',
+    detail: 'Native Android in Kotlin, and Flutter when one codebase must serve both platforms.',
   },
   {
     title: 'Deployment on real hardware',
     detail:
-      'Getting a stack running and staying up on a Raspberry Pi — Linux, systemd services, and database migrations that survive a reboot.',
+      'Running a stack on a Raspberry Pi: Linux, systemd services, database migrations surviving reboot.',
   },
 ];
 
@@ -113,17 +111,14 @@ export const values: ValueItem[] = [
   },
   {
     label: 'Long term',
-    detail: 'Own a system end to end — design it, build it, deploy it, keep it running.',
+    detail: 'Own a system end to end: design, build, deploy, and run it.',
   },
 ];
-
-export const traits = ['Curious', 'Meticulous', 'Rigorous', 'Empathetic', 'Sociable', 'Team lead'];
 
 export const interests = [
   {
     label: 'Outside of code',
-    detail:
-      'Video games, films, walking around parts of the city I have not seen, and reading philosophy and psychology.',
+    detail: 'Video games, films, walking unfamiliar parts of the city, reading philosophy and psychology.',
   },
 ];
 

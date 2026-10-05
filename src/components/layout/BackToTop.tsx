@@ -22,7 +22,7 @@ export function BackToTop() {
       aria-label="Back to top"
       tabIndex={shown ? undefined : -1}
       className={cn(
-        'fixed bottom-5 right-5 z-40 grid h-10 w-10 place-items-center rounded-full border border-zinc-200 bg-white/90 text-zinc-600 shadow-sm backdrop-blur transition duration-200 ease-out-expo hover:border-zinc-300 hover:text-zinc-900 sm:bottom-8 sm:right-8 print-hide',
+        'fixed bottom-5 right-5 z-40 grid h-10 w-10 place-items-center rounded-full border border-hairline bg-white/90 text-muted shadow-sm backdrop-blur transition duration-200 ease-out-expo hover:border-zinc-300 hover:text-ink sm:bottom-8 sm:right-8 print-hide',
         shown ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none translate-y-2 scale-90 opacity-0',
       )}
     >

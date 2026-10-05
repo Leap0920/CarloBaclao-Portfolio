@@ -1,5 +1,5 @@
 import { projects } from './projects';
-import { certifications, skills } from './resume';
+import { certIssuers, certifications, skills } from './resume';
 import { profile } from './profile';
 
 /** Every distinct technology across skills and projects. */
@@ -10,7 +10,7 @@ export const allTechnologies = Array.from(
 /** Headline numbers. All derived from the data so they cannot drift out of date. */
 export const stats = [
   { value: String(projects.length), label: 'Projects built', hint: 'shipped or deployed' },
-  { value: String(certifications.length), label: 'Certificates', hint: 'across 6 issuers' },
+  { value: String(certifications.length), label: 'Certificates', hint: `across ${certIssuers.length} issuers` },
   { value: String(allTechnologies.length), label: 'Technologies', hint: 'in regular use' },
   { value: String(profile.codingSince), label: 'Writing code since', hint: 'senior high school' },
 ];

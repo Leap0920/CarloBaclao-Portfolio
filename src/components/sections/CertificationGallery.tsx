@@ -16,6 +16,7 @@ const LIGHTBOX_EXIT_MS = 200;
 export function CertificationGallery() {
   const [issuer, setIssuer] = useState<string>(ALL);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   // Which certificate the lightbox draws. Deliberately not cleared on close, so
   // the certificate stays on screen for the fade-out.
   const [shownIndex, setShownIndex] = useState<number | null>(null);
@@ -25,6 +26,12 @@ export function CertificationGallery() {
     () => (issuer === ALL ? certifications : certifications.filter((c) => c.issuer === issuer)),
     [issuer],
   );
+
+  // On the default view only the first eight tiles render; a filter or "Show
+  // all" reveals the rest. `visible` is a subset of `filtered`, so indices into
+  // the lightbox must still be resolved against the full `filtered` array.
+  const visible = issuer === ALL && !showAll ? filtered.slice(0, 8) : filtered;
+  const hasMore = issuer === ALL && filtered.length > 8;
 
   const current = shownIndex === null ? null : (filtered[shownIndex] ?? null);
 
@@ -75,7 +82,7 @@ export function CertificationGallery() {
   return (
     <div>
       {/* Filters */}
-      <div className="no-scrollbar -mx-5 flex gap-6 overflow-x-auto border-b border-zinc-200 px-5 sm:mx-0 sm:flex-wrap sm:px-0">
+      <div className="no-scrollbar -mx-5 flex gap-6 overflow-x-auto border-b border-hairline px-5 sm:mx-0 sm:flex-wrap sm:px-0">
         {filters.map((name) => {
           const count =
             name === ALL
@@ -89,16 +96,17 @@ export function CertificationGallery() {
               type="button"
               onClick={() => {
                 setIssuer(name);
+                setShowAll(false);
                 setLightboxOpen(false);
               }}
               aria-pressed={isActive}
               className={cn(
                 'relative shrink-0 pb-3 text-[13px] transition-colors',
-                isActive ? 'text-zinc-900' : 'text-zinc-500 hover:text-zinc-900',
+                isActive ? 'text-ink' : 'text-faint hover:text-ink',
               )}
             >
               {name}
-              <span className="ml-1.5 font-mono text-[10px] tabular-nums text-zinc-400">
+              <span className="ml-1.5 font-mono text-[11px] tabular-nums text-faint">
                 {count}
               </span>
               {isActive ? (
@@ -114,17 +122,17 @@ export function CertificationGallery() {
 
       {/* Grid */}
       <ul className="mt-10 grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-3 lg:grid-cols-4">
-        {filtered.map((cert, index) => (
+        {visible.map((cert) => (
           <li key={cert.id}>
             <motion.button
               type="button"
               layout
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              onClick={() => open(index)}
+              onClick={() => open(filtered.indexOf(cert))}
               aria-label={`View certificate: ${cert.name}`}
               className="group block w-full text-left"
             >
-              <span className="relative block aspect-[4/3] w-full overflow-hidden rounded-lg border border-zinc-200 bg-white transition-colors duration-300 group-hover:border-zinc-300">
+              <span className="relative block aspect-[4/3] w-full overflow-hidden rounded-lg border border-hairline bg-white transition-colors duration-300 group-hover:border-zinc-300">
                 <Image
                   src={cert.image}
                   alt={`${cert.name} certificate from ${cert.issuer}`}
@@ -133,10 +141,10 @@ export function CertificationGallery() {
                   className="object-contain p-2 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                 />
               </span>
-              <span className="mt-3 block line-clamp-2 text-[13px] font-medium leading-snug text-zinc-900">
+              <span className="mt-3 block line-clamp-2 text-[13px] font-medium leading-snug text-ink">
                 {cert.name}
               </span>
-              <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.1em] text-zinc-500">
+              <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.1em] text-faint">
                 {cert.issuer}
               </span>
             </motion.button>
@@ -144,8 +152,20 @@ export function CertificationGallery() {
         ))}
       </ul>
 
+      {hasMore ? (
+        <div className="mt-10 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setShowAll((value) => !value)}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-hairline px-4 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:border-zinc-300 hover:bg-surface-2 sm:w-auto"
+          >
+            {showAll ? 'Show fewer' : `Show all ${filtered.length} certificates`}
+          </button>
+        </div>
+      ) : null}
+
       {filtered.length === 0 ? (
-        <p className="mt-8 flex items-center gap-2 text-sm text-zinc-500">
+        <p className="mt-8 flex items-center gap-2 text-sm text-faint">
           <Award size={15} />
           No certificates from this issuer.
         </p>
@@ -168,18 +188,18 @@ export function CertificationGallery() {
             tabIndex={-1}
             onClick={(event) => event.stopPropagation()}
             className={cn(
-              'relative flex max-h-full w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl outline-none transition duration-200 ease-out',
+              'relative flex max-h-full w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-hairline bg-white shadow-2xl outline-none transition duration-200 ease-out',
               lightboxVisible
                 ? 'translate-y-0 scale-100 opacity-100'
                 : 'translate-y-2 scale-[0.98] opacity-0',
             )}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 px-5 py-4">
+            <div className="flex items-start justify-between gap-4 border-b border-hairline px-5 py-4">
               <div className="min-w-0">
-                <h3 className="truncate text-sm font-semibold tracking-tight text-zinc-900">
+                <h3 className="truncate text-sm font-semibold tracking-tight text-ink">
                   {current.name}
                 </h3>
-                <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-zinc-500">
+                <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-faint">
                   {current.issuer} · {filtered.indexOf(current) + 1} of {filtered.length}
                 </p>
               </div>
@@ -187,13 +207,13 @@ export function CertificationGallery() {
                 type="button"
                 onClick={close}
                 aria-label="Close"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-zinc-200 text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-hairline text-muted transition-colors hover:bg-surface-2 hover:text-ink"
               >
                 <X size={15} />
               </button>
             </div>
   
-            <div className="relative min-h-0 flex-1 bg-[#fafafa]">
+            <div className="relative min-h-0 flex-1 bg-surface-2">
               <div className="relative h-[min(66vh,640px)] w-full">
                 <Image
                   src={current.image}
@@ -206,22 +226,22 @@ export function CertificationGallery() {
             </div>
   
             {filtered.length > 1 ? (
-              <div className="flex items-center justify-between border-t border-zinc-200 px-5 py-3">
+              <div className="flex items-center justify-between border-t border-hairline px-5 py-3">
                 <button
                   type="button"
                   onClick={() => step(-1)}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-ink"
                 >
                   <ChevronLeft size={15} />
                   Previous
                 </button>
-                <span className="hidden font-mono text-[10px] uppercase tracking-[0.1em] text-zinc-400 sm:block">
+                <span className="hidden font-mono text-[11px] uppercase tracking-[0.1em] text-faint sm:block">
                   Use ← → to browse
                 </span>
                 <button
                   type="button"
                   onClick={() => step(1)}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-ink"
                 >
                   Next
                   <ChevronRight size={15} />

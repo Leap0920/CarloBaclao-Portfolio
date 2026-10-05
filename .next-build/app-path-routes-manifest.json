@@ -1,0 +1,8 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/github/contributions/route": "/api/github/contributions",
+  "/api/github/repos/route": "/api/github/repos",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/"
+}

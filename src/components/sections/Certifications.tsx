@@ -8,8 +8,8 @@ export function Certifications() {
       <SectionHeading
         index="05"
         eyebrow="Certificates"
-        title="Continuous learning, documented"
-        description={`${certifications.length} certificates from ${certIssuers.length} issuers — security fundamentals from Cisco and Fortinet, language and database certificates from HackerRank, and a long run of Udemy courses. Select one to read it.`}
+        title={`${certifications.length} certificates`}
+        description={`${certIssuers.length} issuers: security, databases, web.`}
       />
       <CertificationGallery />
     </Section>

@@ -6,7 +6,7 @@ export const projects: Project[] = [
     name: 'DCPH Tracker',
     subtitle: 'Community tracking platform for Detective Conan PH',
     description:
-      'A tracking platform for a fan community: episode, movie and OVA progress with cross-device sync, a story-arc watch guide, leaderboards, themed chat rooms, and a searchable case and character index. Built and maintained for a live audience.',
+      'Episode, movie, and OVA progress tracking with cross-device sync, watch guides, leaderboards, and a searchable case index for a live fan community.',
     tech: ['Next.js', 'React', 'Tailwind CSS', 'Vercel'],
     image: '/images/projects/dcph/cover.png',
     url: 'https://dcphtracker.vercel.app',
@@ -20,7 +20,7 @@ export const projects: Project[] = [
     name: 'Attendance Management System',
     subtitle: 'Full-stack IoT deployment on a Raspberry Pi',
     description:
-      'An end-to-end attendance system built for a real client environment: a Spring Boot API, a React front end, and PostgreSQL, all running on a Raspberry Pi. It handles Flyway database migrations, SMTP notifications, network whitelisting, and ships with a Windows installer for the client.',
+      'Attendance system for a real client: Spring Boot API, React, PostgreSQL on a Raspberry Pi, with Flyway migrations and a Windows installer.',
     tech: [
       'Java',
       'Spring Boot',
@@ -43,7 +43,7 @@ export const projects: Project[] = [
     name: 'DevCard',
     subtitle: 'GitHub profile README builder',
     description:
-      'A visual builder for GitHub profile READMEs. Pick a tech stack, drag sections into place, and the markdown renders live exactly as GitHub will show it. Copy or download in one click.',
+      'Visual builder for GitHub profile READMEs: pick a stack, drag sections, see live markdown as GitHub renders it. One-click copy or download.',
     tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Zustand'],
     image: '/images/projects/devcard/cover.png',
     url: 'https://hubgenerator.vercel.app/',
@@ -57,7 +57,7 @@ export const projects: Project[] = [
     name: 'LoopHabit',
     subtitle: 'Native Android habit tracker',
     description:
-      'An Android habit tracker built in Android Studio with Kotlin. Daily streaks, reminders, and a deliberately quiet interface. Distributed through the project site and Google Play.',
+      'Native Android habit tracker in Kotlin: daily streaks, reminders, and a quiet interface. Distributed via Google Play and the project site.',
     tech: ['Kotlin', 'Android Studio', 'Java'],
     image: '/images/projects/loophabit/banner.jpg',
     url: 'https://loop-habit-website.vercel.app/',
@@ -112,7 +112,7 @@ export const projects: Project[] = [
     description:
       'A responsive restaurant site built from scratch with vanilla JavaScript and CSS, deployed on GitHub Pages.',
     tech: ['JavaScript', 'HTML', 'CSS', 'GitHub Pages'],
-    image: '/images/projects/lecuisine/cover.png',
+    image: '/images/projects/lecuisine/cover.webp',
     url: 'https://leap0920.github.io/LECUISINE/',
     urlLabel: 'leap0920.github.io/LECUISINE',
     year: '2024',

@@ -40,6 +40,8 @@ export interface Profile {
   email: string;
   phone: string;
   location: string;
+  /** Spoken languages, e.g. rendered as a short list. */
+  spokenLanguages: string[];
   github: string;
   linkedin: string;
   /** Path to the résumé PDF served from `public/`. */

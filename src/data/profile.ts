@@ -1,17 +1,18 @@
 import type { Profile } from '@/types';
 
-export const siteUrl = 'https://carlobaclao.dev';
+export const siteUrl = 'https://carlobaclao.vercel.app';
 
 export const profile: Profile = {
   name: 'Carlo Baclao',
   role: 'Full-Stack Developer',
   pitch:
-    'Fourth-year BS Information Technology student in Quezon City building full-stack web apps, Android apps, and IoT deployments on real hardware.',
+    'Full-stack developer and fourth-year IT student in Quezon City, building web, Android, and IoT projects that ship.',
   intro:
-    'I build things that have to actually run — a Spring Boot API on a Raspberry Pi, an Android app people install, a web app that has to survive real users. I am finishing my Information Technology degree and looking for an internship or junior role where I can work on a codebase with other people and get reviewed properly.',
+    'I build full-stack web, Android, and IoT projects — a Spring Boot API on a Raspberry Pi. Finishing my IT degree; open to internships and junior roles.',
   email: 'baclao.carlo.cometa@gmail.com',
   phone: '09686890263',
   location: 'Quezon City, Philippines',
+  spokenLanguages: ['English', 'Filipino'],
   github: 'https://github.com/Leap0920',
   linkedin: 'https://www.linkedin.com/in/baclao-carlo-22936435a/',
   resumeUrl: '/Carlo_Baclao_Resume.pdf',

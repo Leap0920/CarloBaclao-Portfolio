@@ -22,19 +22,19 @@ function Entry({
   tech?: string[];
 }) {
   return (
-    <div className="border-t border-zinc-200 pt-6">
+    <div className="border-t border-hairline pt-6">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
-        <h4 className="text-base font-semibold tracking-tight text-zinc-900">{title}</h4>
-        <time className="shrink-0 font-mono text-[11px] text-zinc-500">{range}</time>
+        <h4 className="text-base font-semibold tracking-tight text-ink">{title}</h4>
+        <time className="shrink-0 font-mono text-[11px] text-faint">{range}</time>
       </div>
-      <p className="mt-1 text-sm font-medium text-zinc-500">{subtitle}</p>
+      <p className="mt-1 text-sm font-medium text-faint">{subtitle}</p>
 
-      {note ? <p className="mt-3 text-sm leading-relaxed text-zinc-600">{note}</p> : null}
+      {note ? <p className="mt-3 text-sm leading-relaxed text-muted">{note}</p> : null}
 
       {lines && lines.length > 0 ? (
         <ul className="mt-4 space-y-2.5">
           {lines.map((line) => (
-            <li key={line} className="flex gap-3 text-sm leading-relaxed text-zinc-600">
+            <li key={line} className="flex gap-3 text-sm leading-relaxed text-muted">
               <span
                 aria-hidden="true"
                 className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-zinc-300"
@@ -46,7 +46,7 @@ function Entry({
       ) : null}
 
       {tech && tech.length > 0 ? (
-        <p className="mt-4 font-mono text-[11px] text-zinc-500">{tech.join(' · ')}</p>
+        <p className="mt-4 font-mono text-[11px] text-faint">{tech.join(' · ')}</p>
       ) : null}
     </div>
   );
@@ -59,12 +59,12 @@ export function Experience() {
         index="03"
         eyebrow="Experience & Education"
         title="Where I have worked and studied"
-        description="One role in a clinical data environment and a degree in progress — plus the coursework that produced most of the projects below."
+        description="One clinical data role, a degree in progress, and the coursework behind these projects."
       />
 
       <div className="grid gap-14 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
         <div>
-          <h3 className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+          <h3 className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-faint">
             <Building2 size={13} />
             Work
           </h3>
@@ -85,7 +85,7 @@ export function Experience() {
         </div>
 
         <div>
-          <h3 className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+          <h3 className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-faint">
             <GraduationCap size={13} />
             Education
           </h3>
@@ -106,17 +106,14 @@ export function Experience() {
       </div>
 
       <Reveal delay={0.1}>
-        <div className="mt-14 flex flex-col gap-5 border-t border-zinc-200 pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-zinc-600">
-            Prefer the one-page version? The full résumé as a PDF — education, experience, skills
-            and certifications.
-          </p>
+        <div className="mt-16 flex flex-col gap-5 border-t border-hairline pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted">One-page version: the full résumé as a PDF.</p>
           <div className="flex shrink-0 flex-wrap gap-2">
             <a
               href={profile.resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
+              className="inline-flex items-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
             >
               <FileText size={15} />
               Open résumé
@@ -124,7 +121,7 @@ export function Experience() {
             <a
               href={profile.resumeUrl}
               download="Carlo_Baclao_Resume.pdf"
-              className="inline-flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
+              className="inline-flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:text-ink"
             >
               <Download size={15} />
               Download

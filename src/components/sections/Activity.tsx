@@ -75,17 +75,21 @@ export function Activity() {
         index="06"
         eyebrow="Activity"
         title="What I have been pushing"
-        description="A live look at my GitHub footprint — contribution history and the repositories I have touched most recently."
+        description="This year's contributions and my most recently updated repositories."
       />
 
       <Reveal>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-200 pt-6">
-          <h3 className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
-            Contributions this year
-          </h3>
-          <div className="flex items-center gap-2 font-mono text-[10px] text-zinc-400">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-6">
+          <h3 className="text-sm font-semibold text-ink">Contributions this year</h3>
+          <div className="flex items-center gap-2 text-[11px] text-muted">
             <span>Less</span>
-            {['#f1f1f4', '#dfe4ff', '#a3b0fc', '#4f5bd5', '#2f34a0'].map((color) => (
+            {[
+              'var(--color-hairline)',
+              'var(--color-accent-soft)',
+              'var(--color-accent-300)',
+              'var(--color-accent-400)',
+              'var(--color-accent)',
+            ].map((color) => (
               <span
                 key={color}
                 className="h-2.5 w-2.5 rounded-[2px]"
@@ -105,22 +109,22 @@ export function Activity() {
             src="/api/github/contributions"
             alt="GitHub contribution activity for the past year"
             loading="lazy"
-            className="h-auto min-w-[620px] w-full"
+            className="h-auto w-full sm:min-w-[620px]"
           />
         </div>
       </Reveal>
 
-      <div className="mt-14">
+      <div className="mt-16">
         <Reveal>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-200 pt-6">
-            <h3 className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-6">
+            <h3 className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">
               Recently updated repositories
             </h3>
             <a
               href={profile.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-900"
+              className="inline-flex items-center gap-1.5 text-sm text-faint transition-colors hover:text-ink"
             >
               @Leap0920
               <ExternalLink size={13} />
@@ -130,13 +134,13 @@ export function Activity() {
 
         {failed ? (
           <Reveal>
-            <p className="mt-5 text-sm text-zinc-600">
+            <p className="mt-5 text-sm text-muted">
               GitHub&apos;s API did not answer this time — the repositories are still on the{' '}
               <a
                 href={profile.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-zinc-900"
+                className="underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-ink"
               >
                 profile
               </a>
@@ -144,7 +148,7 @@ export function Activity() {
             </p>
           </Reveal>
         ) : (
-          <ul className="mt-2 divide-y divide-zinc-200">
+          <ul className="mt-2 divide-y divide-hairline">
             {repos === null
               ? Array.from({ length: 5 }, (_, index) => <RepoSkeleton key={index} />)
               : repos.map((repo) => (
@@ -155,13 +159,13 @@ export function Activity() {
                       rel="noopener noreferrer"
                       className="group flex items-baseline gap-4 py-4"
                     >
-                      <span className="w-40 shrink-0 truncate text-sm font-medium text-zinc-900">
+                      <span className="w-40 shrink-0 truncate text-sm font-medium text-ink">
                         {repo.name}
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-sm text-zinc-500">
+                      <span className="min-w-0 flex-1 truncate text-sm text-faint">
                         {repo.description ?? 'No description yet.'}
                       </span>
-                      <span className="hidden shrink-0 items-center gap-3 font-mono text-[10px] text-zinc-400 sm:flex">
+                      <span className="hidden shrink-0 items-center gap-3 font-mono text-[11px] text-faint sm:flex">
                         {repo.language ? (
                           <span className="inline-flex items-center gap-1.5">
                             <span

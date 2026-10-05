@@ -41,50 +41,55 @@ export const education: EducationItem[] = [
   },
 ];
 
+/**
+ * The tech-stack strip groups. The brief fixes four groups — Frontend,
+ * Backend, Tools, Design — so the former Languages / Frameworks / Data /
+ * Platforms split was re-cut onto those four; every technology carries over
+ * exactly once, and Design adds the two interface competencies the portfolio
+ * itself demonstrates (responsive layout and accessibility).
+ */
 export const skills: SkillCategory[] = [
   {
-    category: 'Languages',
-    summary: 'What I reach for when a problem needs solving.',
-    skills: ['TypeScript', 'JavaScript', 'Java', 'Python', 'C++', 'SQL', 'Dart'],
+    category: 'Frontend',
+    summary: 'The frameworks and languages the interfaces are built in.',
+    skills: ['React', 'Next.js', 'TypeScript', 'JavaScript', 'Flutter', 'Dart'],
   },
   {
-    category: 'Frameworks & Libraries',
-    summary: 'The layers I build on top of those languages.',
+    category: 'Backend',
+    summary: 'APIs, data stores, and the migrations that keep them honest.',
     skills: [
-      'React',
-      'Next.js',
+      'Java',
+      'Python',
+      'C++',
+      'SQL',
       'Spring Boot',
-      'Flutter',
-      'Tailwind CSS',
-      'Framer Motion',
       '.NET',
-    ],
-  },
-  {
-    category: 'Data & Tools',
-    summary: 'How the data is stored, migrated, and shipped.',
-    skills: [
       'PostgreSQL',
       'MongoDB',
       'SQLite',
       'Flyway',
-      'Git',
-      'Docker',
-      'IntelliJ IDEA',
-      'VS Code',
+      'Firebase',
     ],
   },
   {
-    category: 'Platforms & Systems',
-    summary: 'Where it all runs, including the unglamorous parts.',
+    category: 'Tools',
+    summary: 'Where the work is written, versioned, containerised, and run.',
     skills: [
-      'Raspberry Pi',
-      'Linux',
-      'Firebase',
+      'Git',
       'GitHub',
-      'Windows Deployment',
+      'Docker',
+      'Linux',
+      'Raspberry Pi',
+      'IntelliJ IDEA',
+      'VS Code',
       'Android Studio',
+      'Windows Deployment',
     ],
+  },
+  {
+    category: 'Design',
+    summary: 'The layer that makes an interface feel considered.',
+    skills: ['Tailwind CSS', 'Framer Motion', 'Responsive Design', 'Accessibility'],
   },
 ];
 

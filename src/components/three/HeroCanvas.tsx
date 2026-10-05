@@ -20,27 +20,31 @@ interface HeroSceneProps {
 /**
  * Static stand-in shown whenever the 3D scene is not mounted: no WebGL,
  * reduced motion, save-data, still below the fold, or a failed chunk load.
- * It fills the same box as the scene, so swapping never shifts layout, and it
- * reuses existing tokens (hairline / accent-500 / ink) so it reads as
- * intentional rather than broken.
+ *
+ * It fills the same box as the scene — its outermost ring and bead sit just
+ * inside the box edge — so the visible gap between the copy and the graphic
+ * reads the same whether the scene loaded or not. It is built from the frozen
+ * tokens (accent / border), so it reads as intentional rather than broken.
  */
 function SceneFallback() {
   return (
     <div aria-hidden="true" className="relative h-full w-full">
       <div
-        className="absolute inset-0"
+        className="absolute inset-[6%] rounded-full"
         style={{
           background:
-            'radial-gradient(50% 45% at 50% 50%, rgba(79,91,213,0.14) 0%, rgba(79,91,213,0) 70%)',
+            'radial-gradient(50% 50% at 50% 50%, color-mix(in oklab, var(--accent) 20%, transparent), transparent 70%)',
         }}
       />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="aspect-square w-[min(70%,22rem)] rounded-full border border-hairline" />
-        <div className="absolute aspect-square w-[min(50%,16rem)] rotate-45 rounded-[2rem] border border-hairline" />
-        <div className="absolute aspect-square w-[min(25%,8rem)] rounded-3xl bg-accent-500/90" />
-        <div className="absolute left-[9%] top-[44%] h-1.5 w-1.5 rounded-full bg-ink" />
-        <div className="absolute left-[76%] top-[62%] h-1 w-1 rounded-full bg-accent-500" />
-      </div>
+      <div className="absolute inset-[4%] rounded-full border border-accent/30" />
+      <div className="absolute inset-[26%] rotate-45 rounded-card border border-border" />
+      <div
+        className="absolute inset-[36%] rounded-card bg-accent"
+        style={{ boxShadow: '0 0 48px -6px var(--accent)' }}
+      />
+      <div className="absolute left-1/2 top-[4%] h-2 w-2 -translate-x-1/2 rounded-full bg-accent" />
+      <div className="absolute right-[7%] top-[48%] h-1.5 w-1.5 rounded-full bg-accent/70" />
+      <div className="absolute bottom-[9%] left-[15%] h-1.5 w-1.5 rounded-full bg-accent/60" />
     </div>
   );
 }

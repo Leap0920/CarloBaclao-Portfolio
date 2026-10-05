@@ -1,183 +1,219 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
+import { Float, PointMaterial, Points } from '@react-three/drei';
 import * as THREE from 'three';
 
-const ACCENT = '#4f5bd5';
-const INK = '#27272a';
-const LINE = '#8b8b96';
-const MIST = '#a1a1aa';
-/** Matches the page background, so distance fades into the page. */
-const FOG = '#ffffff';
+interface HeroSceneProps {
+  /** Freezes the render loop (reduced motion / off-screen). */
+  still?: boolean;
+  /** Whether the canvas is on screen and allowed to keep rendering. */
+  active?: boolean;
+}
 
-/** Slow, opposing rotations on a wireframe shell - the "blueprint" skin. */
-function Shell() {
-  const ref = useRef<THREE.Mesh>(null);
+/** Mirrors the frozen `--accent` token, used only if the variable is absent. */
+const FALLBACK_ACCENT = '#7c5cff';
+
+/** The live accent, so the object follows the light/dark theme switch too. */
+function readAccent(): string {
+  if (typeof window === 'undefined') return FALLBACK_ACCENT;
+  const value = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  return value || FALLBACK_ACCENT;
+}
+
+/**
+ * Leans the whole composition toward the cursor — a fraction of a radian,
+ * critically damped. Deliberately restrained: it reads as weight, not as a
+ * gimmick, and it can never jitter because every frame interpolates toward a
+ * target with `MathUtils.damp` rather than snapping to the raw pointer.
+ *
+ * The pointer is read from a passive window listener, NOT from R3F's
+ * `state.pointer`: the canvas wrapper is `pointer-events-none`, so it would
+ * never receive the events, and a listener leaves the CTAs clickable.
+ */
+function CursorRig({ still, children }: { still: boolean; children: ReactNode }) {
+  const group = useRef<THREE.Group>(null);
+  const pointer = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (still) return;
+    const onMove = (event: PointerEvent) => {
+      pointer.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.current.y = -((event.clientY / window.innerHeight) * 2 - 1);
+    };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    return () => window.removeEventListener('pointermove', onMove);
+  }, [still]);
 
   useFrame((_, delta) => {
-    if (!ref.current) return;
-    ref.current.rotation.y += delta * 0.055;
-    ref.current.rotation.x -= delta * 0.018;
+    const node = group.current;
+    if (!node) return;
+    node.rotation.y = THREE.MathUtils.damp(node.rotation.y, pointer.current.x * 0.18, 2.4, delta);
+    node.rotation.x = THREE.MathUtils.damp(node.rotation.x, pointer.current.y * 0.12, 2.4, delta);
+    node.position.x = THREE.MathUtils.damp(node.position.x, pointer.current.x * 0.1, 2, delta);
+    node.position.y = THREE.MathUtils.damp(node.position.y, pointer.current.y * 0.07, 2, delta);
+  });
+
+  return <group ref={group}>{children}</group>;
+}
+
+/** The hero object: a faceted low-poly core that turns and breathes. */
+function Core({ accent }: { accent: string }) {
+  const mesh = useRef<THREE.Mesh>(null);
+
+  useFrame((state, delta) => {
+    const node = mesh.current;
+    if (!node) return;
+    node.rotation.y += delta * 0.16;
+    node.rotation.x += delta * 0.06;
+    node.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * 0.9) * 0.03);
   });
 
   return (
-    <mesh ref={ref}>
-      <icosahedronGeometry args={[2.3, 1]} />
-      <meshBasicMaterial wireframe color={LINE} transparent opacity={0.34} depthWrite={false} />
+    <mesh ref={mesh}>
+      <icosahedronGeometry args={[1.25, 0]} />
+      <meshStandardMaterial
+        color={accent}
+        roughness={0.3}
+        metalness={0.16}
+        flatShading
+        emissive={accent}
+        emissiveIntensity={0.12}
+      />
     </mesh>
   );
 }
 
-/** The single saturated object: a faceted core that breathes. */
-function Core() {
-  const ref = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (!ref.current) return;
-    const t = state.clock.elapsedTime;
-    ref.current.rotation.y = t * 0.28;
-    ref.current.rotation.x = t * 0.13;
-    ref.current.scale.setScalar(1 + Math.sin(t * 1.2) * 0.035);
-  });
-
-  return (
-    <mesh ref={ref}>
-      <icosahedronGeometry args={[0.92, 0]} />
-      <meshStandardMaterial color={ACCENT} roughness={0.34} metalness={0.08} flatShading />
-    </mesh>
-  );
-}
-
-interface OrbitProps {
-  radius: number;
-  count: number;
-  tilt: [number, number, number];
-  speed: number;
-  palette: string[];
-  beadScale?: number;
-}
-
-/** A thin ring with beads travelling around it. */
-function Orbit({ radius, count, tilt, speed, palette, beadScale = 1 }: OrbitProps) {
-  const spinner = useRef<THREE.Group>(null);
-
-  const beads = useMemo(
-    () =>
-      Array.from({ length: count }, (_, index) => {
-        const angle = (index / count) * Math.PI * 2;
-        return {
-          key: index,
-          position: [Math.cos(angle) * radius, Math.sin(angle) * radius, 0] as [number, number, number],
-          size: (0.055 + (index % 3) * 0.022) * beadScale,
-          color: palette[index % palette.length]!,
-        };
-      }),
-    [radius, count, palette, beadScale],
-  );
+/** A wireframe shell turning the other way — the "low-poly" cage. */
+function Shell({ accent }: { accent: string }) {
+  const mesh = useRef<THREE.Mesh>(null);
 
   useFrame((_, delta) => {
-    if (spinner.current) spinner.current.rotation.z += delta * speed;
+    const node = mesh.current;
+    if (!node) return;
+    node.rotation.y -= delta * 0.045;
+    node.rotation.z += delta * 0.02;
   });
 
   return (
-    <group rotation={tilt}>
-      <group ref={spinner}>
-        <mesh>
-          <torusGeometry args={[radius, 0.0035, 6, 140]} />
-          <meshBasicMaterial color={LINE} transparent opacity={0.45} />
-        </mesh>
-        {beads.map((bead) => (
-          <mesh key={bead.key} position={bead.position}>
-            <sphereGeometry args={[bead.size, 16, 16]} />
-            <meshStandardMaterial color={bead.color} roughness={0.45} metalness={0.02} />
-          </mesh>
-        ))}
-      </group>
-    </group>
+    <mesh ref={mesh}>
+      <icosahedronGeometry args={[1.9, 0]} />
+      <meshBasicMaterial wireframe color={accent} transparent opacity={0.24} depthWrite={false} />
+    </mesh>
   );
 }
 
 /**
- * Drifts the composition, leans it toward the pointer, and lifts/turns it as the
- * hero scrolls away. Scroll is read into a ref from a passive listener so the
- * render loop never triggers a React render.
+ * The outermost element: a hairline ring the particle dust sits around. It
+ * also anchors the composition's visible extent, so the object reads as
+ * filling its box instead of floating in dead space.
  */
-function Rig({ children, still }: { children: React.ReactNode; still: boolean }) {
-  const ref = useRef<THREE.Group>(null);
-  const scroll = useRef(0);
+function Ring({ accent }: { accent: string }) {
+  const mesh = useRef<THREE.Mesh>(null);
 
-  useEffect(() => {
-    if (still) return;
-    const onScroll = () => {
-      scroll.current = window.scrollY;
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [still]);
-
-  useFrame((state, delta) => {
-    const group = ref.current;
-    if (!group) return;
-
-    const vh = window.innerHeight || 1;
-    const progress = Math.min(1, Math.max(0, scroll.current / vh));
-
-    group.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.13 + progress * 0.9;
-    group.rotation.z = -progress * 0.12;
-
-    const targetY = state.pointer.x * 0.3 + progress * 0.45;
-    const targetX = -state.pointer.y * 0.2 - progress * 0.16;
-    group.rotation.y = THREE.MathUtils.damp(group.rotation.y, targetY, 2.6, delta);
-    group.rotation.x = THREE.MathUtils.damp(group.rotation.x, targetX, 2.6, delta);
+  useFrame((state) => {
+    const node = mesh.current;
+    if (!node) return;
+    node.rotation.x = 0.16 + Math.sin(state.clock.elapsedTime * 0.25) * 0.04;
   });
 
-  // Scaled so the outermost orbit stays inside the frustum at every aspect ratio.
   return (
-    <group ref={ref} scale={0.72}>
-      {children}
+    <mesh ref={mesh}>
+      <torusGeometry args={[2.28, 0.006, 6, 160]} />
+      <meshBasicMaterial color={accent} transparent opacity={0.6} depthWrite={false} />
+    </mesh>
+  );
+}
+
+/**
+ * A drifting field of accent points. Positions are built once into a typed
+ * array (never per frame) and the whole cloud is rotated as a group, so the
+ * render loop allocates nothing.
+ */
+function ParticleField({
+  accent,
+  count = 520,
+  radius = 2.35,
+}: {
+  accent: string;
+  count?: number;
+  radius?: number;
+}) {
+  const group = useRef<THREE.Group>(null);
+
+  const positions = useMemo(() => {
+    const array = new Float32Array(count * 3);
+    for (let i = 0; i < count; i += 1) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = radius * (0.6 + 0.4 * Math.cbrt(Math.random()));
+      array[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      array[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      array[i * 3 + 2] = r * Math.cos(phi);
+    }
+    return array;
+  }, [count, radius]);
+
+  useFrame((_, delta) => {
+    const node = group.current;
+    if (!node) return;
+    node.rotation.y += delta * 0.025;
+    node.rotation.x += delta * 0.01;
+  });
+
+  return (
+    <group ref={group}>
+      <Points positions={positions} stride={3} frustumCulled={false}>
+        <PointMaterial
+          transparent
+          color={accent}
+          size={0.05}
+          sizeAttenuation
+          depthWrite={false}
+          opacity={0.95}
+        />
+      </Points>
     </group>
   );
 }
 
-function Composition({ still }: { still: boolean }) {
+function Composition({ still, accent }: { still: boolean; accent: string }) {
   return (
-    <Rig still={still}>
-      <Shell />
-      <Core />
-      <Orbit radius={3.1} count={7} tilt={[0.42, 0.2, 0]} speed={0.28} palette={[ACCENT, INK, MIST]} />
-      <Orbit radius={3.85} count={5} tilt={[-0.62, -0.35, 0.5]} speed={-0.19} palette={[INK, LINE, ACCENT]} beadScale={0.85} />
-      <Orbit radius={4.5} count={11} tilt={[1.24, 0.5, -0.3]} speed={0.12} palette={[LINE, MIST]} beadScale={0.6} />
-    </Rig>
+    <CursorRig still={still}>
+      <Float speed={1.1} rotationIntensity={0.2} floatIntensity={0.6} floatingRange={[-0.06, 0.06]}>
+        <Core accent={accent} />
+      </Float>
+      <Shell accent={accent} />
+      <Ring accent={accent} />
+      <ParticleField accent={accent} />
+    </CursorRig>
   );
 }
 
-interface HeroSceneProps {
-  still?: boolean;
-  active?: boolean;
-}
-
+/**
+ * The floating, cursor-reactive hero object: a low-poly core inside a
+ * wireframe cage, ringed and dusted with a particle field. Every geometry and
+ * material is created through JSX, so R3F disposes them when the scene
+ * unmounts and the chunk's cost is only ever paid by visitors who see it.
+ */
 export default function HeroScene({ still = false, active = true }: HeroSceneProps) {
+  const accent = useMemo(readAccent, []);
+
   return (
     <Canvas
-      camera={{ position: [0, 0, 10.2], fov: 40 }}
-      dpr={[1, 1.5]}
+      camera={{ position: [0, 0, 6.2], fov: 45 }}
+      dpr={[1, 1.6]}
       flat
       frameloop={still ? 'demand' : active ? 'always' : 'never'}
-      gl={{
-        antialias: true,
-        alpha: true,
-        powerPreference: 'high-performance',
-      }}
+      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       style={{ pointerEvents: 'none' }}
       aria-hidden="true"
     >
-      <fog attach="fog" args={[FOG, 9.5, 16]} />
-      <ambientLight intensity={0.62} />
-      <directionalLight position={[4.5, 6, 6]} intensity={1.5} />
-      <directionalLight position={[-6, -3, -4]} intensity={0.35} color="#c7cffe" />
-      <Composition still={still} />
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[4, 6, 6]} intensity={1.6} />
+      <directionalLight position={[-5, -3, -4]} intensity={0.4} color={accent} />
+      <Composition still={still} accent={accent} />
     </Canvas>
   );
 }

@@ -1,16 +1,153 @@
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════════
-   Design tokens
-   A light, editorial system: near-white surfaces, cool ink text, and
-   one confident indigo accent used sparingly. The rest is type + space.
+   Dark-first theme system
+   ──────────────────────────────────────────────────────────────────
+   DARK is the default. `:root` carries the dark values, so the dark
+   theme applies with no class and with JavaScript disabled. The boot
+   script in `src/app/layout.tsx` (a blocking <script> in <head>, before
+   first paint) swaps `html.light` on when the visitor stored a light
+   choice or their OS asks for one. `.light` overrides every value.
+
+   The `@theme inline` block below maps these raw variables onto
+   Tailwind's utility namespaces, so `bg-background`, `text-foreground`,
+   `border-border`, `text-muted`, `text-accent`, `bg-accent` and
+   `font-display` all resolve to the variables — and therefore follow the
+   theme switch automatically, without re-declaring any utility.
+
+   Contract names other workstreams code against:
+     bg-background  bg-surface  text-foreground  text-muted
+     border-border  text-accent  bg-accent  font-display
+   Do not rename these.
    ══════════════════════════════════════════════════════════════════ */
-@theme {
+
+/* `dark:` utilities key off `.dark` on <html> (class strategy). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Raw variables — DARK (default) ─────────────────────────────── */
+:root {
+  /* Surfaces */
+  --background: #0b0b10;
+  --surface: #14141c;
+  --surface-2: #17171f;
+  --border: rgba(255, 255, 255, 0.08);
+
+  /* Text */
+  --foreground: #f5f5f7;
+  --ink-soft: #c7c7d1;
+  --muted: #9a9aa8;
+  --faint: #8f8f9c;
+
+  /* Accent — the dark accent is exactly #7C5CFF. It clears 4.5:1 on
+     --background (4.52:1) and must not be darkened. */
+  --accent: #7c5cff;
+  --accent-hover: #9279ff;
+  --accent-soft: rgba(124, 92, 255, 0.16);
+  --on-accent: #0b0b10;
+
+  /* Accent ramp — text-safe steps on dark are 300–500; 600–900 are
+     fills (pair them with --on-accent or white). */
+  --accent-50: #f0edff;
+  --accent-100: #e2dbff;
+  --accent-200: #c8bdff;
+  --accent-300: #b09eff;
+  --accent-400: #9c82ff;
+  --accent-500: #7c5cff;
+  --accent-600: #6a46e8;
+  --accent-700: #5837c4;
+  --accent-800: #462c9b;
+  --accent-900: #33206f;
+
+  /* Cyan — GRADIENTS ONLY. Never flat text, never a solid fill.
+     Deliberately exposed as a raw variable (not a `--color-cyan` token)
+     so no `text-cyan` / `bg-cyan` utility can be generated from it. */
+  --cyan: #22d3ee;
+
+  --shadow-card: 0 24px 48px -30px rgb(0 0 0 / 0.62);
+
+  color-scheme: dark;
+}
+
+/* ── Raw variables — LIGHT ──────────────────────────────────────── */
+:root.light {
+  --background: #fafafc;
+  --surface: #ffffff;
+  --surface-2: #f3f3f8;
+  --border: rgba(0, 0, 0, 0.08);
+
+  --foreground: #0b0b10;
+  --ink-soft: #2e2e38;
+  --muted: #565663;
+  --faint: #6b6b76;
+
+  /* The accent is RE-DERIVED for light: #7C5CFF is only 4.17:1 on a
+     near-white page and fails AA as text. #6B45E8 is the same violet
+     family, darkened to 5.53:1 on --background and 5.77:1 on --surface. */
+  --accent: #6b45e8;
+  --accent-hover: #5a34cc;
+  --accent-soft: rgba(107, 69, 232, 0.1);
+  --on-accent: #ffffff;
+
+  --accent-50: #f3f0ff;
+  --accent-100: #e7e1ff;
+  --accent-200: #cfc2ff;
+  --accent-300: #ae99ff;
+  --accent-400: #8b6bff;
+  --accent-500: #6b45e8;
+  --accent-600: #5a34cc;
+  --accent-700: #4a2aa6;
+  --accent-800: #3a2080;
+  --accent-900: #2a1758;
+
+  --shadow-card: 0 20px 40px -30px rgb(16 16 40 / 0.22);
+
+  color-scheme: light;
+}
+
+/* ── Tailwind token map ─────────────────────────────────────────────
+   `static` forces every token below to be emitted, even when no utility
+   happens to reference it yet (Tailwind otherwise tree-shakes unused
+   theme variables, which would silently drop `--space-*` / `--max-width`).
+   `inline` inlines the value into the utility, so the semantic utilities
+   follow the `.light` switch without re-declaring anything. */
+@theme static inline {
+  /* Fonts */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Type scale — rebuilt from a collapsed ramp. Every step is a distinct
-     size; nothing on the page may render below --text-micro. */
+  /* Semantic colour — the contract */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+
+  /* Accent ramp — same names the old utilities already use */
+  --color-accent-50: var(--accent-50);
+  --color-accent-100: var(--accent-100);
+  --color-accent-200: var(--accent-200);
+  --color-accent-300: var(--accent-300);
+  --color-accent-400: var(--accent-400);
+  --color-accent-500: var(--accent-500);
+  --color-accent-600: var(--accent-600);
+  --color-accent-700: var(--accent-700);
+  --color-accent-800: var(--accent-800);
+  --color-accent-900: var(--accent-900);
+
+  /* Legacy aliases kept so untouched components keep resolving */
+  --color-ink: var(--foreground);
+  --color-ink-soft: var(--ink-soft);
+  --color-faint: var(--faint);
+  --color-hairline: var(--border);
+
+  /* Type scale — every step a distinct size.
+     --text-micro (11px) is the HARD FLOOR: nothing may render below it. */
   --text-display: clamp(2.75rem, 8vw, 5rem);
   --leading-display: 0.95;
   --tracking-display: -0.03em;
@@ -22,44 +159,28 @@
   --text-body: 1rem;
   --leading-body: 1.65;
   --text-small: 0.875rem;
-  --text-micro: 0.75rem;
+  --text-micro: 0.6875rem;
 
-  /* Neutrals — the label greys were raised so 11px text clears 4.5:1 */
-  --color-ink: #18181b;
-  --color-ink-soft: #3f3f46;
-  --color-muted: #52525b;
-  /* Faint carries 11-13px labels over the hero wash (#eef1ff at full
-     strength), not just over white. zinc-500 (#71717a) measured 4.30:1
-     against that wash — under the 4.5:1 floor — so it was darkened one
-     step. #6b6b74 measures 4.69:1 there and 5.01:1 on the measured wash. */
-  --color-faint: #6b6b74;
-  --color-hairline: #e4e4e7;
-  --color-surface: #ffffff;
-  --color-surface-2: #fafafa;
+  /* Radius — one language: card 20, large 24, small 16 */
+  --radius: 20px;
+  --radius-lg: 24px;
+  --radius-sm: 16px;
 
-  /* Accent — one hue, no gradients */
-  --color-accent-50: #eef1ff;
-  --color-accent-100: #e0e5ff;
-  --color-accent-200: #c6cffe;
-  --color-accent-300: #a3b0fc;
-  --color-accent-400: #7d8bf7;
-  --color-accent-500: #4f5bd5;
-  --color-accent-600: #3a41c0;
-  --color-accent-700: #2f34a0;
-  --color-accent-800: #282c81;
-  --color-accent-900: #232766;
+  /* 8px spacing scale */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-6: 48px;
+  --space-8: 64px;
+  --space-12: 96px;
+  --space-16: 128px;
 
-  /* Bare accent aliases — point INTO the 50–900 ramp above so every
-     accent utility (bg-accent, text-accent, border-accent) resolves to
-     ONE family. Do not introduce a fourth blue. */
-  --color-accent: #4f5bd5; /* == --color-accent-500 */
-  --color-accent-hover: #3a41c0; /* == --color-accent-600 */
-  --color-accent-soft: #eef1ff; /* == --color-accent-50 */
+  /* Content container */
+  --max-width: 1200px;
+  --container-content: 1200px;
 
-  /* Radius — one language for cards, chips, buttons, inputs and tags */
-  --radius: 12px;
-
-  /* Spacing — section rhythm; raised to 6rem at >=768px below */
+  /* Section rhythm */
   --space-section: 4rem;
 
   /* Motion */
@@ -79,16 +200,21 @@
    ══════════════════════════════════════════════════════════════════ */
 @layer base {
   html {
-    color-scheme: light;
+    background-color: var(--background);
+    color-scheme: dark;
     scroll-behavior: smooth;
     /* Keeps anchored sections clear of the sticky header */
     scroll-padding-top: 5.5rem;
     -webkit-text-size-adjust: 100%;
   }
 
+  html.light {
+    color-scheme: light;
+  }
+
   body {
-    background-color: #ffffff;
-    color: #18181b;
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: var(--font-sans);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -96,13 +222,13 @@
   }
 
   ::selection {
-    background-color: #e0e5ff;
-    color: #232766;
+    background-color: color-mix(in oklab, var(--accent) 34%, transparent);
+    color: var(--foreground);
   }
 
   /* Visible focus for keyboard users only */
   :focus-visible {
-    outline: 2px solid #4f5bd5;
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -113,6 +239,8 @@
   h4,
   h5,
   h6 {
+    /* Space Grotesk — the heading face. Falls back to Inter, then system. */
+    font-family: var(--font-display);
     text-wrap: balance;
   }
 
@@ -130,13 +258,13 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: #d4d4d8;
-    border: 3px solid #ffffff;
+    background-color: color-mix(in oklab, var(--foreground) 18%, transparent);
+    border: 3px solid var(--background);
     border-radius: 999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: #a1a1aa;
+    background-color: color-mix(in oklab, var(--foreground) 30%, transparent);
   }
 
   dialog {
@@ -144,7 +272,7 @@
   }
 
   dialog::backdrop {
-    background-color: rgb(9 9 11 / 0.5);
+    background-color: rgb(5 5 10 / 0.62);
     backdrop-filter: blur(3px);
   }
 }
@@ -153,21 +281,67 @@
    Utilities
    ══════════════════════════════════════════════════════════════════ */
 
-/* Faint blueprint grid, behind the hero and section headers */
-@utility bg-grid {
-  background-image: linear-gradient(to right, rgb(24 24 27 / 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(24 24 27 / 0.045) 1px, transparent 1px);
-  background-size: 60px 60px;
+/* Soft glow behind the hero. Paints on a ::before at inset 0, so it costs
+   no layout and cannot overflow its box. Violet, with cyan permitted ONLY
+   inside the gradient. Place it on a section that is already `relative`. */
+@utility hero-glow {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(
+        48rem 30rem at 78% 4%,
+        color-mix(in oklab, var(--accent) 20%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        34rem 26rem at 10% 96%,
+        color-mix(in oklab, var(--cyan) 12%, transparent),
+        transparent 72%
+      );
+    background-repeat: no-repeat;
+  }
 }
 
-/* Frosted panel for the sticky header and lightboxes */
+/* Frosted panel — 1px hairline, 20px radius, soft shadow, backdrop blur. */
+@utility glass-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: color-mix(in oklab, var(--surface) 72%, transparent);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+/* Frosted surface for the sticky header and lightboxes. */
 @utility glass {
-  background-color: rgb(255 255 255 / 0.76);
+  background-color: color-mix(in oklab, var(--background) 74%, transparent);
   backdrop-filter: saturate(180%) blur(16px);
   -webkit-backdrop-filter: saturate(180%) blur(16px);
 }
 
-/* Horizontal rail that hides its scrollbar */
+/* Faint blueprint grid, behind the hero and section headers. */
+@utility bg-grid {
+  background-image: linear-gradient(
+      to right,
+      color-mix(in oklab, var(--foreground) 5%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--foreground) 5%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 60px 60px;
+}
+
+/* Horizontal rail that hides its scrollbar. */
 @utility no-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -225,11 +399,23 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   Print — a clean fallback for the résumé-facing content
+   Print — a clean, always-light fallback for the résumé-facing content
    ══════════════════════════════════════════════════════════════════ */
 @media print {
   .print-hide {
     display: none !important;
+  }
+
+  :root,
+  :root.light {
+    --background: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #ffffff;
+    --foreground: #000000;
+    --muted: #333333;
+    --faint: #333333;
+    --border: #cccccc;
+    color-scheme: light;
   }
 
   body {

@@ -1,10 +1,63 @@
 'use client';
 
-import { Component, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import {
+  Component,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
 import dynamic from 'next/dynamic';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
-const HeroScene = dynamic(() => import('./HeroScene'), { ssr: false });
+interface HeroSceneProps {
+  still?: boolean;
+  active?: boolean;
+}
+
+/**
+ * Static stand-in shown whenever the 3D scene is not mounted: no WebGL,
+ * reduced motion, save-data, still below the fold, or a failed chunk load.
+ * It fills the same box as the scene, so swapping never shifts layout, and it
+ * reuses existing tokens (hairline / accent-500 / ink) so it reads as
+ * intentional rather than broken.
+ */
+function SceneFallback() {
+  return (
+    <div aria-hidden="true" className="relative h-full w-full">
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(50% 45% at 50% 50%, rgba(79,91,213,0.14) 0%, rgba(79,91,213,0) 70%)',
+        }}
+      />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="aspect-square w-[min(70%,22rem)] rounded-full border border-hairline" />
+        <div className="absolute aspect-square w-[min(50%,16rem)] rotate-45 rounded-[2rem] border border-hairline" />
+        <div className="absolute aspect-square w-[min(25%,8rem)] rounded-3xl bg-accent-500/90" />
+        <div className="absolute left-[9%] top-[44%] h-1.5 w-1.5 rounded-full bg-ink" />
+        <div className="absolute left-[76%] top-[62%] h-1 w-1 rounded-full bg-accent-500" />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The scene chunk is fetched only once the gate below opens. A failed download
+ * (offline, blocked chunk, bad deploy) resolves to the static fallback instead
+ * of throwing into the hero, and `loading` keeps that fallback on screen while
+ * the chunk is in flight, so the box is never empty.
+ */
+const HeroScene = dynamic<HeroSceneProps>(
+  () =>
+    import('./HeroScene').catch(() => ({
+      default: SceneFallback as ComponentType<HeroSceneProps>,
+    })),
+  { ssr: false, loading: () => <SceneFallback /> },
+);
 
 let webglSupport: boolean | null = null;
 
@@ -33,6 +86,32 @@ const webglStore = {
   getServerSnapshot: () => false,
 };
 
+type ConnectionLike = EventTarget & { saveData?: boolean };
+
+function connection(): ConnectionLike | undefined {
+  return (navigator as Navigator & { connection?: ConnectionLike }).connection;
+}
+
+function readSaveData(): boolean {
+  try {
+    return Boolean(connection()?.saveData);
+  } catch {
+    return false;
+  }
+}
+
+/** Save-data is read live; browsers fire "change" if it flips mid-session. */
+const dataSaverStore = {
+  subscribe: (callback: () => void) => {
+    const conn = connection();
+    if (!conn || typeof conn.addEventListener !== 'function') return () => {};
+    conn.addEventListener('change', callback);
+    return () => conn.removeEventListener('change', callback);
+  },
+  getSnapshot: readSaveData,
+  getServerSnapshot: () => false,
+};
+
 /** Keeps a renderer failure from taking the hero down with it. */
 class SceneBoundary extends Component<
   { fallback: ReactNode; children: ReactNode },
@@ -49,55 +128,55 @@ class SceneBoundary extends Component<
   }
 }
 
-/**
- * Static stand-in used when WebGL is unavailable or the scene fails to mount.
- * Shares the composition's visual language so the hero still looks intentional.
- */
-function SceneFallback() {
-  return (
-    <div aria-hidden="true" className="relative h-full w-full">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="h-56 w-56 rounded-full border border-zinc-200 sm:h-72 sm:w-72" />
-        <div className="absolute h-40 w-40 rotate-45 rounded-[2rem] border border-zinc-200 sm:h-52 sm:w-52" />
-        <div className="absolute h-20 w-20 rounded-3xl bg-accent-500/90 sm:h-24 sm:w-24" />
-        <div className="absolute h-1.5 w-1.5 -translate-x-28 rounded-full bg-zinc-900 sm:-translate-x-36" />
-        <div className="absolute h-1 w-1 translate-x-32 translate-y-16 rounded-full bg-accent-500 sm:translate-x-40" />
-      </div>
-    </div>
-  );
-}
-
 interface HeroCanvasProps {
   className?: string;
 }
 
-/** Mounts the 3D hero only on the client, only when WebGL works, and only while visible. */
+/**
+ * Mounts the 3D hero only when it is worth its cost. The scene stays unmounted
+ * — and its ~230 KB chunk stays unfetched — until the wrapper is near the
+ * viewport, and never mounts for reduced-motion, save-data or WebGL-less
+ * visitors, who keep the static composition instead.
+ */
 export function HeroCanvas({ className }: HeroCanvasProps) {
   const reduced = useReducedMotion();
-  const ready = useSyncExternalStore(
+  const dataSaver = useSyncExternalStore(
+    dataSaverStore.subscribe,
+    dataSaverStore.getSnapshot,
+    dataSaverStore.getServerSnapshot,
+  );
+  const webgl = useSyncExternalStore(
     webglStore.subscribe,
     webglStore.getSnapshot,
     webglStore.getServerSnapshot,
   );
 
   const hostRef = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(true);
+  // Starts false: a visitor who never scrolls the band into view must never
+  // pay for the chunk (the phone case, where the band sits below the fold).
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
 
+    // The margin is a lead, not a blanket: it only starts the download just
+    // before the band is reached, and is deliberately smaller than the gap
+    // between the fold and the band on a phone so a visitor who never scrolls
+    // still fetches nothing.
     const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry?.isIntersecting ?? true),
-      { rootMargin: '120px' },
+      ([entry]) => setInView(entry?.isIntersecting ?? false),
+      { rootMargin: '80px' },
     );
     observer.observe(host);
     return () => observer.disconnect();
   }, []);
 
+  const mountScene = webgl && !reduced && !dataSaver && inView;
+
   return (
     <div ref={hostRef} className={className}>
-      {ready ? (
+      {mountScene ? (
         <SceneBoundary fallback={<SceneFallback />}>
           <HeroScene still={reduced} active={inView} />
         </SceneBoundary>

@@ -86,7 +86,19 @@ export function Contact() {
   );
 
   const update = (field: keyof FormValues) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setValues((previous) => ({ ...previous, [field]: event.target.value }));
+    const value = event.target.value;
+    setValues((previous) => ({ ...previous, [field]: value }));
+    // Clear a field's error the moment it is corrected. Leaving
+    // aria-invalid="true" on a field the visitor has already fixed tells a
+    // screen-reader user their input is still wrong.
+    setErrors((previous) => {
+      if (!previous[field]) return previous;
+      if (validate({ ...values, [field]: value })[field]) return previous;
+      const next = { ...previous };
+      delete next[field];
+      return next;
+    });
+    setOpened(false);
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {

@@ -1,134 +1,135 @@
-import { Building2, Download, FileText, GraduationCap } from 'lucide-react';
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { motion, useScroll, useSpring } from 'framer-motion';
 import { Section, SectionHeading } from '@/components/ui/Section';
-import { Reveal, Stagger, StaggerItem } from '@/components/ui/Reveal';
-import { education, experience } from '@/data/resume';
-import { profile } from '@/data/profile';
+import { experience } from '@/data/resume';
 import { formatRange } from '@/lib/format';
+import { resolveVariants, useSlideVariants, viewportOnce } from '@/lib/motion';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { cn } from '@/lib/cn';
 
-/** Shared row: mono date on the right, title and detail on the left. */
-function Entry({
-  title,
-  subtitle,
-  range,
-  note,
-  lines,
-  tech,
-}: {
-  title: string;
-  subtitle: string;
-  range: string;
-  note?: string;
-  lines?: string[];
-  tech?: string[];
-}) {
-  return (
-    <div className="border-t border-hairline pt-6">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
-        <h4 className="text-base font-semibold tracking-tight text-ink">{title}</h4>
-        <time className="shrink-0 font-mono text-[11px] text-faint">{range}</time>
-      </div>
-      <p className="mt-1 text-sm font-medium text-faint">{subtitle}</p>
+/** The 20px glass recipe. `rounded-card` is the contract name; the landed 20px
+ *  token is `--radius` (bare `rounded`), so both are kept so it renders today. */
+const GLASS =
+  'rounded-card rounded border border-border bg-surface/60 backdrop-blur-xl shadow-[var(--shadow-card)]';
 
-      {note ? <p className="mt-3 text-sm leading-relaxed text-muted">{note}</p> : null}
-
-      {lines && lines.length > 0 ? (
-        <ul className="mt-4 space-y-2.5">
-          {lines.map((line) => (
-            <li key={line} className="flex gap-3 text-sm leading-relaxed text-muted">
-              <span
-                aria-hidden="true"
-                className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-zinc-300"
-              />
-              {line}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      {tech && tech.length > 0 ? (
-        <p className="mt-4 font-mono text-[11px] text-faint">{tech.join(' · ')}</p>
-      ) : null}
-    </div>
-  );
+/** Below `lg` the timeline is a single left rail; at `lg` the cards alternate. */
+function useIsStacked() {
+  const [stacked, setStacked] = useState(true);
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 1023px)');
+    const update = () => setStacked(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  return stacked;
 }
 
 export function Experience() {
+  const reduced = useReducedMotion();
+  const { slideLeft, slideRight } = useSlideVariants();
+  const stacked = useIsStacked();
+  const trackRef = useRef<HTMLOListElement>(null);
+
+  // Real scroll progress across the track — this is what draws the rail, not a
+  // timer. Progress is 0 as the track enters, 1 once it is most of the way up.
+  const { scrollYProgress } = useScroll({
+    target: trackRef,
+    offset: ['start 80%', 'end 45%'],
+  });
+
+  // Spring-smoothed. Framer writes this as a `scaleY` transform — never a
+  // height animation — so the draw stays on the compositor.
+  const drawn = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+
   return (
     <Section id="experience">
       <SectionHeading
         index="03"
-        eyebrow="Experience & Education"
-        title="Where I have worked and studied"
-        description="One clinical data role, a degree in progress, and the coursework behind these projects."
+        eyebrow="Experience"
+        title="Where I have worked"
+        description="Clinical data work at a diagnostic center."
       />
 
-      <div className="grid gap-14 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
-        <div>
-          <h3 className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-faint">
-            <Building2 size={13} />
-            Work
-          </h3>
-
-          <Stagger className="mt-6 space-y-8">
-            {experience.map((role) => (
-              <StaggerItem key={role.id}>
-                <Entry
-                  title={role.position}
-                  subtitle={role.company}
-                  range={formatRange(role.range)}
-                  lines={role.description}
-                  tech={role.technologies}
-                />
-              </StaggerItem>
-            ))}
-          </Stagger>
+      {/* overflow-x-clip: the rail and the sliding cards can never add a
+          horizontal scrollbar, however wide the transient transform is. */}
+      <div className="relative overflow-x-clip">
+        {/* The rail — full height, revealed from the top via scaleY. */}
+        <div
+          aria-hidden="true"
+          className="absolute left-4 top-0 h-full w-px -translate-x-1/2 bg-border lg:left-1/2"
+        >
+          <motion.div
+            className="h-full w-full origin-top bg-accent"
+            style={reduced ? { scaleY: 1 } : { scaleY: drawn }}
+          />
         </div>
 
-        <div>
-          <h3 className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-faint">
-            <GraduationCap size={13} />
-            Education
-          </h3>
+        <ol ref={trackRef} className="space-y-12">
+          {experience.map((role, index) => {
+            // Mobile: every card enters from the left. Desktop: alternate.
+            // `resolveVariants` drops the slide (and its offset) under reduced motion.
+            const fromLeft = stacked || index % 2 === 0;
+            const variants = resolveVariants(fromLeft ? slideLeft : slideRight, reduced);
 
-          <Stagger className="mt-6 space-y-8">
-            {education.map((item) => (
-              <StaggerItem key={item.id}>
-                <Entry
-                  title={`${item.degree} in ${item.field}`}
-                  subtitle={item.institution}
-                  range={formatRange(item.range, { month: false })}
-                  note={item.note}
+            return (
+              <li
+                key={role.id}
+                className="relative pl-12 lg:grid lg:grid-cols-2 lg:gap-x-16 lg:pl-0"
+              >
+                {/* Node sitting on the rail. */}
+                <span
+                  aria-hidden="true"
+                  className="absolute left-4 top-1.5 z-10 h-2.5 w-2.5 -translate-x-1/2 rounded-full border border-border bg-accent lg:left-1/2"
                 />
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </div>
+
+                <motion.article
+                  variants={variants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={viewportOnce}
+                  className={cn(
+                    GLASS,
+                    'p-6',
+                    fromLeft ? 'lg:col-start-1 lg:mr-8' : 'lg:col-start-2 lg:ml-8',
+                  )}
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                    <h3 className="font-display text-lg font-semibold tracking-tight text-foreground">
+                      {role.position}
+                    </h3>
+                    <time className="font-mono text-micro text-muted">
+                      {formatRange(role.range)}
+                    </time>
+                  </div>
+
+                  <p className="mt-1 text-sm font-medium text-accent">{role.company}</p>
+
+                  <ul className="mt-4 space-y-2.5">
+                    {role.description.map((line) => (
+                      <li key={line} className="flex gap-3 text-sm leading-relaxed text-muted">
+                        <span
+                          aria-hidden="true"
+                          className="mt-[0.55em] h-1 w-1 shrink-0 rounded-full bg-accent"
+                        />
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {role.technologies.length > 0 ? (
+                    <p className="mt-4 font-mono text-micro text-muted">
+                      {role.technologies.join(' · ')}
+                    </p>
+                  ) : null}
+                </motion.article>
+              </li>
+            );
+          })}
+        </ol>
       </div>
-
-      <Reveal delay={0.1}>
-        <div className="mt-16 flex flex-col gap-5 border-t border-hairline pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-muted">One-page version: the full résumé as a PDF.</p>
-          <div className="flex shrink-0 flex-wrap gap-2">
-            <a
-              href={profile.resumeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
-            >
-              <FileText size={15} />
-              Open résumé
-            </a>
-            <a
-              href={profile.resumeUrl}
-              download="Carlo_Baclao_Resume.pdf"
-              className="inline-flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:text-ink"
-            >
-              <Download size={15} />
-              Download
-            </a>
-          </div>
-        </div>
-      </Reveal>
     </Section>
   );
 }

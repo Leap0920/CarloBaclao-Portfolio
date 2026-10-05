@@ -1,12 +1,58 @@
-import { Section, SectionHeading } from '@/components/ui/Section';
-import { Reveal, Stagger, StaggerItem } from '@/components/ui/Reveal';
-import { focusAreas, values } from '@/data/resume';
-import { profile } from '@/data/profile';
+'use client';
 
-const NARRATIVE =
-  'I started programming in senior high school at the Asian Institute of Computer Studies, then took my Information Technology degree at Quezon City University. Most of what I know came from shipping real deployments, not tutorials.';
+import { motion } from 'framer-motion';
+import { Download } from 'lucide-react';
+import { Section, SectionHeading } from '@/components/ui/Section';
+import { profile } from '@/data/profile';
+import { resolveVariants, useSlideVariants, viewportOnce } from '@/lib/motion';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+
+/**
+ * The 20px glass recipe, composed from the frozen tokens (no bespoke class).
+ * `rounded-card` is the contract name, but no `--radius-card` token landed in
+ * globals.css — the 20px token is `--radius`, surfaced as Tailwind's bare
+ * `rounded`. Both are kept: `rounded-card` records the intent, `rounded` is
+ * what actually renders the 20px today.
+ */
+const GLASS =
+  'rounded-card rounded border border-border bg-surface/60 backdrop-blur-xl shadow-[var(--shadow-card)]';
+
+/**
+ * Portrait for the About section.
+ *
+ * `public/` holds no portrait — only the certification scans and the project
+ * covers — so `src` is `null` and no `<img>` is rendered. An `<img>` pointed
+ * at a missing file would 404, and a grey "photo coming soon" panel is not
+ * this design, so the reserved slot stays empty rather than fake. The slot
+ * itself is always in the flow at a fixed 4:5 ratio, so dropping a portrait at
+ * `public/images/profile/carlo.jpg` and setting `src` fills it with no layout
+ * shift. `alt` is already written for the moment it lands.
+ */
+const PROFILE_PHOTO: { src: string | null; alt: string } = {
+  src: null,
+  alt: 'Portrait of Carlo Baclao, full-stack developer',
+};
+
+/** Years since the first line of code — derived so it never needs a hand edit. */
+const YEARS_CODING = Math.max(1, new Date().getFullYear() - profile.codingSince);
+
+/** Scannable facts, not prose. Values come straight from the profile data. */
+const QUICK_FACTS: ReadonlyArray<{ label: string; value: string }> = [
+  { label: 'Location', value: profile.location },
+  { label: 'Availability', value: profile.availability },
+  { label: 'Experience', value: `${YEARS_CODING}+ years writing code` },
+  { label: 'Languages', value: profile.spokenLanguages.join(' · ') },
+];
 
 export function About() {
+  // `useSlideVariants` supplies the phone-aware travel distance; `resolveVariants`
+  // is what handles reduced motion — it swaps in the resting variant (no offset,
+  // zero duration) so nothing is left sitting 80px to the side.
+  const reduced = useReducedMotion();
+  const { slideLeft, slideRight } = useSlideVariants();
+  const photoVariants = resolveVariants(slideLeft, reduced);
+  const textVariants = resolveVariants(slideRight, reduced);
+
   return (
     <Section id="about" border={false}>
       <SectionHeading
@@ -16,58 +62,65 @@ export function About() {
         description="Full-stack web, native Android, and small deployments on real hardware."
       />
 
-      <div className="grid gap-14 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
-        <Reveal>
-          <p className="text-[15px] leading-relaxed text-muted">{NARRATIVE}</p>
-        </Reveal>
+      <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-16">
+        {/* Portrait — enters from the left. */}
+        <motion.div
+          variants={photoVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          className="lg:col-span-5"
+        >
+          <div
+            className={[
+              'relative mx-auto aspect-[4/5] w-full max-w-sm lg:mx-0',
+              PROFILE_PHOTO.src ? GLASS : '',
+            ]
+              .join(' ')
+              .trim()}
+          >
+            {PROFILE_PHOTO.src ? (
+              <img
+                src={PROFILE_PHOTO.src}
+                alt={PROFILE_PHOTO.alt}
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 h-full w-full rounded-card rounded object-cover"
+              />
+            ) : null}
+          </div>
+        </motion.div>
 
-        <div>
-          <Reveal delay={0.08}>
-            <h3 className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">
-              What I do
-            </h3>
-          </Reveal>
-          <Stagger className="mt-4 divide-y divide-hairline border-y border-hairline">
-            {focusAreas.map((area, index) => (
-              <StaggerItem key={area.title}>
-                <div className="flex gap-4 py-5">
-                  <span className="pt-0.5 font-mono text-[11px] tabular-nums text-accent-500">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <div>
-                    <h4 className="text-sm font-semibold text-ink">{area.title}</h4>
-                    <p className="mt-1 text-sm leading-relaxed text-faint">{area.detail}</p>
-                  </div>
-                </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
+        {/* Bio and quick facts — enter from the right. */}
+        <motion.div
+          variants={textVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          className="lg:col-span-7"
+        >
+          <p className="max-w-prose text-base leading-relaxed text-muted">{profile.intro}</p>
 
-          <Reveal delay={0.1}>
-            <h3 className="mt-12 font-mono text-[11px] uppercase tracking-[0.16em] text-faint">
-              Languages
-            </h3>
-            <p className="mt-4 text-sm text-muted">{profile.spokenLanguages.join(' · ')}</p>
-          </Reveal>
-        </div>
-      </div>
-
-      <div className="mt-16 border-t border-hairline pt-10">
-        <div>
-          <Reveal>
-            <h3 className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">
-              Goals
-            </h3>
-          </Reveal>
-          <dl className="mt-5 space-y-5">
-            {values.map((item, index) => (
-              <Reveal key={item.label} delay={index * 0.05}>
-                <dt className="text-sm font-semibold text-ink">{item.label}</dt>
-                <dd className="mt-1.5 text-sm leading-relaxed text-muted">{item.detail}</dd>
-              </Reveal>
+          <dl className="mt-10 grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2">
+            {QUICK_FACTS.map((fact) => (
+              <div key={fact.label}>
+                <dt className="font-mono text-micro uppercase tracking-[0.16em] text-muted">
+                  {fact.label}
+                </dt>
+                <dd className="mt-1.5 text-sm font-medium text-foreground">{fact.value}</dd>
+              </div>
             ))}
           </dl>
-        </div>
+
+          <a
+            href={profile.resumeUrl}
+            download="Carlo_Baclao_Resume.pdf"
+            className="mt-10 inline-flex min-h-11 items-center gap-2 rounded-card rounded bg-accent px-5 text-sm font-semibold text-on-accent transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+          >
+            <Download size={16} aria-hidden="true" />
+            Download CV
+          </a>
+        </motion.div>
       </div>
     </Section>
   );

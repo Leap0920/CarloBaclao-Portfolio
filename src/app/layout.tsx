@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import { profile, siteUrl } from '@/data/profile';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { THEME_SCRIPT } from '@/lib/theme';
 import './globals.css';
 
@@ -128,9 +127,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               leaving the scrollport (and therefore sticky) untouched. */}
           <div className="overflow-x-clip">
             {children}
-          </div>
-          <div className="fixed bottom-5 left-5 z-40 print-hide">
-            <ThemeToggle />
           </div>
         </ThemeProvider>
         <script

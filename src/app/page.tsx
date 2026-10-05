@@ -1,27 +1,25 @@
 import { BackToTop } from '@/components/layout/BackToTop';
+import { ScrollProgress } from '@/components/layout/ScrollProgress';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { About } from '@/components/sections/About';
-import { Activity } from '@/components/sections/Activity';
-import { Certifications } from '@/components/sections/Certifications';
 import { Contact } from '@/components/sections/Contact';
+import { Education } from '@/components/sections/Education';
 import { Experience } from '@/components/sections/Experience';
 import { Hero } from '@/components/sections/Hero';
-import { Skills } from '@/components/sections/Skills';
-import { Work } from '@/components/sections/Work';
+import { Projects } from '@/components/sections/Projects';
 
 export default function Home() {
   return (
     <>
+      <ScrollProgress />
       <SiteHeader />
       <main>
         <Hero />
         <About />
-        <Skills />
+        <Projects />
         <Experience />
-        <Work />
-        <Certifications />
-        <Activity />
+        <Education />
         <Contact />
       </main>
       <SiteFooter />

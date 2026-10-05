@@ -1,33 +1,46 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { navSections } from '@/data/navigation';
 import { profile } from '@/data/profile';
 import { useMountTransition } from '@/hooks/useMountTransition';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useScrollSpy, useScrolled } from '@/hooks/useScrollSpy';
 import { cn } from '@/lib/cn';
-import { ScrollProgress } from './ScrollProgress';
+import { EASE } from '@/lib/motion';
 
-/** Keep in step with the `duration-300` on the drawer. */
+/** Keep in step with the drawer's CSS transition. */
 const DRAWER_MS = 300;
 
 export function SiteHeader() {
   const active = useScrollSpy();
-  const scrolled = useScrolled(10);
+  const scrolled = useScrolled(8);
+  const reduced = useReducedMotion();
   const [menuOpen, setMenuOpen] = useState(false);
   const { mounted: drawerMounted, visible: drawerVisible } = useMountTransition(menuOpen, DRAWER_MS);
 
-  // Close the drawer on Escape, and whenever the layout grows to desktop.
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const firstLinkRef = useRef<HTMLAnchorElement>(null);
+
+  const closeMenu = useCallback((refocus = false) => {
+    setMenuOpen(false);
+    if (refocus) window.requestAnimationFrame(() => toggleRef.current?.focus());
+  }, []);
+
+  // Escape closes the drawer; growing to the desktop breakpoint closes it too.
   useEffect(() => {
     if (!menuOpen) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMenuOpen(false);
+      if (event.key === 'Escape') closeMenu(true);
     };
     const desktop = window.matchMedia('(min-width: 1024px)');
-    const onBreakpoint = () => desktop.matches && setMenuOpen(false);
+    const onBreakpoint = () => {
+      if (desktop.matches) setMenuOpen(false);
+    };
 
     window.addEventListener('keydown', onKeyDown);
     desktop.addEventListener('change', onBreakpoint);
@@ -35,44 +48,46 @@ export function SiteHeader() {
       window.removeEventListener('keydown', onKeyDown);
       desktop.removeEventListener('change', onBreakpoint);
     };
-  }, [menuOpen]);
+  }, [menuOpen, closeMenu]);
 
-  // Stop the page scrolling behind the mobile drawer.
+  // Land keyboard focus in the panel when it opens.
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [menuOpen]);
+    if (!drawerVisible) return;
+    const timer = window.setTimeout(() => firstLinkRef.current?.focus({ preventScroll: true }), 60);
+    return () => window.clearTimeout(timer);
+  }, [drawerVisible]);
 
   return (
-    <header
+    <motion.header
+      // Opacity stays at 1 so the nav is never stuck invisible before (or
+      // without) hydration; only a restrained 10px settle is animated.
+      initial={{ opacity: 1, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={reduced ? { duration: 0 } : { duration: 0.6, ease: EASE }}
       className={cn(
-        'fixed inset-x-0 top-0 z-50 transition-colors duration-300 print-hide',
-        scrolled ? 'glass border-b border-hairline/80' : 'border-b border-transparent',
+        'fixed inset-x-0 top-0 z-50 print-hide',
+        'backdrop-blur-xl transition-[background-color,border-color] duration-300',
+        scrolled
+          ? 'border-b border-border bg-background/70'
+          : 'border-b border-transparent bg-background/30',
       )}
     >
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-6 px-5 sm:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between gap-4 px-5 sm:px-8">
         <a
-          href="#top"
-          className="group flex items-center gap-3 rounded-md"
+          href="#home"
           aria-label={`${profile.name} — back to top`}
+          className="group flex shrink-0 items-center gap-2.5 rounded-lg"
         >
-          <span className="grid h-10 w-10 lg:h-9 lg:w-9 place-items-center rounded-lg bg-zinc-900 font-mono text-[13px] font-medium text-white transition-colors group-hover:bg-accent-600">
+          <span className="grid h-9 w-9 place-items-center rounded-card border border-border bg-surface font-mono text-xs font-semibold tracking-tight text-foreground transition-colors group-hover:border-accent/40">
             CB
           </span>
-          <span className="hidden leading-tight sm:block">
-            <span className="block text-sm font-semibold tracking-tight text-ink">
-              {profile.name}
-            </span>
-            <span className="block font-mono text-[11px] uppercase tracking-[0.14em] text-faint">
-              {profile.role}
-            </span>
+          <span className="hidden font-display text-sm font-semibold tracking-tight text-foreground sm:block">
+            {profile.name}
           </span>
         </a>
 
-        <nav aria-label="Sections" className="hidden lg:block">
-          <ul className="flex items-center gap-0 xl:gap-0.5">
+        <nav aria-label="Primary" className="hidden lg:block">
+          <ul className="flex items-center gap-0.5">
             {navSections.map((section) => {
               const isActive = active === section.id;
               return (
@@ -81,18 +96,21 @@ export function SiteHeader() {
                     href={`#${section.id}`}
                     aria-current={isActive ? 'true' : undefined}
                     className={cn(
-                      'relative block rounded-full px-2.5 py-1.5 text-[13px] transition-colors',
-                      isActive ? 'text-ink' : 'text-faint hover:text-ink',
+                      'relative flex h-9 items-center rounded-full px-3 text-sm transition-colors',
+                      isActive ? 'text-foreground' : 'text-muted hover:text-foreground',
                     )}
                   >
                     {isActive ? (
                       <motion.span
-                        layoutId="nav-pill"
-                        className="absolute inset-0 rounded-full bg-zinc-100"
-                        transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                        layoutId="nav-active"
+                        aria-hidden="true"
+                        className="absolute inset-0 rounded-full bg-accent/10 ring-1 ring-accent/25"
+                        transition={
+                          reduced ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 32 }
+                        }
                       />
                     ) : null}
-                    <span className="relative">{section.label}</span>
+                    <span className="relative z-10">{section.label}</span>
                   </a>
                 </li>
               );
@@ -100,53 +118,52 @@ export function SiteHeader() {
           </ul>
         </nav>
 
-        <div className="flex items-center gap-2">
-          <a
-            href={`mailto:${profile.email}`}
-            className="hidden items-center gap-1.5 rounded-lg bg-zinc-900 px-3.5 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-600 md:inline-flex"
-          >
-            Get in touch
-            <ArrowUpRight size={14} />
-          </a>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <ThemeToggle />
 
           <button
+            ref={toggleRef}
             type="button"
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() => (menuOpen ? closeMenu(true) : setMenuOpen(true))}
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            className="grid h-10 w-10 lg:h-9 lg:w-9 place-items-center rounded-lg border border-hairline text-ink-soft transition-colors hover:bg-zinc-50 lg:hidden"
+            className="grid h-11 w-11 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/40 lg:hidden"
           >
-            {menuOpen ? <X size={17} /> : <Menu size={17} />}
+            {menuOpen ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}
           </button>
         </div>
       </div>
-
-      <ScrollProgress />
 
       {drawerMounted ? (
         <div
           id="mobile-nav"
           className={cn(
-            'grid overflow-hidden border-t bg-white transition-[grid-template-rows,opacity] duration-300 ease-out-expo lg:hidden',
+            'grid overflow-hidden border-b bg-background/90 backdrop-blur-xl lg:hidden',
+            reduced
+              ? 'transition-none'
+              : 'transition-[grid-template-rows,opacity,border-color] duration-300 ease-out',
             drawerVisible
-              ? 'grid-rows-[1fr] border-hairline/80 opacity-100'
+              ? 'grid-rows-[1fr] border-border opacity-100'
               : 'grid-rows-[0fr] border-transparent opacity-0',
           )}
+          inert={!drawerVisible}
         >
           <div className="min-h-0 overflow-hidden">
-            <nav aria-label="Sections" className="mx-auto w-full max-w-6xl px-5 py-4 sm:px-8">
-              <ul className="grid grid-cols-2 gap-1">
-                {navSections.map((section) => (
+            <nav aria-label="Mobile" className="mx-auto w-full max-w-[1200px] px-5 pb-5 pt-3 sm:px-8">
+              <ul className="flex flex-col">
+                {navSections.map((section, index) => (
                   <li key={section.id}>
                     <a
+                      ref={index === 0 ? firstLinkRef : undefined}
                       href={`#${section.id}`}
-                      onClick={() => setMenuOpen(false)}
+                      onClick={() => closeMenu(false)}
+                      aria-current={active === section.id ? 'true' : undefined}
                       className={cn(
-                        'block rounded-lg px-3 py-2.5 text-sm transition-colors',
+                        'flex h-11 items-center rounded-lg px-3 text-[15px] transition-colors',
                         active === section.id
-                          ? 'bg-zinc-100 font-medium text-ink'
-                          : 'text-muted hover:bg-zinc-50 hover:text-ink',
+                          ? 'bg-accent/10 text-foreground'
+                          : 'text-muted hover:bg-surface/60 hover:text-foreground',
                       )}
                     >
                       {section.label}
@@ -154,20 +171,10 @@ export function SiteHeader() {
                   </li>
                 ))}
               </ul>
-
-              <div className="mt-4 border-t border-zinc-100 pt-4">
-                <a
-                  href={`mailto:${profile.email}`}
-                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white"
-                >
-                  Get in touch
-                  <ArrowUpRight size={14} />
-                </a>
-              </div>
             </nav>
           </div>
         </div>
       ) : null}
-    </header>
+    </motion.header>
   );
 }

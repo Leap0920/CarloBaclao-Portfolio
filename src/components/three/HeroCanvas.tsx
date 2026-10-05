@@ -160,13 +160,16 @@ export function HeroCanvas({ className }: HeroCanvasProps) {
     const host = hostRef.current;
     if (!host) return;
 
-    // The margin is a lead, not a blanket: it only starts the download just
-    // before the band is reached, and is deliberately smaller than the gap
-    // between the fold and the band on a phone so a visitor who never scrolls
-    // still fetches nothing.
+    // Require the band to be MEANINGFULLY on screen, not merely peeking past
+    // the fold. Shrinking the observer root's bottom edge by a percentage of
+    // the viewport means the gate only opens once the band has risen well into
+    // view: on a tall phone, where the band's top rests just below the fold,
+    // the static composition stays put and the chunk is never fetched. The
+    // margin is viewport-relative (not a pixel offset tied to the band's
+    // current position) so it survives the hero layout moving underneath it.
     const observer = new IntersectionObserver(
       ([entry]) => setInView(entry?.isIntersecting ?? false),
-      { rootMargin: '80px' },
+      { rootMargin: '0px 0px -20% 0px' },
     );
     observer.observe(host);
     return () => observer.disconnect();

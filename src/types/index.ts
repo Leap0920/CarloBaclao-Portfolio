@@ -4,6 +4,8 @@ export type IconName =
   | 'github'
   | 'linkedin'
   | 'instagram'
+  | 'facebook'
+  | 'x'
   | 'tiktok'
   | 'mail'
   | 'globe'
@@ -105,8 +107,11 @@ export interface Project {
   description: string;
   tech: string[];
   image: string;
+  /** The live, deployed URL. */
   url: string;
   urlLabel: string;
+  /** Optional public repository, rendered as a separate "GitHub" link. */
+  repo?: string;
   year: string;
   /** Rendered larger, in the featured band at the top of the section. */
   featured?: boolean;

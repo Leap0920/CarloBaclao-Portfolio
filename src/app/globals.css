@@ -9,6 +9,21 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
+  /* Type scale — rebuilt from a collapsed ramp. Every step is a distinct
+     size; nothing on the page may render below --text-micro. */
+  --text-display: clamp(2.75rem, 8vw, 5rem);
+  --leading-display: 0.95;
+  --tracking-display: -0.03em;
+  --text-title: clamp(1.625rem, 3vw, 2.25rem);
+  --leading-title: 1.1;
+  --tracking-title: -0.02em;
+  --text-lead: 1.125rem;
+  --leading-lead: 1.5;
+  --text-body: 1rem;
+  --leading-body: 1.65;
+  --text-small: 0.875rem;
+  --text-micro: 0.75rem;
+
   /* Neutrals — the label greys were raised so 11px text clears 4.5:1 */
   --color-ink: #18181b;
   --color-ink-soft: #3f3f46;
@@ -34,9 +49,29 @@
   --color-accent-800: #282c81;
   --color-accent-900: #232766;
 
+  /* Bare accent aliases — point INTO the 50–900 ramp above so every
+     accent utility (bg-accent, text-accent, border-accent) resolves to
+     ONE family. Do not introduce a fourth blue. */
+  --color-accent: #4f5bd5; /* == --color-accent-500 */
+  --color-accent-hover: #3a41c0; /* == --color-accent-600 */
+  --color-accent-soft: #eef1ff; /* == --color-accent-50 */
+
+  /* Radius — one language for cards, chips, buttons, inputs and tags */
+  --radius: 12px;
+
+  /* Spacing — section rhythm; raised to 6rem at >=768px below */
+  --space-section: 4rem;
+
   /* Motion */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Section rhythm: mobile-first 4rem, 6rem from the desktop breakpoint up */
+@media (min-width: 768px) {
+  :root {
+    --space-section: 6rem;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════

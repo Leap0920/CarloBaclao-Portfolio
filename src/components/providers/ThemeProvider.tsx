@@ -8,8 +8,9 @@
  *
  *     const { theme, setTheme, resolvedTheme } = useTheme();
  *
- * `next-themes` is not installed in this tree, so the equivalent is
- * implemented here. The part that actually prevents a flash of the wrong
+ * `next-themes` is installed but deliberately not adopted — this tree keeps its
+ * own provider — so the equivalent is implemented here. The part that actually
+ * prevents a flash of the wrong
  * theme is NOT this component — it is `THEME_SCRIPT`, the blocking inline
  * script injected into `<head>` by `src/app/layout.tsx`. This provider
  * only keeps React state in sync with what that script already did, and

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, ExternalLink, X as CloseIcon } from 'lucide-react';
+import { ChevronDown, ChevronUp, ExternalLink, X as CloseIcon } from 'lucide-react';
 import { BrandIcon } from '@/components/BrandIcons';
 import { Section, SectionHeading } from '@/components/ui/Section';
 import { TiltCard } from '@/components/ui/TiltCard';
@@ -480,8 +480,8 @@ export function Projects() {
     const el = trackRef.current;
     if (!el) return;
     setEdge({
-      start: el.scrollLeft <= 2,
-      end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2,
+      start: el.scrollTop <= 2,
+      end: el.scrollTop + el.clientHeight >= el.scrollHeight - 2,
     });
   }, []);
 
@@ -503,8 +503,8 @@ export function Projects() {
       const el = trackRef.current;
       if (!el) return;
       const card = el.querySelector('li');
-      const distance = card ? card.getBoundingClientRect().width + 20 : el.clientWidth * 0.8;
-      el.scrollBy({ left: direction * distance, behavior: reduced ? 'auto' : 'smooth' });
+      const distance = card ? card.getBoundingClientRect().height + 20 : el.clientHeight * 0.8;
+      el.scrollBy({ top: direction * distance, behavior: reduced ? 'auto' : 'smooth' });
     },
     [reduced],
   );
@@ -514,7 +514,7 @@ export function Projects() {
       <SectionHeading
         index="01"
         eyebrow="Projects"
-        title="Projects I shipped to real users"
+        title="Things I built that people use"
         action={
           <a
             href={profile.github}
@@ -600,66 +600,71 @@ export function Projects() {
             whileInView="visible"
             viewport={viewportOnce}
             transition={reduced ? { duration: 0 } : { duration: 0.4, ease: EASE }}
-            className="flex min-w-0 flex-col lg:h-full"
+            className="min-w-0 lg:relative lg:h-full"
           >
-            <div className="flex items-center justify-between gap-4">
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-                {carousel.length > 0 ? `More projects · ${carousel.length}` : 'More projects'}
-              </p>
-              {carousel.length > 0 ? (
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => step(-1)}
-                    disabled={edge.start}
-                    aria-label="Previous projects"
-                    className="grid h-10 w-10 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-40 disabled:hover:border-border disabled:hover:text-foreground"
-                  >
-                    <ChevronLeft size={18} aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => step(1)}
-                    disabled={edge.end}
-                    aria-label="Next projects"
-                    className="grid h-10 w-10 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-40 disabled:hover:border-border disabled:hover:text-foreground"
-                  >
-                    <ChevronRight size={18} aria-hidden="true" />
-                  </button>
-                </div>
-              ) : null}
-            </div>
+            {/* Absolutely positioned from `lg` up, so this column takes its
+                height from the featured card beside it. Seven stacked cards
+                measure ~3500px tall; left in flow they would stretch the grid
+                row to match instead of scrolling inside it. Below `lg` the
+                column is in flow and the page itself does the scrolling, which
+                keeps touch users out of a nested scroller. */}
+            <div className="flex flex-col lg:absolute lg:inset-0">
+              <div className="flex items-center justify-between gap-4">
+                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+                  {carousel.length > 0 ? `More projects · ${carousel.length}` : 'More projects'}
+                </p>
+                {carousel.length > 0 ? (
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => step(-1)}
+                      disabled={edge.start}
+                      aria-label="Previous projects"
+                      className="grid h-10 w-10 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-40 disabled:hover:border-border disabled:hover:text-foreground"
+                    >
+                      <ChevronUp size={18} aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => step(1)}
+                      disabled={edge.end}
+                      aria-label="Next projects"
+                      className="grid h-10 w-10 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-40 disabled:hover:border-border disabled:hover:text-foreground"
+                    >
+                      <ChevronDown size={18} aria-hidden="true" />
+                    </button>
+                  </div>
+                ) : null}
+              </div>
 
-            {carousel.length > 0 ? (
-              <ul
-                ref={trackRef}
-                aria-label="More projects"
-                className="no-scrollbar mt-4 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 lg:min-h-0 lg:flex-1"
-              >
-                {carousel.map((project) => (
-                  <li
-                    key={project.slug}
-                    className="h-full w-[85%] shrink-0 snap-start sm:w-[62%] lg:w-[86%]"
-                  >
-                    <ProjectCard
-                      project={project}
-                      onOpen={() => open(project.slug)}
-                      setTrigger={(el) => {
-                        if (el) triggers.current.set(project.slug, el);
-                        else triggers.current.delete(project.slug);
-                      }}
-                    />
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p
-                role="status"
-                className="mt-4 rounded-card border border-border bg-surface p-6 text-sm text-muted"
-              >
-                No other {filter} projects — try another category.
-              </p>
-            )}
+              {carousel.length > 0 ? (
+                <ul
+                  ref={trackRef}
+                  aria-label="More projects"
+                  className="no-scrollbar mt-4 flex flex-col gap-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto"
+                >
+                  {carousel.map((project) => (
+                    <li key={project.slug} className="w-full">
+                      <ProjectCard
+                        project={project}
+                        onOpen={() => open(project.slug)}
+                        setTrigger={(el) => {
+                          if (el) triggers.current.set(project.slug, el);
+                          else triggers.current.delete(project.slug);
+                        }}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p
+                  role="status"
+                  className="mt-4 rounded-card border border-border bg-surface p-6 text-sm text-muted"
+                >
+                  No other {filter} projects — try another category.
+                </p>
+              )}
+            </div>
           </motion.div>
         </div>
       ) : (

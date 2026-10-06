@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
 import { Award, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { certifications, certIssuers } from '@/data/resume';
 import { useMountTransition } from '@/hooks/useMountTransition';
@@ -16,7 +15,6 @@ const LIGHTBOX_EXIT_MS = 200;
 export function CertificationGallery() {
   const [issuer, setIssuer] = useState<string>(ALL);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [showAll, setShowAll] = useState(false);
   // Which certificate the lightbox draws. Deliberately not cleared on close, so
   // the certificate stays on screen for the fade-out.
   const [shownIndex, setShownIndex] = useState<number | null>(null);
@@ -26,12 +24,6 @@ export function CertificationGallery() {
     () => (issuer === ALL ? certifications : certifications.filter((c) => c.issuer === issuer)),
     [issuer],
   );
-
-  // On the default view only the first eight tiles render; a filter or "Show
-  // all" reveals the rest. `visible` is a subset of `filtered`, so indices into
-  // the lightbox must still be resolved against the full `filtered` array.
-  const visible = issuer === ALL && !showAll ? filtered.slice(0, 8) : filtered;
-  const hasMore = issuer === ALL && filtered.length > 8;
 
   const current = shownIndex === null ? null : (filtered[shownIndex] ?? null);
 
@@ -96,7 +88,6 @@ export function CertificationGallery() {
               type="button"
               onClick={() => {
                 setIssuer(name);
-                setShowAll(false);
                 setLightboxOpen(false);
               }}
               aria-pressed={isActive}
@@ -120,49 +111,28 @@ export function CertificationGallery() {
         })}
       </div>
 
-      {/* Grid */}
-      <ul className="mt-10 grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-3 lg:grid-cols-4">
-        {visible.map((cert) => (
+      {/* Names, not thumbnails. The certificate itself is one press away in the
+          lightbox, so the section stays a scannable list and the page does not
+          pay for twenty-three certificate images it may never show. */}
+      <ul className="mt-8 grid gap-x-10 gap-y-0.5 sm:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((cert) => (
           <li key={cert.id}>
-            <motion.button
+            <button
               type="button"
-              layout
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               onClick={() => open(filtered.indexOf(cert))}
-              aria-label={`View certificate: ${cert.name}`}
-              className="group block w-full text-left"
+              aria-label={`View the ${cert.name} certificate`}
+              className="group flex w-full items-baseline justify-between gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-surface-2"
             >
-              <span className="relative block aspect-[4/3] w-full overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-300 group-hover:border-accent/40">
-                <Image
-                  src={cert.image}
-                  alt={`${cert.name} certificate from ${cert.issuer}`}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-contain p-2 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                />
-              </span>
-              <span className="mt-3 block line-clamp-2 text-[13px] font-medium leading-snug text-ink">
+              <span className="text-sm font-medium leading-snug text-foreground transition-colors group-hover:text-accent">
                 {cert.name}
               </span>
-              <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.1em] text-faint">
+              <span className="shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] text-faint">
                 {cert.issuer}
               </span>
-            </motion.button>
+            </button>
           </li>
         ))}
       </ul>
-
-      {hasMore ? (
-        <div className="mt-10 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setShowAll((value) => !value)}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:border-accent/40 hover:bg-surface-2 sm:w-auto"
-          >
-            {showAll ? 'Show fewer' : `Show all ${filtered.length} certificates`}
-          </button>
-        </div>
-      ) : null}
 
       {filtered.length === 0 ? (
         <p className="mt-8 flex items-center gap-2 text-sm text-faint">

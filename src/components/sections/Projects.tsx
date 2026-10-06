@@ -371,7 +371,7 @@ export function Projects() {
   return (
     <Section id="projects">
       <SectionHeading
-        index="04"
+        index="01"
         eyebrow="Projects"
         title="Projects I shipped to real users"
         action={

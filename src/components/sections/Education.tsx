@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Section, SectionHeading } from '@/components/ui/Section';
-import { certifications, education } from '@/data/resume';
+import { education } from '@/data/resume';
 import { formatRange } from '@/lib/format';
 import { resolveVariants, useSlideVariants, viewportOnce } from '@/lib/motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -61,24 +61,6 @@ export function Education() {
         })}
       </div>
 
-      {/* Certifications — folded in as a subordinate list rather than dropped.
-          The brief gives certificates no section of their own, but they are
-          real earned credentials, so the names and issuers live here, quietly
-          beneath the schools. Name + issuer only: no second gallery. */}
-      <div className="mt-14 border-t border-border pt-8">
-        <h3 className="font-mono text-micro uppercase tracking-[0.16em] text-muted">
-          Certifications
-        </h3>
-
-        <ul className="mt-5 grid gap-x-10 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          {certifications.map((cert) => (
-            <li key={cert.id} className="text-sm leading-snug text-muted">
-              <span className="text-foreground">{cert.name}</span>
-              <span className="ml-2 font-mono text-micro text-muted">— {cert.issuer}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
     </Section>
   );
 }

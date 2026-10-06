@@ -82,7 +82,7 @@ export function CertificationGallery() {
   return (
     <div>
       {/* Filters */}
-      <div className="no-scrollbar -mx-5 flex gap-6 overflow-x-auto border-b border-hairline px-5 sm:mx-0 sm:flex-wrap sm:px-0">
+      <div className="no-scrollbar -mx-5 flex gap-6 overflow-x-auto border-b border-border px-5 sm:mx-0 sm:flex-wrap sm:px-0">
         {filters.map((name) => {
           const count =
             name === ALL
@@ -112,7 +112,7 @@ export function CertificationGallery() {
               {isActive ? (
                 <span
                   aria-hidden="true"
-                  className="absolute inset-x-0 -bottom-px h-[1.5px] bg-zinc-900"
+                  className="absolute inset-x-0 -bottom-px h-[1.5px] bg-accent"
                 />
               ) : null}
             </button>
@@ -132,7 +132,7 @@ export function CertificationGallery() {
               aria-label={`View certificate: ${cert.name}`}
               className="group block w-full text-left"
             >
-              <span className="relative block aspect-[4/3] w-full overflow-hidden rounded-lg border border-hairline bg-white transition-colors duration-300 group-hover:border-zinc-300">
+              <span className="relative block aspect-[4/3] w-full overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-300 group-hover:border-accent/40">
                 <Image
                   src={cert.image}
                   alt={`${cert.name} certificate from ${cert.issuer}`}
@@ -157,7 +157,7 @@ export function CertificationGallery() {
           <button
             type="button"
             onClick={() => setShowAll((value) => !value)}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-hairline px-4 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:border-zinc-300 hover:bg-surface-2 sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:border-accent/40 hover:bg-surface-2 sm:w-auto"
           >
             {showAll ? 'Show fewer' : `Show all ${filtered.length} certificates`}
           </button>
@@ -176,7 +176,7 @@ export function CertificationGallery() {
         <div
           onClick={close}
           className={cn(
-            'fixed inset-0 z-[70] flex items-center justify-center bg-zinc-950/70 p-4 backdrop-blur-sm transition-opacity duration-200 sm:p-8',
+            'fixed inset-0 z-[70] flex items-center justify-center bg-background/85 p-4 transition-opacity duration-200 sm:p-8',
             lightboxVisible ? 'opacity-100' : 'opacity-0',
           )}
         >
@@ -188,13 +188,13 @@ export function CertificationGallery() {
             tabIndex={-1}
             onClick={(event) => event.stopPropagation()}
             className={cn(
-              'relative flex max-h-full w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-hairline bg-white shadow-2xl outline-none transition duration-200 ease-out',
+              'relative flex max-h-full w-full max-w-4xl flex-col overflow-hidden rounded-card rounded border border-border bg-surface shadow-[var(--shadow-card)] outline-none transition duration-200 ease-out',
               lightboxVisible
                 ? 'translate-y-0 scale-100 opacity-100'
                 : 'translate-y-2 scale-[0.98] opacity-0',
             )}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-hairline px-5 py-4">
+            <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
               <div className="min-w-0">
                 <h3 className="truncate text-sm font-semibold tracking-tight text-ink">
                   {current.name}
@@ -207,7 +207,7 @@ export function CertificationGallery() {
                 type="button"
                 onClick={close}
                 aria-label="Close"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-hairline text-muted transition-colors hover:bg-surface-2 hover:text-ink"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border text-muted transition-colors hover:bg-surface-2 hover:text-ink"
               >
                 <X size={15} />
               </button>
@@ -226,7 +226,7 @@ export function CertificationGallery() {
             </div>
   
             {filtered.length > 1 ? (
-              <div className="flex items-center justify-between border-t border-hairline px-5 py-3">
+              <div className="flex items-center justify-between border-t border-border px-5 py-3">
                 <button
                   type="button"
                   onClick={() => step(-1)}

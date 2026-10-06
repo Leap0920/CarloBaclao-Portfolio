@@ -36,6 +36,7 @@ import {
   Wind,
 } from 'lucide-react';
 import { BrandIcon } from '@/components/BrandIcons';
+import { Section, SectionHeading } from '@/components/ui/Section';
 import { skills } from '@/data/resume';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { cn } from '@/lib/cn';
@@ -121,14 +122,17 @@ export function TechStack() {
   const reduced = useReducedMotion();
 
   return (
-    <div id="tech-stack" className="mt-16 sm:mt-20 lg:mt-24">
+    <Section id="techstack">
+      <SectionHeading
+        index="02"
+        eyebrow="Tech Stack"
+        title="The tools I actually reach for"
+        description="Grouped into the interfaces, the APIs and data behind them, the toolchain, and the design layer."
+      />
+
       <style>{'@keyframes tech-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}'}</style>
 
-      <h2 className="font-mono text-[11px] font-normal uppercase tracking-[0.16em] text-muted">
-        Tech stack
-      </h2>
-
-      <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
         {skills.map((group) => (
           <motion.div
             key={group.category}
@@ -178,6 +182,6 @@ export function TechStack() {
           </motion.div>
         ))}
       </div>
-    </div>
+    </Section>
   );
 }

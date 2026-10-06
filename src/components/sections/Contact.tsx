@@ -128,7 +128,7 @@ export function Contact() {
   return (
     <Section id="contact">
       <SectionHeading
-        index="07"
+        index="06"
         eyebrow="Contact"
         title={profile.availability}
         description="Email is the fastest route. The form opens your own mail app with the message ready to send — nothing is stored on a server."

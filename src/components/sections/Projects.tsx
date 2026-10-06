@@ -418,7 +418,7 @@ export function Projects() {
                 aria-hidden="true"
                 className={cn(
                   'font-mono text-[11px] tabular-nums',
-                  selected ? 'text-on-accent/80' : 'text-muted',
+                  selected ? 'text-on-accent' : 'text-muted',
                 )}
               >
                 {count}

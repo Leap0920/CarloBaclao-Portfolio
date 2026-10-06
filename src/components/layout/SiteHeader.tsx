@@ -78,7 +78,9 @@ export function SiteHeader() {
           aria-label={`${profile.name} — back to top`}
           className="group flex shrink-0 items-center gap-2.5 rounded-lg"
         >
-          <span className="grid h-9 w-9 place-items-center rounded-card border border-border bg-surface font-mono text-xs font-semibold tracking-tight text-foreground transition-colors group-hover:border-accent/40">
+          {/* `rounded-card` is the contract name but no `--radius-card` token
+              landed in globals.css; `rounded` is the one that renders (20px). */}
+          <span className="grid h-9 w-9 place-items-center rounded-card rounded border border-border bg-surface font-mono text-xs font-semibold tracking-tight text-foreground transition-colors group-hover:border-accent/40">
             CB
           </span>
           <span className="hidden font-display text-sm font-semibold tracking-tight text-foreground sm:block">

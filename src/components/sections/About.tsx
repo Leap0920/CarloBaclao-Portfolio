@@ -1,8 +1,10 @@
 'use client';
 
+import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Download, Eye } from 'lucide-react';
 import { Section, SectionHeading } from '@/components/ui/Section';
+import { CvPreviewDialog } from '@/components/ui/CvPreviewDialog';
 import { profile } from '@/data/profile';
 import { cn } from '@/lib/cn';
 import { resolveVariants, useSlideVariants, viewportOnce } from '@/lib/motion';
@@ -59,6 +61,8 @@ export function About() {
   // is what handles reduced motion — it swaps in the resting variant (no offset,
   // zero duration) so nothing is left sitting 80px to the side.
   const reduced = useReducedMotion();
+  const [cvOpen, setCvOpen] = useState(false);
+  const cvTriggerRef = useRef<HTMLButtonElement>(null);
   const { slideLeft, slideRight } = useSlideVariants();
   const hasPortrait = Boolean(PROFILE_PHOTO.src);
   const portraitVariants = resolveVariants(slideLeft, reduced);
@@ -116,15 +120,16 @@ export function About() {
           ) : null}
 
           <div className="mt-10 flex flex-wrap items-center gap-3">
-            <a
-              href={profile.resumeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              ref={cvTriggerRef}
+              type="button"
+              onClick={() => setCvOpen(true)}
+              aria-haspopup="dialog"
               className="inline-flex min-h-11 items-center gap-2 rounded-card rounded border border-border-strong bg-surface px-5 text-sm font-semibold text-foreground transition-colors duration-200 ease-out hover:border-accent/60 hover:text-accent"
             >
               <Eye size={16} aria-hidden="true" />
               Preview CV
-            </a>
+            </button>
             <a
               href={profile.resumeUrl}
               download="Carlo_Baclao_Resume.pdf"
@@ -152,6 +157,12 @@ export function About() {
           </motion.div>
         ) : null}
       </div>
+
+      <CvPreviewDialog
+        open={cvOpen}
+        onClose={() => setCvOpen(false)}
+        triggerRef={cvTriggerRef}
+      />
     </Section>
   );
 }

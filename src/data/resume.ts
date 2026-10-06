@@ -16,11 +16,9 @@ export const experience: ExperienceItem[] = [
     location: 'Philippines',
     description: [
       'Built and maintained frontend interface features, turning requirements into working UI.',
-      'Worked with the development team on day-to-day feature changes and fixes.',
       'Ran QA regression passes after each change to confirm nothing that already worked had broken.',
-      'Documented and reported the regressions found so they could be fixed before release.',
     ],
-    technologies: [],
+    technologies: ['Frontend Development', 'QA Regression Testing'],
   },
   {
     id: 'state-lab-clinics',

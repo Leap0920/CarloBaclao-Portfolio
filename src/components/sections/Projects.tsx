@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { AnimatePresence, motion, type Variants } from 'framer-motion';
-import { ExternalLink, X as CloseIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, ExternalLink, X as CloseIcon } from 'lucide-react';
 import { BrandIcon } from '@/components/BrandIcons';
 import { Section, SectionHeading } from '@/components/ui/Section';
 import { TiltCard } from '@/components/ui/TiltCard';
@@ -22,6 +22,9 @@ const FILTERS: Filter[] = [
   'All',
   ...Array.from(new Set(projects.map((project) => project.category))),
 ];
+
+/** The project that leads the band. Everything else rides the carousel. */
+const HIGHLIGHT_SLUG = 'dcph-tracker';
 
 /**
  * A project carries one `url`; split it into the two links the cards show.
@@ -106,6 +109,110 @@ function ProjectCard({
             </ul>
 
             <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-1 pt-5">
+              {live ? (
+                <a
+                  href={live}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pointer-events-auto relative z-20 inline-flex min-h-12 items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent"
+                >
+                  Live
+                  <ExternalLink size={14} aria-hidden="true" />
+                </a>
+              ) : null}
+              {repo ? (
+                <a
+                  href={repo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pointer-events-auto relative z-20 inline-flex min-h-12 items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent"
+                >
+                  <BrandIcon name="github" size={15} />
+                  GitHub
+                </a>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </article>
+    </TiltCard>
+  );
+}
+
+/* ── Highlight ────────────────────────────────────────────────────── */
+
+/**
+ * The project that leads the band: the same card language as the carousel, at
+ * a larger size, with the description and the full tech list given room to
+ * breathe. It opens the same dialog.
+ */
+function ProjectHighlight({
+  project,
+  onOpen,
+  setTrigger,
+}: {
+  project: Project;
+  onOpen: () => void;
+  setTrigger: (el: HTMLButtonElement | null) => void;
+}) {
+  const { live, repo } = projectLinks(project);
+
+  return (
+    <TiltCard className="h-full">
+      <article className="group relative flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface transition-transform duration-300 ease-out hover:-translate-y-1.5">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-0 rounded-card opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{
+            background:
+              'radial-gradient(90% 65% at 50% 0%, color-mix(in oklab, var(--accent) 24%, transparent), transparent 72%)',
+          }}
+        />
+
+        <button
+          ref={setTrigger}
+          type="button"
+          onClick={onOpen}
+          aria-label={`Open details for ${project.name}`}
+          className="absolute inset-0 z-10 rounded-card"
+        />
+
+        <div className="pointer-events-none relative flex h-full flex-col">
+          <div className="relative aspect-[16/10] overflow-hidden bg-surface-2 sm:aspect-[16/9]">
+            <Image
+              src={project.image}
+              alt={`${project.name} — ${project.subtitle}`}
+              fill
+              sizes="(max-width: 1024px) 100vw, 640px"
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            />
+            <span className="absolute left-4 top-4 rounded-full border border-border bg-background/85 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
+              Featured
+            </span>
+          </div>
+
+          <div className="flex flex-1 flex-col p-5 sm:p-7">
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+              {project.category} · {project.year}
+            </p>
+            <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              {project.name}
+            </h3>
+            <p className="mt-1.5 text-sm font-medium text-muted">{project.subtitle}</p>
+            <p className="mt-4 text-sm leading-relaxed text-muted">{project.description}</p>
+
+            <ul className="mt-5 flex flex-wrap gap-1.5">
+              {project.tech.map((tech) => (
+                <li
+                  key={tech}
+                  className="rounded-full border border-border bg-background/40 px-2.5 py-1 font-mono text-[11px] text-muted"
+                >
+                  {tech}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-1 pt-6">
               {live ? (
                 <a
                   href={live}
@@ -326,12 +433,30 @@ export function Projects() {
    */
   const travel = Math.abs(Number((slideLeft.hidden as { x?: number } | undefined)?.x ?? 0));
 
+  const trackRef = useRef<HTMLUListElement>(null);
+  const [edge, setEdge] = useState({ start: true, end: true });
+
   const triggers = useRef(new Map<string, HTMLButtonElement>());
   const lastTrigger = useRef<HTMLButtonElement | null>(null);
 
   const filtered = useMemo(
     () => (filter === 'All' ? projects : projects.filter((p) => p.category === filter)),
     [filter],
+  );
+
+  /**
+   * The featured project holds the left of the band; the rest ride the carousel
+   * beside it. Under a filter the featured slot falls to the first match, so the
+   * band never leads with a project the reader just filtered away.
+   */
+  const highlight = useMemo(
+    () => filtered.find((project) => project.slug === HIGHLIGHT_SLUG) ?? filtered[0] ?? null,
+    [filtered],
+  );
+
+  const carousel = useMemo(
+    () => (highlight ? filtered.filter((project) => project.slug !== highlight.slug) : []),
+    [filtered, highlight],
   );
 
   const openProject = useMemo(
@@ -350,22 +475,38 @@ export function Projects() {
     window.requestAnimationFrame(() => target?.focus({ preventScroll: true }));
   }, []);
 
-  /**
-   * Odd cards sweep in from the left, even from the right, with a slight
-   * scale-up. `useSlideVariants` owns the travel distance (80px desktop,
-   * 30px on a phone) and collapses both to a plain fade under reduced
-   * motion — so the scale is only added when motion is allowed.
-   */
-  const cardVariants = useCallback(
-    (index: number): Variants => {
-      const base = index % 2 === 0 ? slideLeft : slideRight;
-      if (reduced) return base;
-      return {
-        hidden: { ...(base.hidden as Record<string, unknown>), scale: 0.96 },
-        visible: { ...(base.visible as Record<string, unknown>), scale: 1 },
-      } as Variants;
+  /** Keep the carousel arrows honest: they disable at the ends of the track. */
+  const syncEdges = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    setEdge({
+      start: el.scrollLeft <= 2,
+      end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2,
+    });
+  }, []);
+
+  useEffect(() => {
+    syncEdges();
+    const el = trackRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', syncEdges, { passive: true });
+    window.addEventListener('resize', syncEdges);
+    return () => {
+      el.removeEventListener('scroll', syncEdges);
+      window.removeEventListener('resize', syncEdges);
+    };
+  }, [syncEdges, carousel.length, filter]);
+
+  /** One card per press, so a press never lands the reader mid-card. */
+  const step = useCallback(
+    (direction: 1 | -1) => {
+      const el = trackRef.current;
+      if (!el) return;
+      const card = el.querySelector('li');
+      const distance = card ? card.getBoundingClientRect().width + 20 : el.clientWidth * 0.8;
+      el.scrollBy({ left: direction * distance, behavior: reduced ? 'auto' : 'smooth' });
     },
-    [reduced, slideLeft, slideRight],
+    [reduced],
   );
 
   return (
@@ -428,35 +569,99 @@ export function Projects() {
         })}
       </div>
 
-      {filtered.length > 0 ? (
-        <motion.ul key={travel} className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((project, index) => (
-              <motion.li
-                key={project.slug}
-                layout={!reduced}
-                variants={cardVariants(index)}
-                initial="hidden"
-                whileInView="visible"
-                viewport={viewportOnce}
-                exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
-                transition={
-                  reduced ? { duration: 0 } : { duration: 0.35, ease: EASE }
-                }
-                className="min-w-0"
+      {highlight ? (
+        <div
+          key={travel}
+          className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-8"
+        >
+          {/* The featured project, on the left. */}
+          <motion.div
+            variants={slideLeft}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            transition={reduced ? { duration: 0 } : { duration: 0.4, ease: EASE }}
+            className="min-w-0"
+          >
+            <ProjectHighlight
+              project={highlight}
+              onOpen={() => open(highlight.slug)}
+              setTrigger={(el) => {
+                if (el) triggers.current.set(highlight.slug, el);
+                else triggers.current.delete(highlight.slug);
+              }}
+            />
+          </motion.div>
+
+          {/* Everything else, riding the carousel, on the right. */}
+          <motion.div
+            variants={slideRight}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            transition={reduced ? { duration: 0 } : { duration: 0.4, ease: EASE }}
+            className="flex min-w-0 flex-col lg:h-full"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+                {carousel.length > 0 ? `More projects · ${carousel.length}` : 'More projects'}
+              </p>
+              {carousel.length > 0 ? (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => step(-1)}
+                    disabled={edge.start}
+                    aria-label="Previous projects"
+                    className="grid h-10 w-10 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-40 disabled:hover:border-border disabled:hover:text-foreground"
+                  >
+                    <ChevronLeft size={18} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => step(1)}
+                    disabled={edge.end}
+                    aria-label="Next projects"
+                    className="grid h-10 w-10 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-40 disabled:hover:border-border disabled:hover:text-foreground"
+                  >
+                    <ChevronRight size={18} aria-hidden="true" />
+                  </button>
+                </div>
+              ) : null}
+            </div>
+
+            {carousel.length > 0 ? (
+              <ul
+                ref={trackRef}
+                aria-label="More projects"
+                className="no-scrollbar mt-4 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 lg:min-h-0 lg:flex-1"
               >
-                <ProjectCard
-                  project={project}
-                  onOpen={() => open(project.slug)}
-                  setTrigger={(el) => {
-                    if (el) triggers.current.set(project.slug, el);
-                    else triggers.current.delete(project.slug);
-                  }}
-                />
-              </motion.li>
-            ))}
-          </AnimatePresence>
-        </motion.ul>
+                {carousel.map((project) => (
+                  <li
+                    key={project.slug}
+                    className="h-full w-[85%] shrink-0 snap-start sm:w-[62%] lg:w-[86%]"
+                  >
+                    <ProjectCard
+                      project={project}
+                      onOpen={() => open(project.slug)}
+                      setTrigger={(el) => {
+                        if (el) triggers.current.set(project.slug, el);
+                        else triggers.current.delete(project.slug);
+                      }}
+                    />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p
+                role="status"
+                className="mt-4 rounded-card border border-border bg-surface p-6 text-sm text-muted"
+              >
+                No other {filter} projects — try another category.
+              </p>
+            )}
+          </motion.div>
+        </div>
       ) : (
         <p
           role="status"

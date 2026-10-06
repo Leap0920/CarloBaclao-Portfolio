@@ -9,6 +9,20 @@ import type {
 
 export const experience: ExperienceItem[] = [
   {
+    id: 'enov8tive',
+    company: 'Enov8tive',
+    position: 'Software Developer',
+    range: { start: '2026-08', end: '2026-10' },
+    location: 'Philippines',
+    description: [
+      'Built and maintained frontend interface features, turning requirements into working UI.',
+      'Worked with the development team on day-to-day feature changes and fixes.',
+      'Ran QA regression passes after each change to confirm nothing that already worked had broken.',
+      'Documented and reported the regressions found so they could be fixed before release.',
+    ],
+    technologies: [],
+  },
+  {
     id: 'state-lab-clinics',
     company: 'State Lab Clinics and Diagnostic Center',
     position: 'Data Encoder',
@@ -61,9 +75,11 @@ export const skills: SkillCategory[] = [
       'Java',
       'Python',
       'C++',
+      'Go',
       'SQL',
       'Spring Boot',
       '.NET',
+      'GraphQL',
       'PostgreSQL',
       'MongoDB',
       'SQLite',

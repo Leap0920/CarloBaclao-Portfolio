@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, PointMaterial, Points } from '@react-three/drei';
 import * as THREE from 'three';
@@ -36,6 +36,33 @@ function readAccent(): string {
   if (typeof window === 'undefined') return FALLBACK_ACCENT;
   const value = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
   return value || FALLBACK_ACCENT;
+}
+
+/**
+ * The accent as REACTIVE state, so the object repaints when the theme changes.
+ *
+ * `--accent` lives on `<html>`, so the theme switch is a class change on that
+ * element. Watching that attribute is what keeps the scene honest: reading the
+ * variable once in `useMemo(readAccent, [])` left the object painted in the
+ * dark amber after a switch to light, where #E8A33D on paper is only 2.02:1 —
+ * the wireframe cage and the orbit rings all but disappeared. Re-reading on
+ * the class mutation moves it to the light accent (#8F5405, 5.71:1).
+ */
+function useAccent(): string {
+  const [accent, setAccent] = useState(readAccent);
+
+  useEffect(() => {
+    const read = () => setAccent(readAccent());
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return accent;
 }
 
 /**
@@ -222,7 +249,7 @@ function Composition({
  * unmounts and the chunk's cost is only ever paid by visitors who see it.
  */
 export default function HeroScene({ still = false, active = true }: HeroSceneProps) {
-  const accent = useMemo(readAccent, []);
+  const accent = useAccent();
   const lowPower = useMemo(isLowPower, []);
 
   return (

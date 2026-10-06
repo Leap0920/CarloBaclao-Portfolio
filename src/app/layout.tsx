@@ -75,8 +75,8 @@ export const viewport: Viewport = {
   // Dark-first: each colour scheme gets its own browser chrome colour so the
   // mobile address bar never paints white above a near-black page.
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fafafc' },
-    { media: '(prefers-color-scheme: dark)', color: '#0b0b10' },
+    { media: '(prefers-color-scheme: light)', color: '#faf7f1' },
+    { media: '(prefers-color-scheme: dark)', color: '#100e0b' },
   ],
   colorScheme: 'dark light',
 };

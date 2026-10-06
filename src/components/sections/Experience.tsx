@@ -50,7 +50,7 @@ export function Experience() {
         index="03"
         eyebrow="Experience"
         title="Where I have worked"
-        description="Clinical data work at a diagnostic center."
+        description="A software development internship, and clinical data work at a diagnostic center."
       />
 
       {/* overflow-x-clip: the rail and the sliding cards can never add a

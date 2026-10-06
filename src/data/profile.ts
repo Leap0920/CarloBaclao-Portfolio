@@ -8,7 +8,7 @@ export const profile: Profile = {
   pitch:
     'Full-stack developer and fourth-year IT student in Quezon City, building web, Android, and IoT projects that ship.',
   intro:
-    'I build full-stack web, Android, and IoT projects — a Spring Boot API on a Raspberry Pi. Finishing my IT degree; open to internships and junior roles.',
+    'Full-stack web, native Android, and IoT projects, including a Spring Boot API running on a Raspberry Pi. I recently completed a software development internship doing frontend work and QA regression testing, and I am finishing my IT degree.',
   email: 'baclao.carlo.cometa@gmail.com',
   phone: '09686890263',
   location: 'Quezon City, Philippines',

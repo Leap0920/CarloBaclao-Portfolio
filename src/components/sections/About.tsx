@@ -1,9 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Download } from 'lucide-react';
+import { Download, Eye } from 'lucide-react';
 import { Section, SectionHeading } from '@/components/ui/Section';
 import { profile } from '@/data/profile';
+import { cn } from '@/lib/cn';
 import { resolveVariants, useSlideVariants, viewportOnce } from '@/lib/motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
@@ -21,12 +22,11 @@ const GLASS =
  * Portrait for the About section.
  *
  * `public/` holds no portrait — only the certification scans and the project
- * covers — so `src` is `null` and no `<img>` is rendered. An `<img>` pointed
- * at a missing file would 404, and a grey "photo coming soon" panel is not
- * this design, so the reserved slot stays empty rather than fake. The slot
- * itself is always in the flow at a fixed 4:5 ratio, so dropping a portrait at
- * `public/images/profile/carlo.jpg` and setting `src` fills it with no layout
- * shift. `alt` is already written for the moment it lands.
+ * covers — so `src` is `null` and no `<img>` is rendered. The left column now
+ * only exists when there is something to put in it: reserving an empty 4:5
+ * slot left a 416×480 hole of whitespace beside the bio. Drop a portrait at
+ * `public/images/profile/carlo.jpg`, set `src`, and the two-column layout
+ * comes back on its own. `alt` is already written for the moment it lands.
  */
 const PROFILE_PHOTO: { src: string | null; alt: string } = {
   src: null,
@@ -44,13 +44,24 @@ const QUICK_FACTS: ReadonlyArray<{ label: string; value: string }> = [
   { label: 'Languages', value: profile.spokenLanguages.join(' · ') },
 ];
 
+/** One `<dt>`/`<dd>` pair. Shared so both layouts render identical markup. */
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="font-mono text-micro uppercase tracking-[0.16em] text-muted">{label}</dt>
+      <dd className="mt-1.5 text-sm font-medium text-foreground">{value}</dd>
+    </div>
+  );
+}
+
 export function About() {
   // `useSlideVariants` supplies the phone-aware travel distance; `resolveVariants`
   // is what handles reduced motion — it swaps in the resting variant (no offset,
   // zero duration) so nothing is left sitting 80px to the side.
   const reduced = useReducedMotion();
   const { slideLeft, slideRight } = useSlideVariants();
-  const photoVariants = resolveVariants(slideLeft, reduced);
+  const hasPortrait = Boolean(PROFILE_PHOTO.src);
+  const portraitVariants = resolveVariants(slideLeft, reduced);
   const textVariants = resolveVariants(slideRight, reduced);
 
   return (
@@ -59,39 +70,32 @@ export function About() {
         index="01"
         eyebrow="About"
         title="An IT student who ships"
-        description="Full-stack web, native Android, and small deployments on real hardware."
       />
 
       <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-16">
-        {/* Portrait — enters from the left. */}
-        <motion.div
-          variants={photoVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportOnce}
-          className="lg:col-span-5"
-        >
-          <div
-            className={[
-              'relative mx-auto aspect-[4/5] w-full max-w-sm lg:mx-0',
-              PROFILE_PHOTO.src ? GLASS : '',
-            ]
-              .join(' ')
-              .trim()}
+        {/* Portrait — enters from the left. Only rendered when one exists, so
+            the grid never carries an empty column. */}
+        {hasPortrait ? (
+          <motion.div
+            variants={portraitVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            className="lg:col-span-5"
           >
-            {PROFILE_PHOTO.src ? (
+            <div className={cn('relative mx-auto aspect-[4/5] w-full max-w-sm lg:mx-0', GLASS)}>
               <img
-                src={PROFILE_PHOTO.src}
+                src={PROFILE_PHOTO.src ?? undefined}
                 alt={PROFILE_PHOTO.alt}
                 loading="lazy"
                 decoding="async"
                 className="absolute inset-0 h-full w-full rounded-card rounded object-cover"
               />
-            ) : null}
-          </div>
-        </motion.div>
+            </div>
+          </motion.div>
+        ) : null}
 
-        {/* Bio and quick facts — enter from the right. */}
+        {/* Bio — enters from the right. */}
         <motion.div
           variants={textVariants}
           initial="hidden"
@@ -101,26 +105,52 @@ export function About() {
         >
           <p className="max-w-prose text-base leading-relaxed text-muted">{profile.intro}</p>
 
-          <dl className="mt-10 grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2">
-            {QUICK_FACTS.map((fact) => (
-              <div key={fact.label}>
-                <dt className="font-mono text-micro uppercase tracking-[0.16em] text-muted">
-                  {fact.label}
-                </dt>
-                <dd className="mt-1.5 text-sm font-medium text-foreground">{fact.value}</dd>
-              </div>
-            ))}
-          </dl>
+          {/* With a portrait the facts live under the bio; without one they get
+              their own column so the row is full instead of half empty. */}
+          {hasPortrait ? (
+            <dl className="mt-10 grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2">
+              {QUICK_FACTS.map((fact) => (
+                <Fact key={fact.label} label={fact.label} value={fact.value} />
+              ))}
+            </dl>
+          ) : null}
 
-          <a
-            href={profile.resumeUrl}
-            download="Carlo_Baclao_Resume.pdf"
-            className="mt-10 inline-flex min-h-11 items-center gap-2 rounded-card rounded bg-accent px-5 text-sm font-semibold text-on-accent transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-          >
-            <Download size={16} aria-hidden="true" />
-            Download CV
-          </a>
+          <div className="mt-10 flex flex-wrap items-center gap-3">
+            <a
+              href={profile.resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center gap-2 rounded-card rounded border border-border-strong bg-surface px-5 text-sm font-semibold text-foreground transition-colors duration-200 ease-out hover:border-accent/60 hover:text-accent"
+            >
+              <Eye size={16} aria-hidden="true" />
+              Preview CV
+            </a>
+            <a
+              href={profile.resumeUrl}
+              download="Carlo_Baclao_Resume.pdf"
+              className="inline-flex min-h-11 items-center gap-2 rounded-card rounded bg-accent px-5 text-sm font-semibold text-on-accent transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            >
+              <Download size={16} aria-hidden="true" />
+              Download CV
+            </a>
+          </div>
         </motion.div>
+
+        {!hasPortrait ? (
+          <motion.div
+            variants={textVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            className="lg:col-span-5"
+          >
+            <dl className="grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2">
+              {QUICK_FACTS.map((fact) => (
+                <Fact key={fact.label} label={fact.label} value={fact.value} />
+              ))}
+            </dl>
+          </motion.div>
+        ) : null}
       </div>
     </Section>
   );

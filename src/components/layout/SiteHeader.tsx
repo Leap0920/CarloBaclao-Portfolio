@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { navSections } from '@/data/navigation';
 import { profile } from '@/data/profile';
 import { useMountTransition } from '@/hooks/useMountTransition';
@@ -121,8 +120,6 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-1.5">
-          <ThemeToggle />
-
           <button
             ref={toggleRef}
             type="button"

@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════════
-   Dark-first theme system — "ink & amber"
+   Theme system — "ink & amber", dark only
 
-   DARK is the default. `:root` carries the dark values, so the dark
-   theme applies with no class and with JavaScript disabled. The boot
-   script in `src/app/layout.tsx` (a blocking <script> in <head>, before
-   first paint) swaps `html.light` on when the visitor stored a light
-   choice or their OS asks for one. `.light` overrides every value.
+   DARK ONLY. `:root` carries the values, so the theme applies with no
+   class and with JavaScript disabled. There is no light palette and no
+   switch: the toggle left the navbar and the light values were deleted
+   rather than hidden, so nothing can drift back in through a stale class
+   or a leftover `.light` selector.
 
    The palette is deliberately WARM: a graphite base with a bone text
    ramp and a single amber accent. The previous violet-on-indigo scheme
@@ -78,50 +78,14 @@
   color-scheme: dark;
 }
 
-/* ── Raw variables — LIGHT ──────────────────────────────────────── */
-:root.light {
-  --background: #faf7f1;
-  --surface: #ffffff;
-  --surface-2: #f2ede4;
-  --border: rgba(23, 20, 14, 0.1);
-  --border-strong: rgba(23, 20, 14, 0.5);
-
-  --foreground: #17140e;
-  --ink-soft: #2e2a22;
-  --muted: #5c5546;
-  --faint: #6b6355;
-
-  /* The accent is RE-DERIVED for light: the dark amber #E8A33D is only
-     ~1.9:1 on paper and is unusable as text. #8F5405 is the same hue
-     family taken down to 5.71:1 on --background, with 6.11:1 for white
-     text on it as a fill. */
-  --accent: #8f5405;
-  --accent-hover: #7a4704;
-  --accent-soft: rgba(143, 84, 5, 0.1);
-  --on-accent: #ffffff;
-
-  --accent-50: #fdf7ec;
-  --accent-100: #f9ecd3;
-  --accent-200: #f0d5a3;
-  --accent-300: #e3b76c;
-  --accent-400: #d19437;
-  --accent-500: #8f5405;
-  --accent-600: #7a4704;
-  --accent-700: #663b03;
-  --accent-800: #522f02;
-  --accent-900: #3d2201;
-
-  --shadow-card: 0 20px 40px -30px rgb(40 26 8 / 0.22);
-
-  color-scheme: light;
-}
+/* The light palette was deleted here. See the header comment. */
 
 /* ── Tailwind token map ─────────────────────────────────────────────
    `static` forces every token below to be emitted, even when no utility
    happens to reference it yet (Tailwind otherwise tree-shakes unused
    theme variables, which would silently drop `--space-*` / `--max-width`).
    `inline` inlines the value into the utility, so the semantic utilities
-   follow the `.light` switch without re-declaring anything. */
+   resolve without re-declaring anything. */
 @theme static inline {
   /* Fonts */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -388,8 +352,7 @@
     display: none !important;
   }
 
-  :root,
-  :root.light {
+  :root {
     --background: #ffffff;
     --surface: #ffffff;
     --surface-2: #ffffff;

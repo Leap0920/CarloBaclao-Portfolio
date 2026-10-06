@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import { profile, siteUrl } from '@/data/profile';
-import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { THEME_SCRIPT } from '@/lib/theme';
 import './globals.css';
 
 const inter = Inter({
@@ -72,13 +70,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  // Dark-first: each colour scheme gets its own browser chrome colour so the
-  // mobile address bar never paints white above a near-black page.
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#faf7f1' },
-    { media: '(prefers-color-scheme: dark)', color: '#100e0b' },
-  ],
-  colorScheme: 'dark light',
+  // Dark only, so there is exactly one browser chrome colour: the mobile
+  // address bar never paints white above a near-black page.
+  themeColor: '#100e0b',
+  colorScheme: 'dark',
 };
 
 /**
@@ -114,21 +109,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`dark ${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
     >
       <head>
-        {/* Blocking, before-paint: resolves the theme and stamps the class on
-            <html>. This is what removes the flash of the wrong theme. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: revealBoot }} />
       </head>
       <body className="bg-background font-sans text-foreground">
-        <ThemeProvider>
-          {/* `overflow-x: clip` — NOT hidden. `hidden` would turn this into a
-              scroll container and break `position: sticky` on the navbar.
-              `clip` trims horizontal overflow from the slide-ins while
-              leaving the scrollport (and therefore sticky) untouched. */}
-          <div className="overflow-x-clip">
-            {children}
-          </div>
-        </ThemeProvider>
+        {/* `overflow-x: clip` — NOT hidden. `hidden` would turn this into a
+            scroll container and break `position: sticky` on the navbar.
+            `clip` trims horizontal overflow from the slide-ins while
+            leaving the scrollport (and therefore sticky) untouched. */}
+        <div className="overflow-x-clip">
+          {children}
+        </div>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}

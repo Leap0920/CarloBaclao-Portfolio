@@ -158,7 +158,7 @@ export function Contact() {
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          className="rounded-card border border-border bg-surface/60 p-5 backdrop-blur-xl sm:p-7"
+          className="rounded-card border border-border bg-surface p-5 sm:p-7"
         >
           <div>
             <label htmlFor={nameId} className="block text-sm font-medium text-foreground">
@@ -286,7 +286,7 @@ export function Contact() {
                   target={social.url.startsWith('mailto:') ? undefined : '_blank'}
                   rel="noopener noreferrer"
                   aria-label={`${social.label} — ${social.handle}`}
-                  className="grid h-11 w-11 place-items-center rounded-full border border-border bg-surface/60 text-muted hover:text-foreground"
+                  className="grid h-11 w-11 place-items-center rounded-full border border-border bg-surface text-muted hover:text-foreground"
                 >
                   <motion.span
                     variants={resolveVariants(scaleIn, reduced)}

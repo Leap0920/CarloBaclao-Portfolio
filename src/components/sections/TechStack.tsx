@@ -96,7 +96,7 @@ function SkillIcon({ name }: { name: string }) {
 /** A single small card: icon + name, hairline border, glassy surface. */
 function TechCard({ name }: { name: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-card border border-border bg-surface/60 px-3 py-2 backdrop-blur-xl">
+    <div className="flex items-center gap-2 rounded-card border border-border bg-surface px-3 py-2">
       <span className="grid h-5 w-5 shrink-0 place-items-center text-accent">
         <SkillIcon name={name} />
       </span>

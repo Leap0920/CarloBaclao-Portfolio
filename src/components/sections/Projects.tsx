@@ -51,7 +51,7 @@ function ProjectCard({
 
   return (
     <TiltCard className="h-full">
-      <article className="group relative flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface/60 backdrop-blur-xl transition-transform duration-300 ease-out hover:-translate-y-1.5">
+      <article className="group relative flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface transition-transform duration-300 ease-out hover:-translate-y-1.5">
         {/* Soft accent glow. Opacity only — no layout property moves. */}
         <div
           aria-hidden="true"
@@ -214,7 +214,7 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
       <div
         aria-hidden="true"
         onClick={onClose}
-        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-background/95"
       />
 
       <motion.div
@@ -242,7 +242,7 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="absolute right-3 top-3 grid h-12 w-12 place-items-center rounded-full border border-border bg-background/80 text-foreground backdrop-blur"
+            className="absolute right-3 top-3 grid h-12 w-12 place-items-center rounded-full border border-border bg-surface text-foreground"
           >
             <CloseIcon size={18} aria-hidden="true" />
           </button>
@@ -410,7 +410,7 @@ export function Projects() {
                 'inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium',
                 selected
                   ? 'border-accent bg-accent text-on-accent'
-                  : 'border-border bg-surface/60 text-muted hover:text-foreground',
+                  : 'border-border bg-surface text-muted hover:text-foreground',
               )}
             >
               {item}
@@ -460,7 +460,7 @@ export function Projects() {
       ) : (
         <p
           role="status"
-          className="mt-8 rounded-card border border-border bg-surface/60 p-6 text-sm text-muted"
+          className="mt-8 rounded-card border border-border bg-surface p-6 text-sm text-muted"
         >
           No {filter} projects yet — try another category.
         </p>

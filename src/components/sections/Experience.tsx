@@ -12,7 +12,7 @@ import { cn } from '@/lib/cn';
 /** The 20px glass recipe. `rounded-card` is the contract name; the landed 20px
  *  token is `--radius` (bare `rounded`), so both are kept so it renders today. */
 const GLASS =
-  'rounded-card rounded border border-border bg-surface/60 backdrop-blur-xl shadow-[var(--shadow-card)]';
+  'rounded-card rounded border border-border bg-surface shadow-[var(--shadow-card)]';
 
 /** Below `lg` the timeline is a single left rail; at `lg` the cards alternate. */
 function useIsStacked() {

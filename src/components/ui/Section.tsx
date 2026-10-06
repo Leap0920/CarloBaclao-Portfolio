@@ -47,7 +47,7 @@ export function SectionHeading({
     <header className={cn('mb-12 sm:mb-14', className)}>
       <div className="flex items-center gap-3">
         <span className="font-mono text-[11px] tabular-nums text-accent-500">{index}</span>
-        <span aria-hidden="true" className="h-px w-8 bg-zinc-300" />
+        <span aria-hidden="true" className="h-px w-8 bg-border" />
         <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">
           {eyebrow}
         </span>

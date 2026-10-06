@@ -73,7 +73,7 @@ export function Hero() {
               </a>
               <a
                 href="#contact"
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-card border border-border bg-surface/60 px-6 text-sm font-semibold text-foreground backdrop-blur-xl transition-colors hover:border-accent/40 sm:w-auto"
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-card border border-border-strong bg-surface px-6 text-sm font-semibold text-foreground transition-colors hover:border-accent/40 sm:w-auto"
               >
                 <Mail size={16} aria-hidden="true" />
                 Contact Me

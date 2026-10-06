@@ -13,7 +13,23 @@ interface HeroSceneProps {
 }
 
 /** Mirrors the frozen `--accent` token, used only if the variable is absent. */
-const FALLBACK_ACCENT = '#7c5cff';
+const FALLBACK_ACCENT = '#e8a33d';
+
+/**
+ * Touch devices rasterise every pixel once and then composite it again, and
+ * they do it on a battery. The scene drops its anti-aliasing, its pixel ratio
+ * and most of its dust there. The composition is unchanged — only the
+ * sampling is — so the phone still gets the same object, just cheaper.
+ */
+function isLowPower(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+  } catch {
+    return false;
+  }
+}
+
 
 /** The live accent, so the object follows the light/dark theme switch too. */
 function readAccent(): string {
@@ -178,7 +194,15 @@ function ParticleField({
   );
 }
 
-function Composition({ still, accent }: { still: boolean; accent: string }) {
+function Composition({
+  still,
+  accent,
+  lowPower,
+}: {
+  still: boolean;
+  accent: string;
+  lowPower: boolean;
+}) {
   return (
     <CursorRig still={still}>
       <Float speed={1.1} rotationIntensity={0.2} floatIntensity={0.6} floatingRange={[-0.06, 0.06]}>
@@ -186,7 +210,7 @@ function Composition({ still, accent }: { still: boolean; accent: string }) {
       </Float>
       <Shell accent={accent} />
       <Ring accent={accent} />
-      <ParticleField accent={accent} />
+      <ParticleField accent={accent} count={lowPower ? 220 : 520} />
     </CursorRig>
   );
 }
@@ -199,21 +223,22 @@ function Composition({ still, accent }: { still: boolean; accent: string }) {
  */
 export default function HeroScene({ still = false, active = true }: HeroSceneProps) {
   const accent = useMemo(readAccent, []);
+  const lowPower = useMemo(isLowPower, []);
 
   return (
     <Canvas
       camera={{ position: [0, 0, 6.2], fov: 45 }}
-      dpr={[1, 1.6]}
+      dpr={lowPower ? [1, 1.25] : [1, 1.6]}
       flat
       frameloop={still ? 'demand' : active ? 'always' : 'never'}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+      gl={{ antialias: !lowPower, alpha: true, powerPreference: 'high-performance' }}
       style={{ pointerEvents: 'none' }}
       aria-hidden="true"
     >
       <ambientLight intensity={0.6} />
       <directionalLight position={[4, 6, 6]} intensity={1.6} />
       <directionalLight position={[-5, -3, -4]} intensity={0.4} color={accent} />
-      <Composition still={still} accent={accent} />
+      <Composition still={still} accent={accent} lowPower={lowPower} />
     </Canvas>
   );
 }

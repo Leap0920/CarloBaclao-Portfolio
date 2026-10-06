@@ -66,10 +66,10 @@ export function SiteHeader() {
       transition={reduced ? { duration: 0 } : { duration: 0.6, ease: EASE }}
       className={cn(
         'fixed inset-x-0 top-0 z-50 print-hide',
-        'backdrop-blur-xl transition-[background-color,border-color] duration-300',
+        'transition-[background-color,border-color] duration-300',
         scrolled
-          ? 'border-b border-border bg-background/70'
-          : 'border-b border-transparent bg-background/30',
+          ? 'border-b border-border bg-background'
+          : 'border-b border-transparent bg-background',
       )}
     >
       <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between gap-4 px-5 sm:px-8">
@@ -130,7 +130,7 @@ export function SiteHeader() {
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            className="grid h-11 w-11 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/40 lg:hidden"
+            className="grid h-11 w-11 place-items-center rounded-full border border-border-strong text-foreground transition-colors hover:border-accent/40 lg:hidden"
           >
             {menuOpen ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}
           </button>
@@ -141,7 +141,7 @@ export function SiteHeader() {
         <div
           id="mobile-nav"
           className={cn(
-            'grid overflow-hidden border-b bg-background/90 backdrop-blur-xl lg:hidden',
+            'grid overflow-hidden border-b bg-background lg:hidden',
             reduced
               ? 'transition-none'
               : 'transition-[grid-template-rows,opacity,border-color] duration-300 ease-out',
@@ -165,7 +165,7 @@ export function SiteHeader() {
                         'flex h-11 items-center rounded-lg px-3 text-[15px] transition-colors',
                         active === section.id
                           ? 'bg-accent/10 text-foreground'
-                          : 'text-muted hover:bg-surface/60 hover:text-foreground',
+                          : 'text-muted hover:bg-surface-2 hover:text-foreground',
                       )}
                     >
                       {section.label}

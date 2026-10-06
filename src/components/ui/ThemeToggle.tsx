@@ -31,7 +31,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-label={label}
       title={label}
       className={cn(
-        'grid h-11 w-11 place-items-center rounded-full border border-border bg-surface/85 text-muted shadow-sm backdrop-blur transition-colors duration-200 ease-out-expo hover:border-accent/60 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+        'grid h-11 w-11 place-items-center rounded-full border border-border-strong bg-surface text-muted shadow-sm transition-colors duration-200 ease-out-expo hover:border-accent/60 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         className,
       )}
     >

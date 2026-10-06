@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
+  // The floating Next.js dev-mode badge sits on top of the design in every
+  // local preview. It is a dev-only artifact, but this site is reviewed
+  // through the dev server and the tunnel, so it is switched off.
+  devIndicators: false,
   // Next's dev server refuses cross-origin requests to its dev resources
   // (/_next/webpack-hmr) unless the requesting host is listed here. When that
   // request is blocked the dev client never boots, so the page stays

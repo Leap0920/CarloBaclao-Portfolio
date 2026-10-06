@@ -1,13 +1,24 @@
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════════
-   Dark-first theme system
-   ──────────────────────────────────────────────────────────────────
+   Dark-first theme system — "ink & amber"
+
    DARK is the default. `:root` carries the dark values, so the dark
    theme applies with no class and with JavaScript disabled. The boot
    script in `src/app/layout.tsx` (a blocking <script> in <head>, before
    first paint) swaps `html.light` on when the visitor stored a light
    choice or their OS asks for one. `.light` overrides every value.
+
+   The palette is deliberately WARM: a graphite base with a bone text
+   ramp and a single amber accent. The previous violet-on-indigo scheme
+   (#7C5CFF on #0B0B10) is the default look of generated portfolios, and
+   its accent only just cleared AA at 4.52:1. Amber clears 8.94:1 on the
+   new background — a real margin, not a squeak.
+
+   Surfaces are FLAT. Nothing in the UI is translucent-over-blurred:
+   `backdrop-filter` was carried by 73 elements and each one forces the
+   compositor to snapshot and blur its backdrop every frame. Depth now
+   comes from hairline borders and one soft shadow, not from frosting.
 
    The `@theme inline` block below maps these raw variables onto
    Tailwind's utility namespaces, so `bg-background`, `text-foreground`,
@@ -26,80 +37,81 @@
 
 /* ── Raw variables — DARK (default) ─────────────────────────────── */
 :root {
-  /* Surfaces */
-  --background: #0b0b10;
-  --surface: #14141c;
-  --surface-2: #17171f;
-  --border: rgba(255, 255, 255, 0.08);
+  /* Surfaces — warm graphite, never blue-black */
+  --background: #100e0b;
+  --surface: #1a1712;
+  --surface-2: #221e18;
+  --border: rgba(244, 236, 222, 0.1);
+  /* A stronger hairline for INTERACTIVE boundaries only. `--border` is a
+     decorative 1.25:1 whisper — correct for a card edge, too faint for a
+     control, where WCAG 1.4.11 wants 3:1. Composited at 40% it measures
+     3.42:1. */
+  --border-strong: rgba(244, 236, 222, 0.4);
 
-  /* Text */
-  --foreground: #f5f5f7;
-  --ink-soft: #c7c7d1;
-  --muted: #9a9aa8;
-  --faint: #8f8f9c;
+  /* Text — a bone ramp, warm at every step */
+  --foreground: #f5f1e8;
+  --ink-soft: #d9d2c4;
+  --muted: #a79e8d;
+  --faint: #8b8271;
 
-  /* Accent — the dark accent is exactly #7C5CFF. It clears 4.5:1 on
-     --background (4.52:1) and must not be darkened. */
-  --accent: #7c5cff;
-  --accent-hover: #9279ff;
-  --accent-soft: rgba(124, 92, 255, 0.16);
-  --on-accent: #0b0b10;
+  /* Accent — amber #E8A33D. Measured 8.94:1 on --background and 8.29:1 on
+     --surface, so it is safe as text, as a border and as a fill. */
+  --accent: #e8a33d;
+  --accent-hover: #f0b65c;
+  --accent-soft: rgba(232, 163, 61, 0.14);
+  --on-accent: #17120a;
 
-  /* Accent ramp — text-safe steps on dark are 300–500; 600–900 are
-     fills (pair them with --on-accent or white). */
-  --accent-50: #f0edff;
-  --accent-100: #e2dbff;
-  --accent-200: #c8bdff;
-  --accent-300: #b09eff;
-  --accent-400: #9c82ff;
-  --accent-500: #7c5cff;
-  --accent-600: #6a46e8;
-  --accent-700: #5837c4;
-  --accent-800: #462c9b;
-  --accent-900: #33206f;
+  /* Accent ramp — 300–500 are text-safe on dark; 600–900 are fills. */
+  --accent-50: #fdf6e8;
+  --accent-100: #faead0;
+  --accent-200: #f4d49e;
+  --accent-300: #eebc6d;
+  --accent-400: #eba94f;
+  --accent-500: #e8a33d;
+  --accent-600: #c9832a;
+  --accent-700: #a1641f;
+  --accent-800: #7a4a18;
+  --accent-900: #553312;
 
-  /* Cyan — GRADIENTS ONLY. Never flat text, never a solid fill.
-     Deliberately exposed as a raw variable (not a `--color-cyan` token)
-     so no `text-cyan` / `bg-cyan` utility can be generated from it. */
-  --cyan: #22d3ee;
-
-  --shadow-card: 0 24px 48px -30px rgb(0 0 0 / 0.62);
+  --shadow-card: 0 22px 44px -32px rgb(0 0 0 / 0.72);
 
   color-scheme: dark;
 }
 
 /* ── Raw variables — LIGHT ──────────────────────────────────────── */
 :root.light {
-  --background: #fafafc;
+  --background: #faf7f1;
   --surface: #ffffff;
-  --surface-2: #f3f3f8;
-  --border: rgba(0, 0, 0, 0.08);
+  --surface-2: #f2ede4;
+  --border: rgba(23, 20, 14, 0.1);
+  --border-strong: rgba(23, 20, 14, 0.5);
 
-  --foreground: #0b0b10;
-  --ink-soft: #2e2e38;
-  --muted: #565663;
-  --faint: #6b6b76;
+  --foreground: #17140e;
+  --ink-soft: #2e2a22;
+  --muted: #5c5546;
+  --faint: #6b6355;
 
-  /* The accent is RE-DERIVED for light: #7C5CFF is only 4.17:1 on a
-     near-white page and fails AA as text. #6B45E8 is the same violet
-     family, darkened to 5.53:1 on --background and 5.77:1 on --surface. */
-  --accent: #6b45e8;
-  --accent-hover: #5a34cc;
-  --accent-soft: rgba(107, 69, 232, 0.1);
+  /* The accent is RE-DERIVED for light: the dark amber #E8A33D is only
+     ~1.9:1 on paper and is unusable as text. #8F5405 is the same hue
+     family taken down to 5.71:1 on --background, with 6.11:1 for white
+     text on it as a fill. */
+  --accent: #8f5405;
+  --accent-hover: #7a4704;
+  --accent-soft: rgba(143, 84, 5, 0.1);
   --on-accent: #ffffff;
 
-  --accent-50: #f3f0ff;
-  --accent-100: #e7e1ff;
-  --accent-200: #cfc2ff;
-  --accent-300: #ae99ff;
-  --accent-400: #8b6bff;
-  --accent-500: #6b45e8;
-  --accent-600: #5a34cc;
-  --accent-700: #4a2aa6;
-  --accent-800: #3a2080;
-  --accent-900: #2a1758;
+  --accent-50: #fdf7ec;
+  --accent-100: #f9ecd3;
+  --accent-200: #f0d5a3;
+  --accent-300: #e3b76c;
+  --accent-400: #d19437;
+  --accent-500: #8f5405;
+  --accent-600: #7a4704;
+  --accent-700: #663b03;
+  --accent-800: #522f02;
+  --accent-900: #3d2201;
 
-  --shadow-card: 0 20px 40px -30px rgb(16 16 40 / 0.22);
+  --shadow-card: 0 20px 40px -30px rgb(40 26 8 / 0.22);
 
   color-scheme: light;
 }
@@ -121,6 +133,7 @@
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
@@ -161,10 +174,15 @@
   --text-small: 0.875rem;
   --text-micro: 0.6875rem;
 
-  /* Radius — one language: card 20, large 24, small 16 */
-  --radius: 20px;
-  --radius-lg: 24px;
-  --radius-sm: 16px;
+  /* Radius — one language, and a tight one. The old 20/24/16px set was
+     soft enough to read as generic; 12/16/8 keeps the surfaces crisp.
+     `--radius-card` exists so `rounded-card` emits a rule on its own:
+     without the token the class compiles to NOTHING and the element
+     silently keeps square corners. */
+  --radius: 12px;
+  --radius-card: 12px;
+  --radius-lg: 16px;
+  --radius-sm: 8px;
 
   /* 8px spacing scale */
   --space-1: 8px;
@@ -203,7 +221,7 @@
     background-color: var(--background);
     color-scheme: dark;
     scroll-behavior: smooth;
-    /* Keeps anchored sections clear of the sticky header */
+    /* Keeps anchored sections clear of the fixed header */
     scroll-padding-top: 5.5rem;
     -webkit-text-size-adjust: 100%;
   }
@@ -222,7 +240,7 @@
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--accent) 34%, transparent);
+    background-color: color-mix(in oklab, var(--accent) 30%, transparent);
     color: var(--foreground);
   }
 
@@ -272,7 +290,7 @@
   }
 
   dialog::backdrop {
-    background-color: rgb(5 5 10 / 0.62);
+    background-color: rgb(10 8 5 / 0.72);
     backdrop-filter: blur(3px);
   }
 }
@@ -281,9 +299,11 @@
    Utilities
    ══════════════════════════════════════════════════════════════════ */
 
-/* Soft glow behind the hero. Paints on a ::before at inset 0, so it costs
-   no layout and cannot overflow its box. Violet, with cyan permitted ONLY
-   inside the gradient. Place it on a section that is already `relative`. */
+/* A single soft amber wash behind the hero. One gradient, not two, and at
+   9% — it reads as depth rather than as a glow blob, and it is a fraction
+   of the paint cost the old violet+cyan pair carried. Paints on a ::before
+   at inset 0, so it costs no layout and cannot overflow its box. Place it
+   on a section that is already `relative`. */
 @utility hero-glow {
   position: relative;
   isolation: isolate;
@@ -294,51 +314,13 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background-image:
-      radial-gradient(
-        48rem 30rem at 78% 4%,
-        color-mix(in oklab, var(--accent) 20%, transparent),
-        transparent 70%
-      ),
-      radial-gradient(
-        34rem 26rem at 10% 96%,
-        color-mix(in oklab, var(--cyan) 12%, transparent),
-        transparent 72%
-      );
+    background-image: radial-gradient(
+      46rem 28rem at 76% 2%,
+      color-mix(in oklab, var(--accent) 9%, transparent),
+      transparent 68%
+    );
     background-repeat: no-repeat;
   }
-}
-
-/* Frosted panel — 1px hairline, 20px radius, soft shadow, backdrop blur. */
-@utility glass-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background-color: color-mix(in oklab, var(--surface) 72%, transparent);
-  box-shadow: var(--shadow-card);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-}
-
-/* Frosted surface for the sticky header and lightboxes. */
-@utility glass {
-  background-color: color-mix(in oklab, var(--background) 74%, transparent);
-  backdrop-filter: saturate(180%) blur(16px);
-  -webkit-backdrop-filter: saturate(180%) blur(16px);
-}
-
-/* Faint blueprint grid, behind the hero and section headers. */
-@utility bg-grid {
-  background-image: linear-gradient(
-      to right,
-      color-mix(in oklab, var(--foreground) 5%, transparent) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--foreground) 5%, transparent) 1px,
-      transparent 1px
-    );
-  background-size: 60px 60px;
 }
 
 /* Horizontal rail that hides its scrollbar. */

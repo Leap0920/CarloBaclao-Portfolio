@@ -15,7 +15,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
  * what actually renders the 20px today.
  */
 const GLASS =
-  'rounded-card rounded border border-border bg-surface/60 backdrop-blur-xl shadow-[var(--shadow-card)]';
+  'rounded-card rounded border border-border bg-surface shadow-[var(--shadow-card)]';
 
 /**
  * Portrait for the About section.

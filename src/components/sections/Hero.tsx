@@ -30,13 +30,14 @@ export function Hero() {
     <section id="home" className="hero-glow relative isolate scroll-mt-20 overflow-hidden">
       <div className="mx-auto w-full max-w-[1200px] px-5 pb-16 pt-28 sm:px-8 sm:pt-32 lg:pb-24 lg:pt-36">
         <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-16">
-          {/* Copy — first in the DOM, so on a phone the graphic follows it. */}
+          {/* Copy — first in the DOM, and lifted above the graphic, which is the
+              hero's background on a phone. */}
           <motion.div
             variants={v(staggerContainer)}
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
-            className="max-w-xl"
+            className="relative z-10 max-w-xl"
           >
             <motion.h1
               variants={v(fadeUp)}
@@ -96,27 +97,36 @@ export function Hero() {
             </motion.ul>
           </motion.div>
 
-          {/* The 3D band. Square box, in flow, so it can never sit under the
-              copy; `pointer-events-none` keeps it from stealing the CTAs'
-              clicks. The canvas fills the box, so the VISIBLE graphic sits a
-              few px inside the box edge rather than a dead band below it. */}
-          <motion.div
-            variants={v(scaleIn)}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportOnce}
+          {/* The 3D band. From `lg` up it is the right-hand column of the grid;
+              below `lg` it leaves the flow and becomes the hero's background —
+              `absolute inset-0` anchors to the section (the grid is not itself
+              positioned), so the layer covers the whole hero and the graphic
+              sits centred behind the copy rather than pushing it down.
+              `pointer-events-none` keeps it from stealing the CTAs' clicks, and
+              the dimming lives on this non-motion wrapper because the `scaleIn`
+              variant writes opacity inline on the motion child and would
+              override a class on it. */}
+          <div
             aria-hidden="true"
-            className="pointer-events-none relative isolate mx-auto aspect-square w-full max-w-[18rem] sm:max-w-[22rem] lg:max-w-[28rem]"
+            className="pointer-events-none absolute inset-0 z-0 grid place-items-center opacity-45 lg:static lg:z-auto lg:block lg:opacity-100"
           >
-            <div
-              className="absolute inset-0 -z-10"
-              style={{
-                background:
-                  'radial-gradient(50% 46% at 50% 80%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 70%)',
-              }}
-            />
-            <HeroCanvas className="h-full w-full" />
-          </motion.div>
+            <motion.div
+              variants={v(scaleIn)}
+              initial="hidden"
+              whileInView="visible"
+              viewport={viewportOnce}
+              className="relative isolate aspect-square w-[min(84vw,24rem)] lg:mx-auto lg:w-full lg:max-w-[28rem]"
+            >
+              <div
+                className="absolute inset-0 -z-10"
+                style={{
+                  background:
+                    'radial-gradient(50% 46% at 50% 80%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 70%)',
+                }}
+              />
+              <HeroCanvas className="h-full w-full" />
+            </motion.div>
+          </div>
         </div>
 
         <TechStack />

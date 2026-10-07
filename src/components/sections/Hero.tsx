@@ -4,7 +4,7 @@ import { useRef, useState, type CSSProperties } from 'react';
 import { Download, Eye } from 'lucide-react';
 import { BrandIcon } from '@/components/BrandIcons';
 import { CvPreviewDialog } from '@/components/ui/CvPreviewDialog';
-import { HeroCanvas } from '@/components/three/HeroCanvas';
+import { JupiterHero } from '@/components/hero/JupiterHero';
 import { profile } from '@/data/profile';
 import { Reveal } from '@/components/ui/Reveal';
 import { DURATION, EASE, STAGGER_STEP } from '@/lib/motion';
@@ -83,7 +83,10 @@ export function Hero() {
           .hero-rise { animation: none; }
         }
       `}</style>
-      <div className="mx-auto w-full max-w-6xl px-5 pb-16 pt-28 sm:px-8 sm:pt-32 lg:pb-24 lg:pt-36">
+      {/* `pb` used to be 64/96px, which measured as 96px of empty hero below the
+          graphic plus 112px of the next section's own top padding — 208px of
+          nothing between the planet and the Projects heading. */}
+      <div className="mx-auto w-full max-w-6xl px-5 pb-8 pt-28 sm:px-8 sm:pt-32 lg:pb-10 lg:pt-36">
         <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-16">
           {/* Copy, first in the DOM, and lifted above the graphic, which is the
               hero's background on a phone. */}
@@ -168,31 +171,41 @@ export function Hero() {
             </ul>
           </div>
 
-          {/* The 3D band. From `lg` up it is the right-hand column of the grid;
-              below `lg` it leaves the flow and becomes the hero's background,
-              `absolute inset-0` anchors to the section (the grid is not itself
-              positioned), so the layer covers the whole hero and the graphic
-              sits centred behind the copy rather than pushing it down.
-              `pointer-events-none` keeps it from stealing the CTAs' clicks, and
-              the dimming lives on this wrapper rather than on the reveal child,
-              where the hidden state's opacity would fight it. */}
+          {/* The graphic band. From `lg` up it is the right-hand column of the
+              grid; below `lg` it stays in the flow and sits under the copy.
+
+              It used to leave the flow below `lg` and become a dimmed
+              background behind the hero. Measured, that was not survivable: the
+              planet's lit band lifted the pixels under the stats list to about
+              2.5:1 against the muted 11px labels, and dimming it enough to clear
+              4.5:1 left the graphic effectively invisible — the arithmetic
+              wanted roughly a seventh of the strength it had. Sitting in the
+              flow instead, no copy is ever over it, so it can be shown whole on
+              a phone rather than at 45% and still failing.
+
+              `pointer-events-none` keeps it from stealing the CTAs' clicks. */}
+          {/* Decorative: the live planet inside is drag-to-spin, but it carries
+              no information, so it stays out of the accessibility tree and out
+              of the tab order. `pointer-events-none` is undone on the canvas
+              itself, which is the only part that wants the pointer. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 z-0 grid place-items-center opacity-45 lg:static lg:z-auto lg:block lg:opacity-100"
+            className="pointer-events-none relative z-0 mx-auto grid w-full place-items-center lg:static lg:z-auto lg:mx-0 lg:block"
           >
             <Reveal
               y={0}
               scale={0.9}
-              className="relative isolate aspect-square w-[min(84vw,24rem)] lg:mx-auto lg:w-full lg:max-w-[28rem]"
+              className="relative isolate aspect-square w-[min(112%,25rem)] lg:mx-auto lg:w-[112%] lg:max-w-none"
             >
               <div
+                aria-hidden="true"
                 className="absolute inset-0 -z-10"
                 style={{
                   background:
                     'radial-gradient(50% 46% at 50% 80%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 70%)',
                 }}
               />
-              <HeroCanvas className="h-full w-full" />
+              <JupiterHero className="h-full w-full" />
             </Reveal>
           </div>
         </div>

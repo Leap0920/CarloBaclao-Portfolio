@@ -1,11 +1,9 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Section, SectionHeading } from '@/components/ui/Section';
+import { Reveal } from '@/components/ui/Reveal';
 import { education } from '@/data/resume';
 import { formatRange } from '@/lib/format';
-import { resolveVariants, useSlideVariants, viewportOnce } from '@/lib/motion';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { cn } from '@/lib/cn';
 
 /** The 20px glass recipe. `rounded-card` is the contract name; the landed 20px
@@ -14,9 +12,6 @@ const GLASS =
   'rounded-card rounded border border-border bg-surface shadow-[var(--shadow-card)]';
 
 export function Education() {
-  const reduced = useReducedMotion();
-  const { slideLeft, slideRight } = useSlideVariants();
-
   return (
     <Section id="education">
       <SectionHeading
@@ -27,19 +22,15 @@ export function Education() {
       />
 
       {/* Schools — the first card enters from the left, the second from the right. */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-5 sm:gap-6 md:grid-cols-2">
         {education.map((item, index) => {
-          // `resolveVariants` drops the slide (and its offset) under reduced motion.
-          const variants = resolveVariants(index % 2 === 0 ? slideLeft : slideRight, reduced);
-
           return (
-            <motion.article
+            <Reveal
               key={item.id}
-              variants={variants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={viewportOnce}
-              className={cn(GLASS, 'p-6')}
+              as="article"
+              y={0}
+              x={index % 2 === 0 ? -80 : 80}
+              className={cn(GLASS, 'p-5 sm:p-6')}
             >
               <p className="font-mono text-micro uppercase tracking-[0.16em] text-accent">
                 {formatRange(item.range, { month: false })}
@@ -56,7 +47,7 @@ export function Education() {
               {item.note ? (
                 <p className="mt-4 text-sm leading-relaxed text-muted">{item.note}</p>
               ) : null}
-            </motion.article>
+            </Reveal>
           );
         })}
       </div>

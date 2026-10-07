@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Float, PointMaterial, Points } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -243,6 +243,31 @@ function Composition({
 }
 
 /**
+ * The scene renders on demand rather than every frame the browser offers.
+ *
+ * An ambient drift does not need 60 fps, and this canvas shares the main
+ * thread with the page: on a mid-range machine the always-on loop was the
+ * single largest task source on the page, and it showed up as dropped frames
+ * while the hero was on screen. Half the frames costs about half the work and
+ * is invisible here — every animation in the scene is driven by `delta`, so
+ * they advance by real elapsed time and keep their speed exactly.
+ */
+const SCENE_FPS = 30;
+
+/** Ticks the demand loop at a fixed rate while the hero is on screen. */
+function FrameGate({ enabled }: { enabled: boolean }) {
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const timer = window.setInterval(() => invalidate(), 1000 / SCENE_FPS);
+    return () => window.clearInterval(timer);
+  }, [enabled, invalidate]);
+
+  return null;
+}
+
+/**
  * The floating, cursor-reactive hero object: a low-poly core inside a
  * wireframe cage, ringed and dusted with a particle field. Every geometry and
  * material is created through JSX, so R3F disposes them when the scene
@@ -257,11 +282,12 @@ export default function HeroScene({ still = false, active = true }: HeroScenePro
       camera={{ position: [0, 0, 6.2], fov: 45 }}
       dpr={lowPower ? [1, 1.25] : [1, 1.6]}
       flat
-      frameloop={still ? 'demand' : active ? 'always' : 'never'}
+      frameloop={active ? 'demand' : 'never'}
       gl={{ antialias: !lowPower, alpha: true, powerPreference: 'high-performance' }}
       style={{ pointerEvents: 'none' }}
       aria-hidden="true"
     >
+      <FrameGate enabled={active && !still} />
       <ambientLight intensity={0.6} />
       <directionalLight position={[4, 6, 6]} intensity={1.6} />
       <directionalLight position={[-5, -3, -4]} intensity={0.4} color={accent} />

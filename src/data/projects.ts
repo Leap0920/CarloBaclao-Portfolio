@@ -6,7 +6,7 @@ export const projects: Project[] = [
     name: 'DCPH Tracker',
     subtitle: 'Community tracking platform for Detective Conan PH',
     description:
-      'Episode, movie, and OVA progress tracking with cross-device sync, watch guides, leaderboards, and a searchable case index, serving 500 users in a live fan community.',
+      'Episode, movie, and OVA progress tracking for a live fan community of 500 users, with an integrated AI chatbot, sync across devices, watch guides, leaderboards, and a searchable case index. Metadata is pulled from five sources: Kitsu, AniList, Jikan, the DC Wiki, and Wikipedia.',
     tech: ['Next.js', 'React', 'Tailwind CSS', 'Vercel'],
     image: '/images/projects/dcph/cover.png',
     url: 'https://dcphtracker.vercel.app',

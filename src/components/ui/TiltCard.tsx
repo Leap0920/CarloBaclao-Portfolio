@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
-import { motion, useSpring } from 'framer-motion';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { cn } from '@/lib/cn';
 
 /** Maximum rotation, in degrees, at the outer edges of the card. */
 const MAX_TILT = 6;
-
-/** Damped spring — the pointer drives a target, the spring catches up. */
-const SPRING = { stiffness: 220, damping: 24, mass: 0.4 } as const;
 
 /**
  * A pointer-tracking 3D tilt, built once and reused.
@@ -22,6 +24,12 @@ const SPRING = { stiffness: 220, damping: 24, mass: 0.4 } as const;
  *
  * Only `transform` moves, and `will-change: transform` is set *only* on
  * the enabled element — never across the grid.
+ *
+ * The tilt is hand-rolled rather than spring-driven: the pointer writes the
+ * rotation straight to the element's transform, and a short ease-out transition
+ * on that transform stands in for the previous spring, so the card still lags
+ * the cursor instead of snapping to it. The component carries no framer
+ * dependency.
  */
 export function TiltCard({
   children,
@@ -35,6 +43,7 @@ export function TiltCard({
 }) {
   const reduced = useReducedMotion();
   const [finePointer, setFinePointer] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const media = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -46,26 +55,36 @@ export function TiltCard({
 
   const enabled = finePointer && !reduced;
 
-  const rotateX = useSpring(0, SPRING);
-  const rotateY = useSpring(0, SPRING);
+  // The transform is written imperatively, so React cannot clear it. When the
+  // card stops being interactive, drop whatever tilt it was left holding.
+  useEffect(() => {
+    if (enabled) return;
+    const card = cardRef.current;
+    if (card) card.style.transform = '';
+  }, [enabled]);
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!enabled) return;
-    const rect = event.currentTarget.getBoundingClientRect();
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return;
     const px = (event.clientX - rect.left) / rect.width - 0.5;
     const py = (event.clientY - rect.top) / rect.height - 0.5;
-    rotateY.set(px * max * 2);
-    rotateX.set(-py * max * 2);
+    const rotateY = px * max * 2;
+    const rotateX = -py * max * 2;
+    card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
   };
 
   const reset = () => {
-    rotateX.set(0);
-    rotateY.set(0);
+    const card = cardRef.current;
+    if (!card) return;
+    card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
   };
 
   return (
-    <motion.div
+    <div
+      ref={cardRef}
       data-tilt={enabled ? 'on' : 'off'}
       onPointerMove={handlePointerMove}
       onPointerLeave={reset}
@@ -73,17 +92,15 @@ export function TiltCard({
       style={
         enabled
           ? {
-              rotateX,
-              rotateY,
-              transformPerspective: 900,
               transformStyle: 'preserve-3d',
               willChange: 'transform',
+              transition: 'transform 160ms ease-out',
             }
           : undefined
       }
       className={cn('relative', className)}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

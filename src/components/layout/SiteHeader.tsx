@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { navSections } from '@/data/navigation';
 import { profile } from '@/data/profile';
@@ -9,7 +8,6 @@ import { useMountTransition } from '@/hooks/useMountTransition';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useScrollSpy, useScrolled } from '@/hooks/useScrollSpy';
 import { cn } from '@/lib/cn';
-import { EASE } from '@/lib/motion';
 
 /** Keep in step with the drawer's CSS transition. */
 const DRAWER_MS = 300;
@@ -56,13 +54,11 @@ export function SiteHeader() {
     return () => window.clearTimeout(timer);
   }, [drawerVisible]);
 
+  // The header is present immediately — a fixed navbar that fades in would hold
+  // the whole page back for the sake of chrome, so it carries no entrance at
+  // all. Only the scrolled border/background change is transitioned, in CSS.
   return (
-    <motion.header
-      // Opacity stays at 1 so the nav is never stuck invisible before (or
-      // without) hydration; only a restrained 10px settle is animated.
-      initial={{ opacity: 1, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={reduced ? { duration: 0 } : { duration: 0.6, ease: EASE }}
+    <header
       className={cn(
         'fixed inset-x-0 top-0 z-50 print-hide',
         'transition-[background-color,border-color] duration-300',
@@ -102,13 +98,9 @@ export function SiteHeader() {
                     )}
                   >
                     {isActive ? (
-                      <motion.span
-                        layoutId="nav-active"
+                      <span
                         aria-hidden="true"
                         className="absolute inset-0 rounded-full bg-accent/10 ring-1 ring-accent/25"
-                        transition={
-                          reduced ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 32 }
-                        }
                       />
                     ) : null}
                     <span className="relative z-10">{section.label}</span>
@@ -174,6 +166,6 @@ export function SiteHeader() {
           </div>
         </div>
       ) : null}
-    </motion.header>
+    </header>
   );
 }

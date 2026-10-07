@@ -1,18 +1,25 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, ChevronUp, ExternalLink, X as CloseIcon } from 'lucide-react';
 import { BrandIcon } from '@/components/BrandIcons';
+import { Reveal } from '@/components/ui/Reveal';
 import { Section, SectionHeading } from '@/components/ui/Section';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { profile } from '@/data/profile';
 import { projects } from '@/data/projects';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { cn } from '@/lib/cn';
-import { EASE, viewportOnce, useSlideVariants } from '@/lib/motion';
 import type { Project, ProjectCategory } from '@/types';
 
 type Filter = 'All' | ProjectCategory;
@@ -23,11 +30,14 @@ const FILTERS: Filter[] = [
   ...Array.from(new Set(projects.map((project) => project.category))),
 ];
 
-/** The project that leads the band. Everything else rides the carousel. */
+/**
+ * The project the band opens on. It also leads the list, which is what puts
+ * DCPH-Tracker on the first line.
+ */
 const HIGHLIGHT_SLUG = 'dcph-tracker';
 
 /**
- * A project carries one `url`; split it into the two links the cards show.
+ * A project carries one `url`; split it into the two links the view shows.
  * When that url is a repository, it is the code link and there is no live
  * site — never label a repo as a deployment.
  */
@@ -39,14 +49,24 @@ function projectLinks(project: Project): { live?: string; repo?: string } {
   };
 }
 
-/* ── Card ─────────────────────────────────────────────────────────── */
+/* ── View ─────────────────────────────────────────────────────────── */
 
-function ProjectCard({
+/**
+ * Whatever the list has selected, shown at size: the art, the description and
+ * the whole tech list, with the dialog one press away. It carries no trigger
+ * over its own surface — the panel is content now, and the list beside it is
+ * what moves the selection.
+ */
+function ProjectView({
   project,
+  position,
+  total,
   onOpen,
   setTrigger,
 }: {
   project: Project;
+  position: number;
+  total: number;
   onOpen: () => void;
   setTrigger: (el: HTMLButtonElement | null) => void;
 }) {
@@ -65,120 +85,8 @@ function ProjectCard({
           }}
         />
 
-        {/* One stretched trigger for the whole card. Sits above the art,
-            below the real links (which re-raise themselves with z-20). */}
-        <button
-          ref={setTrigger}
-          type="button"
-          onClick={onOpen}
-          aria-label={`Open details for ${project.name}`}
-          className="absolute inset-0 z-10 rounded-card"
-        />
-
-        <div className="pointer-events-none relative flex h-full flex-col">
-          <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
-            <Image
-              src={project.image}
-              alt={`${project.name} — ${project.subtitle}`}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-            />
-          </div>
-
-          <div className="flex flex-1 flex-col p-5 sm:p-6">
-            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-              {project.category} · {project.year}
-            </p>
-            <h3 className="mt-2 font-display text-lg font-semibold tracking-tight text-foreground">
-              {project.name}
-            </h3>
-            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">
-              {project.description}
-            </p>
-
-            <ul className="mt-4 flex flex-wrap gap-1.5">
-              {project.tech.slice(0, 5).map((tech) => (
-                <li
-                  key={tech}
-                  className="rounded-full border border-border bg-background/40 px-2.5 py-1 font-mono text-[11px] text-muted"
-                >
-                  {tech}
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-1 pt-5">
-              {live ? (
-                <a
-                  href={live}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pointer-events-auto relative z-20 inline-flex min-h-12 items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent"
-                >
-                  Live
-                  <ExternalLink size={14} aria-hidden="true" />
-                </a>
-              ) : null}
-              {repo ? (
-                <a
-                  href={repo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pointer-events-auto relative z-20 inline-flex min-h-12 items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent"
-                >
-                  <BrandIcon name="github" size={15} />
-                  GitHub
-                </a>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </article>
-    </TiltCard>
-  );
-}
-
-/* ── Highlight ────────────────────────────────────────────────────── */
-
-/**
- * The project that leads the band: the same card language as the carousel, at
- * a larger size, with the description and the full tech list given room to
- * breathe. It opens the same dialog.
- */
-function ProjectHighlight({
-  project,
-  onOpen,
-  setTrigger,
-}: {
-  project: Project;
-  onOpen: () => void;
-  setTrigger: (el: HTMLButtonElement | null) => void;
-}) {
-  const { live, repo } = projectLinks(project);
-
-  return (
-    <TiltCard className="h-full">
-      <article className="group relative flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface transition-transform duration-300 ease-out hover:-translate-y-1.5">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 rounded-card opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{
-            background:
-              'radial-gradient(90% 65% at 50% 0%, color-mix(in oklab, var(--accent) 24%, transparent), transparent 72%)',
-          }}
-        />
-
-        <button
-          ref={setTrigger}
-          type="button"
-          onClick={onOpen}
-          aria-label={`Open details for ${project.name}`}
-          className="absolute inset-0 z-10 rounded-card"
-        />
-
-        <div className="pointer-events-none relative flex h-full flex-col">
-          <div className="relative aspect-[16/10] overflow-hidden bg-surface-2 sm:aspect-[16/9]">
+        <div className="relative flex h-full flex-col">
+          <div className="relative aspect-[2/1] overflow-hidden bg-surface-2 sm:aspect-[16/9]">
             <Image
               src={project.image}
               alt={`${project.name} — ${project.subtitle}`}
@@ -186,22 +94,26 @@ function ProjectHighlight({
               sizes="(max-width: 1024px) 100vw, 640px"
               className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             />
-            <span className="absolute left-4 top-4 rounded-full border border-border bg-background/85 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
-              Featured
+            {/* Where this project sits in the set — the same count the index
+                shows, so the two columns agree at a glance. */}
+            <span className="absolute left-3 top-3 rounded-full border border-border bg-background px-2.5 py-1 font-mono text-[11px] tabular-nums text-muted">
+              <span className="text-foreground">{String(position).padStart(2, '0')}</span>
+              {' / '}
+              {String(total).padStart(2, '0')}
             </span>
           </div>
 
-          <div className="flex flex-1 flex-col p-5 sm:p-7">
+          <div className="flex flex-1 flex-col p-4 sm:p-7">
             <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
               {project.category} · {project.year}
             </p>
-            <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            <h3 className="mt-2 font-display text-xl font-semibold tracking-tight text-foreground sm:text-3xl">
               {project.name}
             </h3>
             <p className="mt-1.5 text-sm font-medium text-muted">{project.subtitle}</p>
-            <p className="mt-4 text-sm leading-relaxed text-muted">{project.description}</p>
+            <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-muted sm:mt-4 sm:line-clamp-none">{project.description}</p>
 
-            <ul className="mt-5 flex flex-wrap gap-1.5">
+            <ul className="mt-4 flex flex-wrap gap-1.5 sm:mt-5">
               {project.tech.map((tech) => (
                 <li
                   key={tech}
@@ -212,13 +124,22 @@ function ProjectHighlight({
               ))}
             </ul>
 
-            <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-1 pt-6">
+            <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 pt-4 sm:gap-x-5 sm:pt-6">
+              <button
+                ref={setTrigger}
+                type="button"
+                onClick={onOpen}
+                aria-label={`Open details for ${project.name}`}
+                className="inline-flex min-h-11 sm:min-h-12 items-center rounded-full border border-border px-4 text-sm font-medium text-foreground transition-colors hover:border-accent/50 hover:text-accent"
+              >
+                View details
+              </button>
               {live ? (
                 <a
                   href={live}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="pointer-events-auto relative z-20 inline-flex min-h-12 items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent"
+                  className="inline-flex min-h-11 sm:min-h-12 items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent"
                 >
                   Live
                   <ExternalLink size={14} aria-hidden="true" />
@@ -229,7 +150,7 @@ function ProjectHighlight({
                   href={repo}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="pointer-events-auto relative z-20 inline-flex min-h-12 items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent"
+                  className="inline-flex min-h-11 sm:min-h-12 items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent"
                 >
                   <BrandIcon name="github" size={15} />
                   GitHub
@@ -249,7 +170,6 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 function ProjectDialog({ project, onClose }: { project: Project; onClose: () => void }) {
-  const reduced = useReducedMotion();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const { live, repo } = projectLinks(project);
@@ -311,30 +231,21 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
   const descriptionId = `project-description-${project.slug}`;
 
   return createPortal(
-    <motion.div
-      className="fixed inset-0 z-[120] flex items-end justify-center p-3 sm:items-center sm:p-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={reduced ? { duration: 0 } : { duration: 0.25, ease: EASE }}
-    >
+    <div className="project-dialog-backdrop fixed inset-0 z-[120] flex items-end justify-center p-3 sm:items-center sm:p-6">
       <div
         aria-hidden="true"
         onClick={onClose}
         className="absolute inset-0 bg-background/95"
       />
 
-      <motion.div
+      <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 16 }}
-        animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
-        transition={reduced ? { duration: 0 } : { duration: 0.3, ease: EASE }}
-        className="relative z-10 max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-card border border-border bg-surface shadow-2xl"
+        className="project-dialog-panel relative z-10 max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-card border border-border bg-surface shadow-2xl"
       >
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-surface-2">
           <Image
@@ -409,8 +320,8 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
             ) : null}
           </div>
         </div>
-      </motion.div>
-    </motion.div>,
+      </div>
+    </div>,
     document.body,
   );
 }
@@ -419,25 +330,16 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
 
 export function Projects() {
   const reduced = useReducedMotion();
-  const { slideLeft, slideRight } = useSlideVariants();
   const [filter, setFilter] = useState<Filter>('All');
   const [openSlug, setOpenSlug] = useState<string | null>(null);
-
-  /**
-   * The resolved travel distance (80px desktop / 30px phone, 0 when motion is
-   * off). `useSlideVariants` can only resolve the breakpoint after mount —
-   * there is no `window` during SSR — and Framer Motion captures `initial`
-   * once per mount, so a card that mounted with the desktop offset would keep
-   * sweeping 80px on a phone. Keying the grid on the resolved distance
-   * re-mounts it once, with the phone distance applied.
-   */
-  const travel = Math.abs(Number((slideLeft.hidden as { x?: number } | undefined)?.x ?? 0));
-
-  const trackRef = useRef<HTMLUListElement>(null);
-  const [edge, setEdge] = useState({ start: true, end: true });
+  const [selectedSlug, setSelectedSlug] = useState<string>(HIGHLIGHT_SLUG);
+  /** Which way the last move went, so the view can arrive from that side. */
+  const [direction, setDirection] = useState<1 | -1>(1);
 
   const triggers = useRef(new Map<string, HTMLButtonElement>());
   const lastTrigger = useRef<HTMLButtonElement | null>(null);
+  /** The view panel, so a press on a phone can bring it into sight. */
+  const viewRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(
     () => (filter === 'All' ? projects : projects.filter((p) => p.category === filter)),
@@ -445,19 +347,23 @@ export function Projects() {
   );
 
   /**
-   * The featured project holds the left of the band; the rest ride the carousel
-   * beside it. Under a filter the featured slot falls to the first match, so the
-   * band never leads with a project the reader just filtered away.
+   * What the left of the band shows. The selection is held by slug, so it
+   * survives a filter that happens to hide it: when the selected project is
+   * not in the filtered set the view falls to the leader, then to the first
+   * match — never to nothing while the set is non-empty.
    */
-  const highlight = useMemo(
-    () => filtered.find((project) => project.slug === HIGHLIGHT_SLUG) ?? filtered[0] ?? null,
-    [filtered],
+  const selected = useMemo(
+    () =>
+      filtered.find((project) => project.slug === selectedSlug) ??
+      filtered.find((project) => project.slug === HIGHLIGHT_SLUG) ??
+      filtered[0] ??
+      null,
+    [filtered, selectedSlug],
   );
 
-  const carousel = useMemo(
-    () => (highlight ? filtered.filter((project) => project.slug !== highlight.slug) : []),
-    [filtered, highlight],
-  );
+  const selectedIndex = selected
+    ? filtered.findIndex((project) => project.slug === selected.slug)
+    : -1;
 
   const openProject = useMemo(
     () => projects.find((project) => project.slug === openSlug) ?? null,
@@ -475,46 +381,122 @@ export function Projects() {
     window.requestAnimationFrame(() => target?.focus({ preventScroll: true }));
   }, []);
 
-  /** Keep the carousel arrows honest: they disable at the ends of the track. */
-  const syncEdges = useCallback(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    setEdge({
-      start: el.scrollTop <= 2,
-      end: el.scrollTop + el.clientHeight >= el.scrollHeight - 2,
-    });
-  }, []);
+  /**
+   * Select by position, and on a phone bring the view into sight. Every move
+   * goes through here — a row press, an arrow, a key — so the travel direction
+   * is always known and no path can skip the nudge.
+   *
+   * Below `lg` the view sits ABOVE the index, so a row press changes something
+   * that is off screen above the reader. It only nudges when the panel is fully
+   * off screen, and only as far as `block: 'nearest'` needs — never yanking a
+   * half-visible panel.
+   */
+  const selectIndex = useCallback(
+    (next: number) => {
+      const target = filtered[next];
+      if (!target) return;
 
-  useEffect(() => {
-    syncEdges();
-    const el = trackRef.current;
-    if (!el) return;
-    el.addEventListener('scroll', syncEdges, { passive: true });
-    window.addEventListener('resize', syncEdges);
-    return () => {
-      el.removeEventListener('scroll', syncEdges);
-      window.removeEventListener('resize', syncEdges);
-    };
-  }, [syncEdges, carousel.length, filter]);
+      const index = filtered.findIndex((project) => project.slug === selectedSlug);
+      const from = index === -1 ? 0 : index;
+      setDirection(next >= from ? 1 : -1);
+      setSelectedSlug(target.slug);
 
-  /** One card per press, so a press never lands the reader mid-card. */
-  const step = useCallback(
-    (direction: 1 | -1) => {
-      const el = trackRef.current;
-      if (!el) return;
-      const card = el.querySelector('li');
-      const distance = card ? card.getBoundingClientRect().height + 20 : el.clientHeight * 0.8;
-      el.scrollBy({ top: direction * distance, behavior: reduced ? 'auto' : 'smooth' });
+      if (window.matchMedia('(min-width: 1024px)').matches) return;
+      const node = viewRef.current;
+      if (!node) return;
+      const rect = node.getBoundingClientRect();
+      if (rect.top >= window.innerHeight || rect.bottom <= 0) {
+        node.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' });
+      }
     },
-    [reduced],
+    [filtered, selectedSlug, reduced],
+  );
+
+  /**
+   * One press = one project, so the view never lands between two. The set
+   * wraps: past the last project comes the first, and before the first comes
+   * the last. That is why the arrows are never disabled — there is always
+   * somewhere to go.
+   */
+  const step = useCallback(
+    (delta: 1 | -1) => {
+      const count = filtered.length;
+      if (count === 0) return;
+      const index = filtered.findIndex((project) => project.slug === selectedSlug);
+      const from = index === -1 ? 0 : index;
+      selectIndex((from + delta + count) % count);
+    },
+    [filtered, selectedSlug, selectIndex],
+  );
+
+  /**
+   * The index is a listbox in everything but name: Up/Down walk it and wrap
+   * with it, Home/End jump to the ends, and focus moves with the selection so
+   * the next press lands on the row the reader just chose.
+   */
+  const onListKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLUListElement>) => {
+      const { key } = event;
+      if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Home' && key !== 'End') return;
+      event.preventDefault();
+
+      const count = filtered.length;
+      if (count === 0) return;
+      const index = filtered.findIndex((project) => project.slug === selectedSlug);
+      const from = index === -1 ? 0 : index;
+      const next =
+        key === 'ArrowDown'
+          ? (from + 1) % count
+          : key === 'ArrowUp'
+            ? (from - 1 + count) % count
+            : key === 'Home'
+              ? 0
+              : count - 1;
+
+      selectIndex(next);
+      event.currentTarget
+        .querySelectorAll<HTMLButtonElement>('button')
+        [next]?.focus({ preventScroll: true });
+    },
+    [filtered, selectedSlug, selectIndex],
   );
 
   return (
     <Section id="projects">
+      {/* The three entrance animations this section still owns, as CSS
+          keyframes rather than Framer variants: the direction-aware view swap
+          and the two dialog surfaces. The scroll reveals are the `Reveal`
+          primitive's job. All three stand down under reduced motion. */}
+      <style>{`
+        @keyframes project-swap-in {
+          from { opacity: 0; transform: translateY(var(--swap-y, 0px)); }
+          to { opacity: 1; transform: none; }
+        }
+        .project-swap { animation: project-swap-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+        @keyframes project-dialog-backdrop-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .project-dialog-backdrop { animation: project-dialog-backdrop-in 0.25s ease-out both; }
+
+        @keyframes project-dialog-panel-in {
+          from { opacity: 0; transform: translateY(16px) scale(0.96); }
+          to { opacity: 1; transform: none; }
+        }
+        .project-dialog-panel { animation: project-dialog-panel-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .project-swap,
+          .project-dialog-backdrop,
+          .project-dialog-panel { animation: none; }
+        }
+      `}</style>
+
       <SectionHeading
         index="01"
         eyebrow="Projects"
-        title="Things I built that people use"
+        title="Things that I built"
         action={
           <a
             href={profile.github}
@@ -534,7 +516,7 @@ export function Projects() {
         className="flex flex-wrap gap-2"
       >
         {FILTERS.map((item) => {
-          const selected = item === filter;
+          const isFilter = item === filter;
           const count =
             item === 'All'
               ? projects.length
@@ -544,12 +526,17 @@ export function Projects() {
             <button
               key={item}
               type="button"
-              onClick={() => setFilter(item)}
-              aria-pressed={selected}
+              onClick={() => {
+                setFilter(item);
+                // A new set opens on its leader again rather than on whatever
+                // happened to be selected under the previous one.
+                setSelectedSlug(HIGHLIGHT_SLUG);
+              }}
+              aria-pressed={isFilter}
               aria-label={`${item}, ${count} ${count === 1 ? 'project' : 'projects'}`}
               className={cn(
-                'inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium',
-                selected
+                'inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors',
+                isFilter
                   ? 'border-accent bg-accent text-on-accent'
                   : 'border-border bg-surface text-muted hover:text-foreground',
               )}
@@ -559,7 +546,7 @@ export function Projects() {
                 aria-hidden="true"
                 className={cn(
                   'font-mono text-[11px] tabular-nums',
-                  selected ? 'text-on-accent' : 'text-muted',
+                  isFilter ? 'text-on-accent' : 'text-muted',
                 )}
               >
                 {count}
@@ -569,118 +556,170 @@ export function Projects() {
         })}
       </div>
 
-      {highlight ? (
-        <div
-          key={travel}
-          className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-8"
-        >
-          {/* The featured project, on the left. */}
-          <motion.div
-            variants={slideLeft}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportOnce}
-            transition={reduced ? { duration: 0 } : { duration: 0.4, ease: EASE }}
-            className="min-w-0"
-          >
-            <ProjectHighlight
-              project={highlight}
-              onOpen={() => open(highlight.slug)}
-              setTrigger={(el) => {
-                if (el) triggers.current.set(highlight.slug, el);
-                else triggers.current.delete(highlight.slug);
-              }}
-            />
-          </motion.div>
-
-          {/* Everything else, riding the carousel, on the right. */}
-          <motion.div
-            variants={slideRight}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportOnce}
-            transition={reduced ? { duration: 0 } : { duration: 0.4, ease: EASE }}
-            className="min-w-0 lg:relative lg:h-full"
-          >
-            {/* Absolutely positioned from `lg` up, so this column takes its
-                height from the featured card beside it. Seven stacked cards
-                measure ~3500px tall; left in flow they would stretch the grid
-                row to match instead of scrolling inside it. Below `lg` the
-                column is in flow and the page itself does the scrolling, which
-                keeps touch users out of a nested scroller. */}
-            <div className="flex flex-col lg:absolute lg:inset-0">
-              <div className="flex items-center justify-between gap-4">
-                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-                  {carousel.length > 0 ? `More projects · ${carousel.length}` : 'More projects'}
-                </p>
-                {carousel.length > 0 ? (
+      {filtered.length > 0 ? (
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-8">
+          {/* The index. It stays first in the DOM — it is the control — but it
+              is ordered AFTER the view at every width, so on a phone the
+              highlights are what you land on and the list follows underneath. */}
+          <Reveal x={80} y={0} className="order-2 min-w-0">
+            <div className="flex items-center justify-between gap-4">
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+                Projects · {filtered.length}
+              </p>
+              <div className="flex items-center gap-3">
+                {/* The arrows say which way the reader can go; this says how
+                    far along they are. */}
+                <span className="font-mono text-[11px] tabular-nums text-faint">
+                  <span className="text-foreground">
+                    {selectedIndex >= 0 ? String(selectedIndex + 1).padStart(2, '0') : '--'}
+                  </span>
+                  {' / '}
+                  {String(filtered.length).padStart(2, '0')}
+                </span>
+                {filtered.length > 1 ? (
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => step(-1)}
-                      disabled={edge.start}
-                      aria-label="Previous projects"
-                      className="grid h-10 w-10 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-40 disabled:hover:border-border disabled:hover:text-foreground"
+                      aria-label="Previous project"
+                      className="grid h-11 w-11 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent"
                     >
                       <ChevronUp size={18} aria-hidden="true" />
                     </button>
                     <button
                       type="button"
                       onClick={() => step(1)}
-                      disabled={edge.end}
-                      aria-label="Next projects"
-                      className="grid h-10 w-10 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-40 disabled:hover:border-border disabled:hover:text-foreground"
+                      aria-label="Next project"
+                      className="grid h-11 w-11 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent"
                     >
                       <ChevronDown size={18} aria-hidden="true" />
                     </button>
                   </div>
                 ) : null}
               </div>
-
-              {carousel.length > 0 ? (
-                <ul
-                  ref={trackRef}
-                  aria-label="More projects"
-                  className="no-scrollbar mt-4 flex flex-col gap-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto"
-                >
-                  {carousel.map((project) => (
-                    <li key={project.slug} className="w-full">
-                      <ProjectCard
-                        project={project}
-                        onOpen={() => open(project.slug)}
-                        setTrigger={(el) => {
-                          if (el) triggers.current.set(project.slug, el);
-                          else triggers.current.delete(project.slug);
-                        }}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p
-                  role="status"
-                  className="mt-4 rounded-card border border-border bg-surface p-6 text-sm text-muted"
-                >
-                  No other {filter} projects — try another category.
-                </p>
-              )}
             </div>
-          </motion.div>
+
+            <ul
+              aria-label="Projects"
+              onKeyDown={onListKeyDown}
+              className="mt-4 flex flex-col gap-1.5"
+            >
+              {filtered.map((project, index) => {
+                const isSelected = project.slug === selected?.slug;
+
+                return (
+                  <li key={project.slug}>
+                    <Reveal y={14} delay={Math.min(index, 7) * 0.04}>
+                      <button
+                        type="button"
+                        onClick={() => selectIndex(index)}
+                        aria-pressed={isSelected}
+                        className={cn(
+                          'group relative flex w-full items-center gap-3 overflow-hidden rounded-card border py-2.5 pl-4 pr-3.5 text-left transition-colors duration-200',
+                          isSelected
+                            ? 'border-accent/50 bg-surface-2'
+                            : 'border-transparent hover:border-border hover:bg-surface',
+                        )}
+                      >
+                        {/* The rail marks the selection without moving a box. */}
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            'absolute inset-y-2.5 left-0 w-[3px] rounded-full bg-accent transition-opacity duration-200',
+                            isSelected ? 'opacity-100' : 'opacity-0',
+                          )}
+                        />
+
+                        {/* A recognisable thumbnail does the work a number
+                            cannot — the covers are the same art as the view. */}
+                        <span className="relative block h-11 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-2">
+                          <Image
+                            src={project.image}
+                            alt=""
+                            fill
+                            sizes="64px"
+                            className={cn(
+                              'object-cover transition-[opacity,scale] duration-200',
+                              isSelected
+                                ? 'scale-105 opacity-100'
+                                : 'opacity-60 group-hover:scale-105 group-hover:opacity-100',
+                            )}
+                          />
+                        </span>
+
+                        <span className="min-w-0 flex-1">
+                          <span
+                            className={cn(
+                              'block font-mono text-[11px] tabular-nums tracking-[0.16em]',
+                              isSelected ? 'text-accent' : 'text-faint',
+                            )}
+                          >
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                          <span
+                            className={cn(
+                              'mt-1 block break-words text-sm font-medium',
+                              isSelected ? 'text-foreground' : 'text-muted group-hover:text-foreground',
+                            )}
+                          >
+                            {project.name}
+                          </span>
+                        </span>
+
+                        <span
+                          className={cn(
+                            'hidden shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] sm:block',
+                            isSelected ? 'text-accent' : 'text-faint',
+                          )}
+                        >
+                          {project.category}
+                        </span>
+                      </button>
+                    </Reveal>
+                  </li>
+                );
+              })}
+            </ul>
+          </Reveal>
+
+          {/* The view of whatever the list has selected. Left column from `lg`,
+              and first on a phone so the highlights lead. Announced politely so
+              a screen reader hears the swap. */}
+          <Reveal x={-80} y={0} className="order-1 min-w-0">
+            <div ref={viewRef} aria-live="polite" className="h-full">
+              {selected ? (
+                <div
+                  key={selected.slug}
+                  style={{ '--swap-y': `${10 * direction}px` } as CSSProperties}
+                  className="project-swap h-full"
+                >
+                  <ProjectView
+                    project={selected}
+                    position={selectedIndex + 1}
+                    total={filtered.length}
+                    onOpen={() => open(selected.slug)}
+                    setTrigger={(el) => {
+                      if (el) triggers.current.set(selected.slug, el);
+                      else triggers.current.delete(selected.slug);
+                    }}
+                  />
+                </div>
+              ) : null}
+            </div>
+          </Reveal>
         </div>
       ) : (
         <p
           role="status"
-          className="mt-8 rounded-card border border-border bg-surface p-6 text-sm text-muted"
+          className="mt-8 rounded-card border border-border bg-surface p-5 sm:p-6 text-sm text-muted"
         >
           No {filter} projects yet — try another category.
         </p>
       )}
 
-      <AnimatePresence>
-        {openProject ? (
-          <ProjectDialog key={openProject.slug} project={openProject} onClose={close} />
-        ) : null}
-      </AnimatePresence>
+      {openProject ? (
+        <ProjectDialog key={openProject.slug} project={openProject} onClose={close} />
+      ) : null}
     </Section>
   );
 }

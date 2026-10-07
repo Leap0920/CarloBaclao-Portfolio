@@ -157,8 +157,43 @@ export function HeroCanvas({ className }: HeroCanvasProps) {
 
   const hostRef = useRef<HTMLDivElement>(null);
   // Starts false: a visitor who never scrolls the band into view must never
-  // pay for the chunk (the phone case, where the band sits below the fold).
+  // pay for the chunk.
   const [inView, setInView] = useState(false);
+  // Below `lg` the band is the hero's *background*, not a column, so it is
+  // always intersecting and the gate below can never hold — a phone would
+  // fetch the whole scene to sit behind the copy at 45% opacity. The static
+  // composition is built for exactly that case, so the scene is desktop-only.
+  const [wide, setWide] = useState(false);
+
+  // The scene is expensive to stand up — its chunk, its shaders, its GPU
+  // context — and it becomes eligible at exactly the moment the hero's copy is
+  // animating in and React is hydrating. Waiting for the first idle slot lets
+  // those finish first: the entrance keeps the main thread, and the graphic
+  // arrives a beat later instead of competing for it.
+  const [idle, setIdle] = useState(false);
+
+  useEffect(() => {
+    if (!inView) {
+      setIdle(false);
+      return;
+    }
+
+    if (typeof window.requestIdleCallback !== 'function') {
+      const timer = window.setTimeout(() => setIdle(true), 300);
+      return () => window.clearTimeout(timer);
+    }
+
+    const handle = window.requestIdleCallback(() => setIdle(true), { timeout: 1500 });
+    return () => window.cancelIdleCallback(handle);
+  }, [inView]);
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 1024px)');
+    const update = () => setWide(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -179,7 +214,7 @@ export function HeroCanvas({ className }: HeroCanvasProps) {
     return () => observer.disconnect();
   }, []);
 
-  const mountScene = webgl && !reduced && !dataSaver && inView;
+  const mountScene = wide && webgl && !reduced && !dataSaver && idle;
 
   return (
     <div ref={hostRef} className={className}>

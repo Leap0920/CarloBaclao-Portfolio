@@ -2,12 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import { Award, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Award, ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { certifications, certIssuers } from '@/data/resume';
+import { Reveal } from '@/components/ui/Reveal';
 import { useMountTransition } from '@/hooks/useMountTransition';
 import { cn } from '@/lib/cn';
 
 const ALL = 'All';
+
+/** Names shown before the list is expanded. Phones only — `sm` shows all. */
+const MOBILE_PREVIEW = 8;
 
 /** Keep in step with the `duration-200` on the lightbox surfaces. */
 const LIGHTBOX_EXIT_MS = 200;
@@ -15,6 +19,7 @@ const LIGHTBOX_EXIT_MS = 200;
 export function CertificationGallery() {
   const [issuer, setIssuer] = useState<string>(ALL);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   // Which certificate the lightbox draws. Deliberately not cleared on close, so
   // the certificate stays on screen for the fade-out.
   const [shownIndex, setShownIndex] = useState<number | null>(null);
@@ -89,10 +94,11 @@ export function CertificationGallery() {
               onClick={() => {
                 setIssuer(name);
                 setLightboxOpen(false);
+                setExpanded(false);
               }}
               aria-pressed={isActive}
               className={cn(
-                'relative shrink-0 pb-3 text-[13px] transition-colors',
+                'relative flex min-h-11 shrink-0 items-center pb-3 text-[13px] transition-colors sm:min-h-0',
                 isActive ? 'text-ink' : 'text-faint hover:text-ink',
               )}
             >
@@ -115,24 +121,43 @@ export function CertificationGallery() {
           lightbox, so the section stays a scannable list and the page does not
           pay for twenty-three certificate images it may never show. */}
       <ul className="mt-8 grid gap-x-10 gap-y-0.5 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((cert) => (
-          <li key={cert.id}>
-            <button
-              type="button"
-              onClick={() => open(filtered.indexOf(cert))}
-              aria-label={`View the ${cert.name} certificate`}
-              className="group flex w-full items-baseline justify-between gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-surface-2"
-            >
-              <span className="text-sm font-medium leading-snug text-foreground transition-colors group-hover:text-accent">
-                {cert.name}
-              </span>
-              <span className="shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] text-faint">
-                {cert.issuer}
-              </span>
-            </button>
+        {filtered.map((cert, index) => (
+          <li key={cert.id} className={cn(!expanded && index >= MOBILE_PREVIEW && 'hidden sm:block')}>
+            {/* Cascades in a row at a time as the list is scrolled. */}
+            <Reveal y={14} delay={Math.min(index, 9) * 0.035}>
+              <button
+                type="button"
+                onClick={() => open(index)}
+                aria-label={`View the ${cert.name} certificate`}
+                className="group flex w-full items-baseline justify-between gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 sm:py-2.5"
+              >
+                <span className="text-sm font-medium leading-snug text-foreground transition-colors group-hover:text-accent">
+                  {cert.name}
+                </span>
+                <span className="shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] text-faint">
+                  {cert.issuer}
+                </span>
+              </button>
+            </Reveal>
           </li>
         ))}
       </ul>
+
+      {filtered.length > MOBILE_PREVIEW ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((value) => !value)}
+          aria-expanded={expanded}
+          className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-card border border-border text-sm font-medium text-muted transition-colors hover:border-accent/50 hover:text-foreground sm:hidden"
+        >
+          {expanded ? 'Show fewer' : `Show all ${filtered.length} certificates`}
+          <ChevronDown
+            size={16}
+            aria-hidden="true"
+            className={cn('transition-transform duration-200', expanded && 'rotate-180')}
+          />
+        </button>
+      ) : null}
 
       {filtered.length === 0 ? (
         <p className="mt-8 flex items-center gap-2 text-sm text-faint">
@@ -177,9 +202,9 @@ export function CertificationGallery() {
                 type="button"
                 onClick={close}
                 aria-label="Close"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border text-muted transition-colors hover:bg-surface-2 hover:text-ink"
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-border text-muted transition-colors hover:bg-surface-2 hover:text-ink"
               >
-                <X size={15} />
+                <X size={17} />
               </button>
             </div>
   
@@ -200,9 +225,9 @@ export function CertificationGallery() {
                 <button
                   type="button"
                   onClick={() => step(-1)}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-ink"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-ink"
                 >
-                  <ChevronLeft size={15} />
+                  <ChevronLeft size={16} />
                   Previous
                 </button>
                 <span className="hidden font-mono text-[11px] uppercase tracking-[0.1em] text-faint sm:block">
@@ -211,10 +236,10 @@ export function CertificationGallery() {
                 <button
                   type="button"
                   onClick={() => step(1)}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-ink"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-ink"
                 >
                   Next
-                  <ChevronRight size={15} />
+                  <ChevronRight size={16} />
                 </button>
               </div>
             ) : null}

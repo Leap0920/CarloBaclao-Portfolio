@@ -112,11 +112,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: revealBoot }} />
       </head>
       <body className="bg-background font-sans text-foreground">
-        {/* `overflow-x: clip` — NOT hidden. `hidden` would turn this into a
-            scroll container and break `position: sticky` on the navbar.
-            `clip` trims horizontal overflow from the slide-ins while
-            leaving the scrollport (and therefore sticky) untouched. */}
-        <div className="overflow-x-clip">
+        {/* `overflow: clip` — NOT hidden. `hidden` would turn this into a
+            scroll container and break `position: sticky` on the navbar;
+            `clip` leaves the scrollport (and therefore sticky) untouched.
+            Both axes are clipped on purpose. A scroll-reveal block sits
+            `--reveal-y` px below its resting place until it plays, and a
+            transformed block still counts towards the document's scrollable
+            overflow — un-clipped, the last blocks on the page make
+            `scrollHeight` breathe as they play, which skews the denominator
+            behind the progress bar at the top. Fixed elements (header,
+            progress bar, back-to-top) and the portalled dialogs are not
+            clipped: they resolve to the viewport or to <body>. */}
+        <div className="overflow-clip">
           {children}
         </div>
         <script

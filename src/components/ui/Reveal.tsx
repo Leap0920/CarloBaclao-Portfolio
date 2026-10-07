@@ -3,6 +3,7 @@
 import {
   Children,
   createContext,
+  createElement,
   useContext,
   useEffect,
   useRef,
@@ -81,6 +82,9 @@ function stopWatching() {
   window.removeEventListener('resize', measure);
 }
 
+/** The tags a reveal can land on without changing the markup's semantics. */
+type RevealTag = 'div' | 'article' | 'li' | 'ul' | 'form' | 'p' | 'span' | 'section';
+
 interface RevealProps {
   children: ReactNode;
   className?: string;
@@ -88,6 +92,12 @@ interface RevealProps {
   delay?: number;
   /** Distance in pixels the element travels upward. */
   y?: number;
+  /** Distance in pixels the element travels sideways. Negative enters from the left. */
+  x?: number;
+  /** Scale the element starts at. */
+  scale?: number;
+  /** Element to render. Defaults to a div; use it to keep list/article semantics. */
+  as?: RevealTag;
 }
 
 /**
@@ -97,10 +107,25 @@ interface RevealProps {
  * scoped to `html.js-reveal` — a class the boot script adds before the first
  * paint. No JavaScript, a failed bundle, or a stalled clock all end with the
  * content on screen rather than stuck at zero opacity.
+ *
+ * This is the ONLY entrance mechanism the sections use. A JS-gated entrance
+ * (a framework variant that server-renders `opacity: 0`) holds real content
+ * hostage to hydration: on a slow connection the copy is in the HTML but
+ * invisible for as long as the bundle takes to arrive, and any trigger that
+ * fails to fire leaves the block blank for good. See the hero's `hero-rise`
+ * keyframe for the same rule applied to the LCP element.
  */
-export function Reveal({ children, className, delay = 0, y = 20 }: RevealProps) {
+export function Reveal({
+  children,
+  className,
+  delay = 0,
+  y = 20,
+  x = 0,
+  scale = 1,
+  as = 'div',
+}: RevealProps) {
   const reduced = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const node = ref.current;
@@ -125,15 +150,19 @@ export function Reveal({ children, className, delay = 0, y = 20 }: RevealProps) 
     };
   }, [reduced, delay]);
 
-  return (
-    <div
-      ref={ref}
-      data-reveal="hidden"
-      className={cn(className)}
-      style={{ '--reveal-y': `${y}px` } as CSSProperties}
-    >
-      {children}
-    </div>
+  return createElement(
+    as,
+    {
+      ref,
+      'data-reveal': 'hidden',
+      className: cn(className),
+      style: {
+        '--reveal-y': `${y}px`,
+        '--reveal-x': `${x}px`,
+        '--reveal-scale': scale,
+      } as CSSProperties,
+    },
+    children,
   );
 }
 
@@ -169,15 +198,21 @@ export function StaggerItem({
   children,
   className,
   y = 18,
+  x = 0,
+  scale = 1,
+  as = 'div',
 }: {
   children: ReactNode;
   className?: string;
   y?: number;
+  x?: number;
+  scale?: number;
+  as?: RevealTag;
 }) {
   const delay = useContext(StaggerDelay);
 
   return (
-    <Reveal className={className} delay={delay} y={y}>
+    <Reveal className={className} delay={delay} y={y} x={x} scale={scale} as={as}>
       {children}
     </Reveal>
   );

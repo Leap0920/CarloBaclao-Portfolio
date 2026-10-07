@@ -6,7 +6,7 @@ export const profile: Profile = {
   name: 'Carlo Baclao',
   role: 'Full-Stack Developer',
   pitch:
-    'Full-stack developer and fourth-year IT student in Quezon City, building web, Android, and IoT projects that ship.',
+    'Full-stack developer and fourth-year IT student in Quezon City, building web, Android, and IoT projects.',
   intro:
     'Fourth-year IT student in Quezon City, building full-stack web, native Android, and IoT projects, including a Spring Boot API running on a Raspberry Pi.',
   email: 'baclao.carlo.cometa@gmail.com',

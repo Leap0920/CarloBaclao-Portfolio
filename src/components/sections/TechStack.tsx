@@ -1,7 +1,6 @@
 'use client';
 
 import type { ComponentType } from 'react';
-import { motion } from 'framer-motion';
 import {
   Accessibility,
   ArrowRightLeft,
@@ -36,11 +35,11 @@ import {
   Wind,
 } from 'lucide-react';
 import { BrandIcon } from '@/components/BrandIcons';
+import { Stagger, StaggerItem } from '@/components/ui/Reveal';
 import { Section, SectionHeading } from '@/components/ui/Section';
 import { skills } from '@/data/resume';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { cn } from '@/lib/cn';
-import { resolveVariants, scaleIn, staggerContainer, viewportOnce } from '@/lib/motion';
 
 type IconType = ComponentType<{ size?: number | string; className?: string }>;
 
@@ -132,15 +131,9 @@ export function TechStack() {
 
       <style>{'@keyframes tech-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}'}</style>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+      <div className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-8">
         {skills.map((group) => (
-          <motion.div
-            key={group.category}
-            variants={resolveVariants(staggerContainer, reduced)}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportOnce}
-          >
+          <Stagger key={group.category} step={0.12}>
             <h3 className="font-display text-sm font-semibold tracking-tight text-foreground">
               {group.category}
             </h3>
@@ -157,29 +150,32 @@ export function TechStack() {
                 )}
               >
                 {group.skills.map((name) => (
-                  <motion.li
+                  <StaggerItem
                     key={name}
-                    variants={resolveVariants(scaleIn, reduced)}
+                    as="li"
+                    y={0}
+                    scale={0.9}
                     className="mr-2 shrink-0 sm:mr-0"
                   >
                     <TechCard name={name} />
-                  </motion.li>
+                  </StaggerItem>
                 ))}
 
                 {/* The second copy that makes the loop seamless — marquee only. */}
                 {group.skills.map((name) => (
-                  <motion.li
+                  <li
                     key={`loop-${name}`}
                     aria-hidden="true"
-                    variants={resolveVariants(scaleIn, reduced)}
                     className="mr-2 shrink-0 sm:hidden motion-reduce:hidden"
                   >
-                    <TechCard name={name} />
-                  </motion.li>
+                    <StaggerItem y={0} scale={0.9}>
+                      <TechCard name={name} />
+                    </StaggerItem>
+                  </li>
                 ))}
               </ul>
             </div>
-          </motion.div>
+          </Stagger>
         ))}
       </div>
     </Section>

@@ -23,8 +23,8 @@
    The `@theme inline` block below maps these raw variables onto
    Tailwind's utility namespaces, so `bg-background`, `text-foreground`,
    `border-border`, `text-muted`, `text-accent`, `bg-accent` and
-   `font-display` all resolve to the variables — and therefore follow the
-   theme switch automatically, without re-declaring any utility.
+   `font-display` all resolve to the variables — so a palette change is a
+   single edit here, with no utility re-declared.
 
    Contract names other workstreams code against:
      bg-background  bg-surface  text-foreground  text-muted
@@ -185,13 +185,12 @@
     background-color: var(--background);
     color-scheme: dark;
     scroll-behavior: smooth;
-    /* Keeps anchored sections clear of the fixed header */
-    scroll-padding-top: 5.5rem;
+    /* The header offset lives on the sections themselves — `scroll-mt-20`,
+       80px, via the `Section` component. It is deliberately NOT repeated here:
+       `scroll-padding-top` on the scrollport and `scroll-margin-top` on the
+       target BOTH apply, so the pair together landed every anchor 168px down
+       against a 65px header (measured, 2026-10-06). */
     -webkit-text-size-adjust: 100%;
-  }
-
-  html.light {
-    color-scheme: light;
   }
 
   body {
@@ -310,9 +309,24 @@
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Slide travel is passed per element as the DESKTOP distance; this scales it
+   down on phones. An 80px sweep over a 320px-wide screen reads as a jump, not
+   an entrance, so mobile gets ~37% of it — the same intent the old
+   `useSlideVariants` hook encoded, kept in one place instead of per section. */
+:root {
+  --reveal-x-scale: 1;
+}
+
+@media (max-width: 639px) {
+  :root {
+    --reveal-x-scale: 0.375;
+  }
+}
+
 .js-reveal [data-reveal='hidden'] {
   opacity: 0;
-  transform: translateY(var(--reveal-y, 20px));
+  transform: translate(calc(var(--reveal-x, 0px) * var(--reveal-x-scale)), var(--reveal-y, 20px))
+    scale(var(--reveal-scale, 1));
 }
 
 [data-reveal='shown'] {
@@ -324,6 +338,58 @@
   .js-reveal [data-reveal='hidden'] {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Section headings — a pure-CSS entrance
+   The eyebrow, the title and the description of every section rise in
+   as the section arrives. This is deliberately NOT the `Reveal`
+   mechanism: a heading is the first thing a reader looks for, so
+   nothing here may wait on JavaScript or on a scroll listener. Where
+   the browser has a view timeline the animation runs off the element's
+   own travel through the viewport; everywhere else the identical
+   keyframe runs off the clock. Both paths end on screen.
+   ══════════════════════════════════════════════════════════════════ */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rise-2 {
+  animation-delay: 0.09s;
+}
+
+.rise-3 {
+  animation-delay: 0.18s;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rise,
+    .rise-2,
+    .rise-3 {
+      animation-timeline: view();
+      animation-range: cover 8% cover 38%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .rise-2,
+  .rise-3 {
+    animation: none;
   }
 }
 

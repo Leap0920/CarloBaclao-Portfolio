@@ -35,5 +35,5 @@ export function formatYear(value: string): string {
 export function formatRange(range: DateRange, options: { month?: boolean } = {}): string {
   const { month = true } = options;
   const render = month ? formatMonth : formatYear;
-  return `${render(range.start)} — ${range.end ? render(range.end) : 'Present'}`;
+  return `${render(range.start)} - ${range.end ? render(range.end) : 'Present'}`;
 }

@@ -59,12 +59,25 @@ export const education: EducationItem[] = [
  * Platforms split was re-cut onto those four; every technology carries over
  * exactly once, and Design adds the two interface competencies the portfolio
  * itself demonstrates (responsive layout and accessibility).
+ *
+ * `levels` is Carlo's own proficiency, 1 (learning) to 5 (daily driver), and
+ * it drives the tooltip and the depth bar on each tile. Edit the numbers
+ * here and the tech section follows; a skill left out of `levels` renders
+ * unrated rather than being given an invented score.
  */
 export const skills: SkillCategory[] = [
   {
     category: 'Frontend',
     summary: 'The frameworks and languages the interfaces are built in.',
     skills: ['React', 'Next.js', 'TypeScript', 'JavaScript', 'Flutter', 'Dart'],
+    levels: {
+      React: 5,
+      'Next.js': 5,
+      JavaScript: 5,
+      TypeScript: 4,
+      Flutter: 3,
+      Dart: 3,
+    },
   },
   {
     category: 'Backend',
@@ -84,6 +97,21 @@ export const skills: SkillCategory[] = [
       'Flyway',
       'Firebase',
     ],
+    levels: {
+      SQL: 5,
+      Java: 4,
+      Python: 4,
+      'Spring Boot': 4,
+      PostgreSQL: 4,
+      'C++': 3,
+      MongoDB: 3,
+      SQLite: 3,
+      Flyway: 3,
+      Firebase: 3,
+      Go: 2,
+      '.NET': 2,
+      GraphQL: 2,
+    },
   },
   {
     category: 'Tools',
@@ -99,11 +127,28 @@ export const skills: SkillCategory[] = [
       'Android Studio',
       'Windows Deployment',
     ],
+    levels: {
+      Git: 5,
+      GitHub: 5,
+      'VS Code': 5,
+      Linux: 4,
+      'Raspberry Pi': 4,
+      'IntelliJ IDEA': 4,
+      Docker: 3,
+      'Android Studio': 3,
+      'Windows Deployment': 3,
+    },
   },
   {
     category: 'Design',
     summary: 'The layer that makes an interface feel considered.',
     skills: ['Tailwind CSS', 'Framer Motion', 'Responsive Design', 'Accessibility'],
+    levels: {
+      'Tailwind CSS': 5,
+      'Responsive Design': 5,
+      Accessibility: 4,
+      'Framer Motion': 3,
+    },
   },
 ];
 
@@ -205,20 +250,20 @@ export const certifications: Certification[] = [
   },
   {
     id: 'udemy-pyscript',
-    name: 'PyScript Fundamentals 101 — Run Python in your Browser',
+    name: 'PyScript Fundamentals 101 - Run Python in your Browser',
     issuer: 'Udemy',
     image:
       "/images/Certification/PyScript Fundamentals 101- Run Python in your Browser's HTML.jpg",
   },
   {
     id: 'udemy-flutter',
-    name: 'Dart & Flutter — The Complete Flutter Development Course',
+    name: 'Dart & Flutter - The Complete Flutter Development Course',
     issuer: 'Udemy',
     image: '/images/Certification/Dart & Flutter  The Complete Flutter Development Course.jpg',
   },
   {
     id: 'udemy-python-success',
-    name: 'Python Programming — The Complete Course for Success',
+    name: 'Python Programming - The Complete Course for Success',
     issuer: 'Udemy',
     image: '/images/Certification/Python Programming The Complete Course for Success.jpg',
   },
@@ -242,7 +287,7 @@ export const certifications: Certification[] = [
   },
   {
     id: 'udemy-js-fullstack',
-    name: 'JavaScript Fundamentals to Advanced — Full Stack Development',
+    name: 'JavaScript Fundamentals to Advanced - Full Stack Development',
     issuer: 'Udemy',
     image:
       '/images/Certification/JavaScript Fundamentals to Advanced- Full Stack Development.jpg',
@@ -273,7 +318,7 @@ export const certifications: Certification[] = [
   },
   {
     id: 'mastering-cpp',
-    name: 'Mastering C++ Language — C++ Programming For Beginners',
+    name: 'Mastering C++ Language - C++ Programming For Beginners',
     issuer: 'Udemy',
     image: '/images/Certification/Mastering C++ Language - C++ Programming For Beginners.jpg',
   },
@@ -284,6 +329,40 @@ export const certifications: Certification[] = [
     image: '/images/Certification/Web3  Blockchain Project Manager Certification Course.jpg',
   },
 ];
+
+/**
+ * The certificates that earn a hero card, capped at three because the
+ * brief caps the featured set at "2-3 max", and listed in the order they
+ * must render: flagship first.
+ *
+ * Everything else renders as a compact text list. Twenty-three equally loud
+ * image tiles was both far too long a scroll and flat as hierarchy: when every
+ * item shouts, none of them stands out. The cut is by kind, one of each: the
+ * flagship web certification, a skill-verified advanced tier, and a vendor
+ * security credential. The other Cisco, Fortinet, HackerRank and TESDA
+ * credentials drop to the secondary list rather than being lost.
+ *
+ * This is an ORDERED array, not a Set, and `featuredCertifications` is derived
+ * by mapping over it. That matters: filtering `certifications` preserves SOURCE
+ * order, and the freeCodeCamp credential sits 8th in that array, so a
+ * filter-based derivation silently made the HackerRank SQL certificate the
+ * flagship. Nothing in the component could have caught it, because both
+ * orderings are valid lists. The order in this array is the order on the page.
+ */
+const FEATURED_CERT_IDS = [
+  'fcc-responsive-web', // freeCodeCamp, the flagship web certification
+  'hackerrank-sql-advanced', // skill-verified, advanced tier
+  'cisco-technical-intro', // vendor credential, widest recognition
+];
+
+export const featuredCertifications: Certification[] = FEATURED_CERT_IDS.flatMap((id) => {
+  const cert = certifications.find((entry) => entry.id === id);
+  return cert ? [cert] : [];
+});
+
+export const otherCertifications = certifications.filter(
+  (cert) => !FEATURED_CERT_IDS.includes(cert.id),
+);
 
 /** Certification issuers in the order they should appear as filters. */
 export const certIssuers = Array.from(new Set(certifications.map((cert) => cert.issuer))).sort(

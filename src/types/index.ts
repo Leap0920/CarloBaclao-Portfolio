@@ -91,6 +91,13 @@ export interface SkillCategory {
   /** One line describing how the group is used in practice. */
   summary: string;
   skills: string[];
+  /**
+   * Self-assessed proficiency per skill, 1 (learning) to 5 (daily
+   * driver). Sparse on purpose: a skill with no entry is shown as
+   * unrated rather than being given an invented number, and the values
+   * are Carlo's own assessment, editable in `src/data/resume.ts`.
+   */
+  levels?: Record<string, number>;
 }
 
 export interface Certification {
@@ -98,6 +105,10 @@ export interface Certification {
   name: string;
   issuer: string;
   image: string;
+  /** Issue date, `YYYY-MM`. Omitted when it has not been supplied yet. */
+  date?: string;
+  /** Public verification URL for the credential. Omitted until supplied. */
+  verify?: string;
 }
 
 export interface Project {
@@ -105,6 +116,14 @@ export interface Project {
   name: string;
   subtitle: string;
   description: string;
+  /**
+   * The impact line for the showcase card: what the project does and
+   * who it does it for, in one or two sentences. This is the first
+   * sentence or two of `description`, kept verbatim, and it is what
+   * the plate leads with. `description` remains the long form for the
+   * dialog.
+   */
+  impact: string;
   tech: string[];
   image: string;
   /** The live, deployed URL. */

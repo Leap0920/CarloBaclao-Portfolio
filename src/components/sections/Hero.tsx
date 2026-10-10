@@ -1,11 +1,28 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { ArrowUpRight } from 'lucide-react';
 import { ScrollExit, VelocityMarquee } from '@/components/ui/Cinematic';
 import { CvPreviewDialog } from '@/components/ui/CvPreviewDialog';
+import { Magnetic } from '@/components/ui/Magnetic';
 import { profile } from '@/data/profile';
 import { focusAreas } from '@/data/resume';
+
+/**
+ * The hero's visual object: the WebGL particle field. It is the scene the
+ * hero was always meant to carry - the old Jupiter shader files were deleted
+ * in its favour.
+ *
+ * It is loaded with `ssr: false` and mounted only once the browser is idle
+ * (see the effect in `Hero`), so neither the server pass nor the first
+ * hydration pays to parse or run three.js, and the pure-CSS `hero-rise`
+ * entrance is never gated behind a bundle. The scene gates its own frame
+ * loop (demand frameloop, an in-view IntersectionObserver and a tab-visibility
+ * check) and stops rendering entirely when it leaves the viewport, so it
+ * costs nothing while off screen.
+ */
+const HeroField = dynamic(() => import('@/components/three/HeroField'), { ssr: false });
 
 /**
  * The name, split once so the surname can carry the display emphasis.
@@ -49,6 +66,27 @@ export function Hero() {
   const [cvOpen, setCvOpen] = useState(false);
   const cvTriggerRef = useRef<HTMLButtonElement>(null);
 
+  // The canvas mounts only once the browser is idle (or 1500ms has passed),
+  // so hydration and the pure-CSS entrance finish first and neither is gated
+  // behind three.js. `requestIdleCallback` is not universal, hence the
+  // `setTimeout(1)` fallback; both paths set the same flag, so the field is
+  // present once the page settles. No per-frame work lives here - this runs
+  // exactly once.
+  const [fieldReady, setFieldReady] = useState(false);
+
+  useEffect(() => {
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    if (typeof w.requestIdleCallback === 'function') {
+      const handle = w.requestIdleCallback(() => setFieldReady(true), { timeout: 1500 });
+      return () => w.cancelIdleCallback?.(handle);
+    }
+    const handle = window.setTimeout(() => setFieldReady(true), 1);
+    return () => window.clearTimeout(handle);
+  }, []);
+
   return (
     <section
       id="home"
@@ -76,13 +114,35 @@ export function Hero() {
             column taller than a short screen would clip its own eyebrow); and
             the display name wraps rather than overflowing, so the frame stays
             inside 320px. */}
-        <div className="mx-auto flex w-full max-w-6xl flex-col px-5 pt-24 pb-16 sm:px-8 sm:pt-28 lg:min-h-[100dvh] lg:justify-center lg:pt-[var(--space-section)] lg:pb-24">
+        <div className="relative mx-auto flex w-full max-w-6xl flex-col px-5 pt-24 pb-16 sm:px-8 sm:pt-28 lg:min-h-[100dvh] lg:justify-center lg:pt-[var(--space-section)] lg:pb-24">
+          {/* The hero's visual object: the WebGL field, absolutely placed so
+              it adds no layout height at any width (the page must not grow
+              taller). From `lg` up it occupies the right-hand stage - the copy
+              owns the left 7 of 12 columns - so the text and the field never
+              share a cell. On narrower viewports it sits behind the copy,
+              where the shader's copy-exclusion rectangle (fed the real
+              measured rect via `data-hero-copy`) dims any particle under the
+              text; the field uses NormalBlending, so it composites as ink over
+              the bone page rather than as additive light. The layer is inert -
+              `pointer-events-none` and `aria-hidden` - and the scene reads the
+              pointer from its own window listener, so parallax still works
+              without the canvas ever capturing a click. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 lg:left-[58.333%]"
+          >
+            {fieldReady ? <HeroField className="h-full w-full" /> : null}
+          </div>
+
           {/* One grid, two zones. The copy takes the left 7 columns; the right
               5 are the ambient stage. A single grid child leaves the other
               columns empty by construction, so no placeholder element is
               needed and the split stays honestly asymmetric. */}
           <div className="grid grid-cols-1 lg:grid-cols-12 lg:items-center">
-            <div className="lg:col-span-7">
+            {/* `relative z-10` keeps the copy above the field layer, and
+                `data-hero-copy` hands the scene the real measured rect to
+                keep clear (see the shader's copy-exclusion zone). */}
+            <div className="relative z-10 lg:col-span-7" data-hero-copy>
               <div>
                 {/* The page's hero eyebrow. `text-accent` rather than the
                     `text-faint` micro-label step: the hero carries the
@@ -124,6 +184,10 @@ export function Hero() {
                     `scale` and `translate` properties, so a
                     `transition-transform` would leave the hover state instant. */}
                 <div className="hero-rise hero-rise-4 mt-8">
+                  {/* The CTA leans toward the pointer. `Magnetic` is transform
+                      only and a no-op under reduced motion, so it adds no
+                      resting state and no motion when motion is off. */}
+                  <Magnetic>
                     <button
                       ref={cvTriggerRef}
                       type="button"
@@ -139,6 +203,7 @@ export function Hero() {
                         <ArrowUpRight size={16} />
                       </span>
                     </button>
+                  </Magnetic>
                 </div>
               </div>
             </div>

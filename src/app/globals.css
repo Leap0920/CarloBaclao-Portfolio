@@ -527,6 +527,22 @@
   }
 }
 
+/* -- The name decoding ---------------------------------------------
+   `DecodeText` swaps each letter for a random glyph until the real one
+   locks in. The letters still churning are painted in the accent, so the
+   name resolves out of amber static into the foreground colour instead of
+   just stopping - the same "signal locking" read as the caret. Only the
+   colour changes, and the display face is a monospace, so a swap is a
+   repaint and never a reflow.
+
+   The scramble is driven from JS (it is a one-shot, not a function of
+   scroll position, so there is no timeline to hang it on). Under
+   `prefers-reduced-motion` the component never runs it and these rules
+   simply never match. */
+[data-scrambling] {
+  color: var(--accent);
+}
+
 /* -- A dashed rule --------------------------------------------------
    The hairline of this theme. A dashed rule reads as a boundary a
    terminal would draw, where a solid 1px gradient line reads as a

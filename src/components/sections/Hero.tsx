@@ -4,6 +4,7 @@ import { useRef, useState, type CSSProperties } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { ScrollExit, VelocityMarquee } from '@/components/ui/Cinematic';
 import { CvPreviewDialog } from '@/components/ui/CvPreviewDialog';
+import { DecodeText } from '@/components/ui/DecodeText';
 import { Magnetic } from '@/components/ui/Magnetic';
 import { profile } from '@/data/profile';
 import { focusAreas } from '@/data/resume';
@@ -15,6 +16,12 @@ import { focusAreas } from '@/data/resume';
  */
 const [givenName, ...surnameParts] = profile.name.split(' ');
 const surname = surnameParts.join(' ');
+
+/** The same split, in the shape `DecodeText` wants to animate. */
+const nameWords = [
+  { text: givenName },
+  { text: surname, className: 'italic' },
+].filter((word) => word.text.length > 0);
 
 /**
  * The hero: the opening frame of the session.
@@ -88,13 +95,22 @@ export function Hero() {
 
               {/* The only h1 on the page, real selectable type at display
                   scale. The surname is italicised for emphasis: the same
-                  family, never a serif injected into a mono headline. The
+                  name, set twice in one line, is what makes the pair read
+                  as a name rather than as two words. The trailing block
                   caret is the page's one blinking element and it is
-                  `aria-hidden` - a cursor is not content. This is the LCP
-                  element, so it takes the CSS entrance and is on screen
-                  from the first paint. */}
-              <h1 className="hero-rise hero-rise-2 mt-5 font-display text-display leading-display tracking-display text-foreground">
-                {givenName} <span className="italic">{surname}</span>
+                  `aria-hidden`, so it is decoration to a screen reader
+                  and a cursor to everyone else.
+
+                  The letters decode - see `DecodeText`. The heading
+                  carries the real name as its accessible label, so the
+                  scrambling glyphs inside never reach assistive tech,
+                  and the markup that ships to a crawler is the finished
+                  name. */}
+              <h1
+                aria-label={profile.name}
+                className="hero-rise hero-rise-2 mt-5 font-display text-display leading-display tracking-display text-foreground"
+              >
+                <DecodeText words={nameWords} />
                 <span aria-hidden="true" className="caret" />
               </h1>
 

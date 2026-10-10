@@ -6,7 +6,7 @@ interface SectionProps {
   id: string;
   children: React.ReactNode;
   className?: string;
-  /** Removes the hairline, for the first section on the page. */
+  /** Draws the dashed seam across the top. Off for the first section. */
   border?: boolean;
   /**
    * Drops the `max-w-6xl` container so children can run edge to edge.
@@ -24,15 +24,20 @@ interface SectionProps {
 /**
  * Consistent vertical rhythm and gutters for every top-level section.
  *
+ * The top edge is the `.seam` dashed rule, which draws itself in as the
+ * section arrives (a scroll-driven `view()` timeline, so it is a function
+ * of position rather than a one-shot). It replaced a solid 1px gradient
+ * hairline: a dashed boundary is a line a terminal would draw, and the
+ * solid gradient line was the single most generic mark on the page.
+ *
  * `data-snap` is the scroll-snap stop. Snapping is declared on `html`
  * (see globals.css) and is `proximity`, desktop-only and off under
  * reduced motion, so this attribute is inert everywhere else.
  *
- * `scroll-mt-24` (96px) is the nav island's own offset: the island is
- * ~56px tall plus a 16px top gap, and the extra 24px is the clearance
- * between the island's bottom edge and the heading. It lives here and
- * NOT as `scroll-padding-top` on the scrollport: the two would add up
- * and land every anchor twice as far down as intended.
+ * `scroll-mt-24` (96px) clears the top of the viewport for an anchored
+ * jump. It lives here and NOT as `scroll-padding-top` on the scrollport:
+ * the two would add up and land every anchor twice as far down as
+ * intended.
  */
 export function Section({ id, children, className, border = true, bleed = false }: SectionProps) {
   return (
@@ -43,10 +48,9 @@ export function Section({ id, children, className, border = true, bleed = false 
         /* One knob for the page's vertical air: the token, not a class
            ramp. The bottom padding is deliberately 15% larger than the
            top, because equal top and bottom padding reads bottom-heavy
-           once the next section's hairline sits on it. */
+           once the next section's seam sits on it. */
         'relative scroll-mt-24 pt-[var(--space-section)] pb-[calc(var(--space-section)*1.15)]',
-        border &&
-          'seam border-t border-hairline before:absolute before:-top-px before:inset-x-0 before:h-px before:bg-[linear-gradient(90deg,transparent,color-mix(in_oklab,var(--accent)_38%,transparent),transparent)]',
+        border && 'seam',
         className,
       )}
     >
@@ -74,11 +78,13 @@ interface SectionHeadingProps {
    */
   index?: string;
   /**
-   * Small uppercase label above the title. Optional, and rationed: at
-   * most one eyebrow per three sections on the page. If everything is
-   * labelled, nothing is.
+   * The command line above the title, e.g. `'~/projects'`. It is the
+   * heading's eyebrow, spelled the way this theme spells things: a shell
+   * invocation. Rendered in the mono face in the accent colour, after a
+   * `$`, with a dashed rule running to the right margin - so the heading
+   * reads as a command and its output rather than as a label and a title.
    */
-  eyebrow?: string;
+  command: string;
   title: React.ReactNode;
   description?: React.ReactNode;
   /** Optional element pinned to the right of the title on wide screens. */
@@ -87,7 +93,7 @@ interface SectionHeadingProps {
 }
 
 export function SectionHeading({
-  eyebrow,
+  command,
   title,
   description,
   action,
@@ -95,19 +101,21 @@ export function SectionHeading({
 }: SectionHeadingProps) {
   return (
     <header className={cn('relative mb-14 sm:mb-20 lg:mb-24', className)}>
-      {eyebrow ? (
-        <div className="rise flex items-center gap-3">
-          <span aria-hidden="true" className="h-px w-8 bg-accent" />
-          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent">
-            {eyebrow}
-          </span>
-        </div>
-      ) : null}
+      <div className="rise flex items-center gap-3 font-mono text-[11px] tracking-[0.08em]">
+        <span aria-hidden="true" className="text-faint">
+          $
+        </span>
+        <span className="text-accent">{command}</span>
+        {/* The dashed rule that runs from the command to the margin. It
+            is what makes the line read as a shell transcript rather than
+            as an eyebrow with a decorative stroke next to it. */}
+        <span aria-hidden="true" className="rule-dash h-px flex-1" />
+      </div>
 
       <div
         className={cn(
           'flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-10',
-          eyebrow ? 'mt-4 sm:mt-5' : 'mt-0',
+          'mt-4 sm:mt-5',
         )}
       >
         <div className="max-w-2xl">
@@ -119,27 +127,40 @@ export function SectionHeading({
                title that is already markup names itself. */
             aria-label={typeof title === 'string' ? title : undefined}
           >
-            {/* Titles arrive as plain strings, which is what Shuffle
-                wants; a title that is already markup (a link, a
-                fragment) is passed through untouched rather than being
-                flattened to text. */}
-            {typeof title === 'string' ? (
-              /* `splitAria="hidden"` instead of GSAP's default `'auto'`.
-                 `'auto'` puts `aria-label` on the split container, which
-                 here is this <span> — prohibited on a role-less element
-                 and a real audit failure. With `'hidden'` the split
-                 characters stay hidden and the <h2> above supplies the
-                 name, so the text is announced once, correctly. */
-              <Shuffle
-                text={title}
-                tag="span"
-                textAlign="left"
-                triggerOnce
-                splitAria="hidden"
-              />
-            ) : (
-              title
-            )}
+            {/* `type-in` wipes the title in from the left as it enters,
+                scrubbed by the heading's own travel through the viewport:
+                the words appear in reading order at reading speed, and
+                scroll back up and they un-type. It sits on an inner span
+                because `rise-2` already owns the element's `animation`
+                shorthand and two classes cannot both set it.
+
+                The clip is not a removal - the `<h2>` above still carries
+                the text for a screen reader and for search - which is why
+                this is only ever applied to a heading, never to body
+                copy. */}
+            <span className="type-in inline-block">
+              {/* Titles arrive as plain strings, which is what Shuffle
+                  wants; a title that is already markup (a link, a
+                  fragment) is passed through untouched rather than being
+                  flattened to text. */}
+              {typeof title === 'string' ? (
+                /* `splitAria="hidden"` instead of GSAP's default `'auto'`.
+                   `'auto'` puts `aria-label` on the split container, which
+                   here is this <span> - prohibited on a role-less element
+                   and a real audit failure. With `'hidden'` the split
+                   characters stay hidden and the <h2> above supplies the
+                   name, so the text is announced once, correctly. */
+                <Shuffle
+                  text={title}
+                  tag="span"
+                  textAlign="left"
+                  triggerOnce
+                  splitAria="hidden"
+                />
+              ) : (
+                title
+              )}
+            </span>
           </h2>
           {description ? (
             /* The lead paragraph is where the page's scroll-linked

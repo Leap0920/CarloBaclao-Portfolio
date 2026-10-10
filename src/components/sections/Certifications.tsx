@@ -180,6 +180,7 @@ export function Certifications() {
   return (
     <Section id="certifications">
       <SectionHeading
+        command="~/certifications"
         title="Certificates and achievements"
         description={`${total} credentials from ${GROUPS.length} issuers, ${featuredCount} of them featured, in one roll.`}
       />

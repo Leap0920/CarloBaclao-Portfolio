@@ -551,7 +551,7 @@ export function Projects() {
 
       <SectionHeading
         index="01"
-        eyebrow="Projects"
+        command="~/projects"
         title="Things that I built"
         action={
           <a
@@ -717,7 +717,7 @@ export function Projects() {
                                   'object-cover transition-[opacity,scale] duration-200',
                                   isSelected
                                     ? 'scale-105 opacity-100'
-                                    : 'opacity-60 group-hover:scale-105 group-hover:opacity-100',
+                                    : 'opacity-80 group-hover:scale-105 group-hover:opacity-100',
                                 )}
                               />
                             </span>

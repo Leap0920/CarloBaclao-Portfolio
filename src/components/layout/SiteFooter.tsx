@@ -34,7 +34,14 @@ export function SiteFooter() {
                 <p className="font-display text-lg font-semibold tracking-tight text-foreground">
                   {profile.name}
                 </p>
-                <p className="mt-2 font-mono text-xs text-faint">&copy; {year}</p>
+                <p className="mt-2 font-mono text-xs text-faint">
+                  <span aria-hidden="true" className="text-accent">
+                    ${' '}
+                  </span>
+                  exit 0
+                  <span aria-hidden="true"> · </span>
+                  &copy; {year}
+                </p>
               </div>
 
               <nav aria-label="Page sections">

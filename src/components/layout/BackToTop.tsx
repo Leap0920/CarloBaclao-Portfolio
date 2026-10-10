@@ -22,7 +22,11 @@ export function BackToTop() {
       aria-label="Back to top"
       tabIndex={shown ? undefined : -1}
       className={cn(
-        'fixed bottom-5 right-5 z-40 grid h-11 w-11 place-items-center rounded-full bg-surface-2 text-muted shadow-card transition-[opacity,translate,scale,background-color,color] duration-300 ease-fluid hover:bg-accent hover:text-on-accent sm:bottom-8 sm:right-8 print-hide',
+        /* `bottom-[calc(var(--statusbar-h)+1rem)]`, not a fixed `bottom-5`:
+           the status line is 44px of fixed chrome across the bottom of the
+           viewport, and a control parked 20px from the bottom edge sits
+           half-underneath it. */
+        'fixed bottom-[calc(var(--statusbar-h)+1rem)] right-5 z-40 grid h-11 w-11 place-items-center rounded-full bg-surface-2 text-muted shadow-card transition-[opacity,translate,scale,background-color,color] duration-300 ease-fluid hover:bg-accent hover:text-on-accent sm:right-8 print-hide',
         shown ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none translate-y-2 scale-90 opacity-0',
       )}
     >

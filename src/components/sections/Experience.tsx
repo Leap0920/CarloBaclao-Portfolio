@@ -40,6 +40,7 @@ export function Experience() {
   return (
     <Section id="experience">
       <SectionHeading
+        command="~/experience"
         title="Where I have worked"
         description="A software development internship, and clinical data work at a diagnostic center."
       />

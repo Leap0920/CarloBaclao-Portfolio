@@ -84,6 +84,7 @@ export function Education() {
   return (
     <Section id="education">
       <SectionHeading
+        command="~/education"
         title="Where I studied"
         description="A degree in progress and the coursework behind the projects."
       />

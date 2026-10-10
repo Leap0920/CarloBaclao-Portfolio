@@ -1,47 +1,36 @@
 @import "tailwindcss";
 
 /* ==================================================================
-   Theme: CINEMATIC, LIGHT ONLY
+   Theme: SHELL — a phosphor terminal, dark only
 
-   Design language: a long-scroll film. A warm bone stage, one ember
-   accent used for every point of attention on the page, massive
-   display type, and plates that float on the stage rather than sit on
-   it. The reader scrolls; the page performs.
+   The page is a terminal session. The reader does not scroll a
+   document; they scroll a shell buffer, and the buffer answers.
 
-   THE LIGHT PALETTE LIVES IN `:root` AND IS THE ONLY THEME. There is no
-   counterpart, no `.dark`/`.light` class, no boot script and no stored
-   preference, so the intended design is what a reader with JavaScript
-   disabled and what a crawler get. Light is also the mode this palette
-   was measured hardest in (DESIGN.md section 2), which is why the two
-   ambient layers that cost it contrast are permanently thinned further
-   down this file.
+   Design language:
+     - A cold, near-black stage (#0b0d0e) that is never pure black.
+     - ONE phosphor accent (amber) for every point of attention.
+     - MONOSPACE EVERYWHERE. The body copy is a mono face, not a
+       grotesque: a terminal that types in a proportional font is a
+       screenshot of a terminal, not a terminal.
+     - Chrome a shell actually has: a status line pinned to the bottom
+       of the viewport, a line-number gutter down the left edge, prompt
+       glyphs, dashed rules, bracket labels.
+     - EVERY SCROLL MOVES SOMETHING. The gutter advances, the status
+       line fills, section seams draw, headings type themselves in.
+       Those are scroll-DRIVEN (CSS `animation-timeline`), not one-shot
+       reveals: they are a function of scroll position, so a two-pixel
+       nudge still moves them. They also run with JavaScript disabled,
+       which the JS-driven effects never did.
 
-   ONE ACCENT, LOCKED FOR THE WHOLE PAGE: ember. `#A8471A` holds 5.2:1
-   on the bone stage. The lighter ember the two-mode palette used for
-   its near-black stage is gone with that stage. A component that reads
-   `--accent` once and caches the raw value drifts the moment the token
-   moves; read the token, never a literal.
+   ONE THEME, ALWAYS. The dark palette lives in `:root`, so there is no
+   class, no boot script and no stored preference to reach the intended
+   design. There is deliberately no `light:` variant: with a single
+   theme there is nothing to branch on, and a variant that can never
+   match is a trap for whoever reads this next.
 
-   NO PURE BLACK, NO PURE WHITE. The stage is `#F3F0EA` (warm bone); a
-   pure value leaves a surface nothing to sit above and kills depth.
-   The palette is warm-neutral on purpose, which is what keeps a light
-   page from reading as a default white one.
-
-   SHADOWS ARE TINTED, NEVER BLACK. Elevation is built from stacked
-   layers tinted to the page hue, so a lifted plate reads as light
-   falling on a surface instead of as dirt.
-
-   `backdrop-filter` is reserved for the dialog backdrop, which is the
-   only site left for it now that the nav island is gone. It is never
-   applied to a scrolling content area: every blurred element forces
-   the compositor to snapshot and re-blur its backdrop, which is the
-   single most expensive CSS on a long page.
-
-   The `@theme inline` block maps these raw variables onto Tailwind's
-   utility namespaces, so `bg-background`, `text-foreground`,
-   `border-border`, `text-muted`, `text-accent`, `bg-accent` and
-   `font-display` all resolve to the variables. A palette change is a
-   single edit in this file, with no utility re-declared.
+   NO PURE BLACK, NO PURE WHITE. The stage is #0b0d0e and the ink is a
+   slightly green-cast phosphor white (#dfe6e2). A pure value leaves a
+   surface nothing to sit above and kills depth.
 
    Contract names other workstreams code against:
      bg-background  bg-surface  bg-surface-2  text-foreground
@@ -53,103 +42,96 @@
    Z-INDEX SCALE. Use these, never an arbitrary z-[9999]:
      0  content that sits under a decorative field
     10  section content above its own decorative layer
-    40  reserved (was the fixed nav island, now removed)
-    50  dialogs
-    60  fixed pointer-events-none chrome (grain)
+    40  the line-number gutter (fixed, pointer-events-none)
+    50  the status line (fixed chrome)
+    60  dialogs, the grain, the skip link
    ================================================================== */
 
-/* ONE THEME, ALWAYS. The page is light-only, and the light palette lives
-   in `:root`, so no class, no boot script and no stored preference is
-   needed to reach the intended design. There is deliberately no `dark:`
-   or `light:` variant any more: with a single theme there is nothing to
-   branch on, and a variant that can never match is a trap for whoever
-   reads this next. */
-
-/* -- Raw variables: LIGHT. The only theme ------------------------- */
+/* -- Raw variables: SHELL. The only theme ------------------------- */
 :root {
-  /* Surfaces. A warm bone stage with plates floating above it. */
-  --background: #f3f0ea;
-  --surface: #fdfcfa;
-  --surface-2: #f7f4ee;
-  --border: rgba(18, 16, 13, 0.12);
-  /* The interactive-boundary hairline. `--border` is a decorative
-     whisper and must never outline a control; this one is the edge of
-     something you can press or read as a boundary. */
-  --border-strong: rgba(18, 16, 13, 0.42);
+  /* Surfaces. A cold near-black stage with panels floating above it. */
+  --background: #0b0d0e;
+  --surface: #121517;
+  --surface-2: #191d1f;
+  /* The decorative hairline. Never outlines a control. */
+  --border: rgba(214, 226, 224, 0.1);
+  /* The interactive-boundary hairline: the edge of something you can
+     press or read as a boundary. */
+  --border-strong: rgba(214, 226, 224, 0.32);
 
-  /* Text: a warm ink ramp. Hierarchy is these four steps, not hue.
-     Measured on the #f3f0ea stage: foreground 16.7:1, ink-soft 13.2:1,
-     muted 7.0:1, faint 4.9:1. `faint` is the micro-label step and is the
-     floor; it is the dimmest value that still clears 4.5:1 at 11px, and
-     only against the FLAT stage. Ambient layers cost ratio (measured:
-     the hero falls from 4.78:1 bare to 3.69:1 with both its own glow and
-     the backdrop), so measure a micro label on its real backdrop before
-     trusting the token value. */
-  --foreground: #12100d;
-  --ink-soft: #2a2620;
-  --muted: #56504a;
-  --faint: #6e675e;
+  /* Text: a phosphor-white ramp with a faint green cast, because a
+     terminal's white is a phosphor, not a paper. Hierarchy is these
+     four steps, not hue. Measured on the #0b0d0e stage:
+     foreground 15.4:1, ink-soft 11.9:1, muted 6.1:1, faint 5.0:1.
+     `faint` is the micro-label floor at 11px and the dimmest value that
+     still clears 4.5:1; measure a micro label on its REAL backdrop
+     before trusting the token. */
+  --foreground: #dfe6e2;
+  --ink-soft: #b9c3bf;
+  --muted: #88928e;
+  --faint: #7c867f;
 
-  /* The one accent. Ember, dark enough to hold 5.2:1 on paper. A raw
-     hex cached in a component paints the wrong ember; read the token. */
-  --accent: #a8471a;
-  --accent-hover: #8f3b14;
-  --accent-soft: rgba(168, 71, 26, 0.1);
-  --on-accent: #fff6ef;
+  /* The one accent. Phosphor amber, 11.1:1 on the stage. A component
+     that reads `--accent` once and caches the raw value drifts the
+     moment the token moves; read the token, never a literal. */
+  --accent: #ffb454;
+  --accent-hover: #ffc678;
+  --accent-soft: rgba(255, 180, 84, 0.12);
+  --on-accent: #1a1206;
 
-  /* Neutral ramp, warm. 50 lightest to 900 darkest. Every neutral in
+  /* Neutral ramp, cold. 50 lightest to 900 darkest. Every neutral in
      the page comes from here. */
-  --accent-50: #faf8f5;
-  --accent-100: #f3f0ea;
-  --accent-200: #ded8cf;
-  --accent-300: #a79e8f;
-  --accent-400: #6e675e;
-  --accent-500: #56504a;
-  --accent-600: #3a352f;
-  --accent-700: #2a2620;
-  --accent-800: #1c1916;
-  --accent-900: #12100d;
+  --accent-50: #eef1ef;
+  --accent-100: #dfe6e2;
+  --accent-200: #b9c3bf;
+  --accent-300: #88928e;
+  --accent-400: #6b7570;
+  --accent-500: #4b5350;
+  --accent-600: #333a38;
+  --accent-700: #222826;
+  --accent-800: #191d1f;
+  --accent-900: #121517;
 
-  /* Elevation. A tight contact layer that draws the edge, a mid
-     diffusion that does the lifting, and a wide ambient pool that makes
-     the plate float. Tinted to the stage hue (28 25 22), never black. */
+  /* Elevation on a dark stage is not a shadow; it is a lit edge plus a
+     dark pool. The inset is the top edge catching the light, which is
+     what makes a panel read as machined rather than printed. */
   --elev-card:
-    0 1px 2px rgb(28 25 22 / 0.05),
-    0 10px 28px -10px rgb(28 25 22 / 0.1),
-    0 30px 60px -28px rgb(28 25 22 / 0.14);
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 2px 6px -2px rgb(0 0 0 / 0.5),
+    0 14px 34px -14px rgb(0 0 0 / 0.62);
   --elev-float:
-    0 1px 2px rgb(28 25 22 / 0.06),
-    0 18px 44px -14px rgb(28 25 22 / 0.14),
-    0 56px 104px -36px rgb(28 25 22 / 0.18);
-  /* The inner highlight that makes a core plate read as machined rather
-     than printed: the top edge catches the light. */
-  --elev-inset: inset 0 1px 0 rgb(255 255 255 / 0.9);
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 3px 10px -3px rgb(0 0 0 / 0.55),
+    0 28px 60px -18px rgb(0 0 0 / 0.72);
+  --elev-inset: inset 0 1px 0 rgb(255 255 255 / 0.05);
 
-  /* The ambient wash behind the page. A warm ember pool high on the
-     page and a second one low, both weak enough that text contrast is
-     set by the layer above them rather than by this one. */
+  /* The ambient wash behind the page: two weak amber pools, one high
+     and one low. They set mood, never contrast. */
   --wash:
-    radial-gradient(60rem 40rem at 78% -6%, rgb(168 71 26 / 0.07), transparent 68%),
-    radial-gradient(48rem 34rem at 8% 62%, rgb(168 71 26 / 0.04), transparent 70%);
+    radial-gradient(60rem 40rem at 78% -6%, rgb(255 180 84 / 0.05), transparent 68%),
+    radial-gradient(48rem 34rem at 8% 62%, rgb(255 180 84 / 0.03), transparent 70%);
 
-  /* Intermediate stage tones for the scroll-linked backdrop
-     (StageBackdrop.tsx). The palette has nothing lighter than
-     `--background` and nothing between `--background` and `--surface`,
-     so the two ends of the backdrop's tonal arc need their own values.
-     Both stay inside the warm bone family: `warm` is the stage one step
-     warmer and lighter, `deep` one step deeper. They are never used for
-     text or surfaces, only as a full-viewport backdrop tone that
-     crossfades against `--background`, so the page never inverts. */
-  --stage-warm: #f8e9d8;
-  --stage-deep: #e6dfd2;
+  /* The two ends of the scroll-linked backdrop's tonal arc
+     (StageBackdrop.tsx). `warm` is the stage one step warmer and
+     lighter, `deep` one step deeper. Neither is ever used for text or
+     a surface, only as a full-viewport backdrop tone that crossfades
+     against `--background`, so the page never inverts. */
+  --stage-warm: #191712;
+  --stage-deep: #070809;
 
-  color-scheme: light;
+  /* The status line's height. One token, because the page's bottom
+     padding, the bar itself and the back-to-top button all have to
+     agree on it or one of them ends up under something. */
+  --statusbar-h: 2.75rem;
+  /* The gutter's line pitch. The ruler hairlines, the numeric labels
+     and the playhead band are all derived from this one number. */
+  --gutter-pitch: 32px;
+
+  color-scheme: dark;
 }
 
-/* There is no second palette. A `:root.light` counterpart was deleted
-   along with the theme switch, and re-adding one means re-arguing the
-   whole contrast case in DESIGN.md first: the two ambient layers above
-   the stage were only survivable because they are permanently thinned. */
+/* There is no second palette. A light counterpart would mean re-arguing
+   the whole contrast case before a single token moved. */
 
 /* -- Tailwind token map -------------------------------------------
    `static` forces every token below to be emitted even when no utility
@@ -158,12 +140,15 @@
    `inline` inlines the value into the utility, so the semantic
    utilities resolve without re-declaring anything. */
 @theme static inline {
-  /* Geist carries both body and display, and does the differentiating
-     through scale and weight rather than a second face. JetBrains Mono
-     is the label and numeral face. */
-  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* THE BODY FACE IS A MONO. Mapping `--font-sans` onto the mono family
+     is what flips the entire page to the terminal in one edit: every
+     existing `text-sm`, paragraph and label becomes monospace without a
+     call site being touched. Azeret Mono carries the display sizes -
+     geometric, wide and unmistakably a machine face - while IBM Plex
+     Mono keeps body copy humanist enough to read in long paragraphs. */
+  --font-sans: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-space-mono), var(--font-plex-mono), ui-monospace, monospace;
 
   /* Semantic colour: the contract */
   --color-background: var(--background);
@@ -197,13 +182,16 @@
   --color-hairline: var(--border);
 
   /* Type scale. Every step a distinct size.
-     --text-micro (11px) is the HARD FLOOR: nothing may render below it. */
-  --text-display: clamp(2.75rem, 8vw, 6.5rem);
-  --leading-display: 0.92;
-  --tracking-display: -0.04em;
+     --text-micro (11px) is the HARD FLOOR: nothing may render below it.
+     The display step is deliberately modest for a hero name: Space Mono
+     is wide, and at 5.5rem the name wrapped to two lines on the desktop
+     the client actually uses. */
+  --text-display: clamp(2.25rem, 5.6vw, 4.75rem);
+  --leading-display: 0.98;
+  --tracking-display: -0.02em;
   --text-title: clamp(1.75rem, 3.4vw, 2.75rem);
   --leading-title: 1.08;
-  --tracking-title: -0.025em;
+  --tracking-title: -0.02em;
   --text-lead: 1.125rem;
   --leading-lead: 1.5;
   --text-body: 1rem;
@@ -212,24 +200,18 @@
   --text-micro: 0.6875rem;
 
   /* Radius: ONE documented system (SHAPE CONSISTENCY LOCK).
-     Surfaces are nested squircle plates, controls are pills. Nothing
-     else is allowed a corner.
-       shell (outer tray)  2rem                     = 32px
-       core  (inner plate) calc(2rem - 0.375rem)    = 26px, concentric
-       card                1.5rem                   = 24px, no tray
-       control             full pill
-     The core radius is the shell minus the shell's own padding, which
-     is what keeps the two curves mathematically concentric. A core
-     that simply repeats the shell radius is the tell of a faked bezel.
-     `--radius-card` exists so `rounded-card` emits a rule on its own:
-     without the token the class compiles to NOTHING and the element
-     silently keeps square corners. */
-  --radius-shell: 2rem;
-  --radius-core: calc(2rem - 0.375rem);
-  --radius: 1.5rem;
-  --radius-card: 1.5rem;
-  --radius-lg: 1rem;
-  --radius-sm: 0.75rem;
+     Surfaces are nested plates, controls are pills. Nothing else is
+     allowed a corner. A terminal window is a rectangle with a small
+     radius, not a pillow: the shell radius came down from 2rem to
+     1.25rem for exactly that reason, and the core radius stays the
+     shell minus the shell's own padding so the two curves remain
+     concentric. */
+  --radius-shell: 1.25rem;
+  --radius-core: calc(1.25rem - 0.375rem);
+  --radius: 0.875rem;
+  --radius-card: 0.875rem;
+  --radius-lg: 0.625rem;
+  --radius-sm: 0.5rem;
 
   /* 8px spacing scale */
   --space-1: 8px;
@@ -249,9 +231,9 @@
      `Section.tsx` consumes this token and nothing else sets section
      padding, so raising the whitespace of the whole page is an edit to
      this ramp alone. The bottom step is deliberately larger than the
-     top (see Section.tsx): equal top and bottom padding reads
-     bottom-heavy because the next section's hairline sits right on it. */
-  --space-section: 9rem;
+     top: equal top and bottom padding reads bottom-heavy because the
+     next section's seam sits right on it. */
+  --space-section: 8rem;
 
   /* Elevation, mapped so `shadow-card` / `shadow-float` emit rules. */
   --shadow-card: var(--elev-card);
@@ -259,13 +241,15 @@
 
   /* Motion. `--ease-fluid` is mass, not easing: it starts slow, travels
      fast and settles. `linear` and `ease-in-out` are banned for UI
-     transitions, so neither appears anywhere except the marquee. */
+     transitions, so neither appears anywhere except a marquee and a
+     scroll-DRIVEN timeline, where linear is the correct mapping from
+     scroll position to progress. */
   --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-/* Section rhythm: 9rem mobile, 11rem from `sm`, 13rem from `lg`. The
+/* Section rhythm: 8rem mobile, 10rem from `sm`, 12rem from `lg`. The
    steps match Tailwind's breakpoints so this ramp and the utility
    classes around it change at the same widths.
 
@@ -278,13 +262,13 @@
 @layer base {
   @media (min-width: 640px) {
     :root {
-      --space-section: 11rem;
+      --space-section: 10rem;
     }
   }
 
   @media (min-width: 1024px) {
     :root {
-      --space-section: 13rem;
+      --space-section: 12rem;
     }
   }
 }
@@ -295,7 +279,7 @@
 @layer base {
   html {
     background-color: var(--background);
-    color-scheme: light;
+    color-scheme: dark;
     scroll-behavior: smooth;
     /* The header offset lives on the sections themselves
        (`scroll-mt-24`), never here: `scroll-padding-top` on the
@@ -314,7 +298,7 @@
   body {
     color: var(--foreground);
     font-family: var(--font-sans);
-    line-height: 1.6;
+    line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -331,7 +315,7 @@
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--accent) 26%, transparent);
+    background-color: color-mix(in oklab, var(--accent) 30%, transparent);
     color: var(--foreground);
   }
 
@@ -365,13 +349,13 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: color-mix(in oklab, var(--foreground) 20%, transparent);
+    background-color: color-mix(in oklab, var(--foreground) 16%, transparent);
     border: 3px solid var(--background);
     border-radius: 999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(in oklab, var(--foreground) 34%, transparent);
+    background-color: color-mix(in oklab, var(--foreground) 30%, transparent);
   }
 
   dialog {
@@ -379,20 +363,20 @@
   }
 
   dialog::backdrop {
-    background-color: rgb(11 10 9 / 0.62);
+    background-color: rgb(3 4 5 / 0.72);
     backdrop-filter: blur(8px);
   }
 }
 
 /* ==================================================================
-   Scroll snapping: the cinematic beat
+   Scroll snapping: the terminal's page-down
 
    `proximity`, never `mandatory`. Mandatory snapping on a page whose
    sections are 1,500 to 4,000px tall fights the reader on every wheel
    event, and it makes a long section impossible to stop inside.
    Proximity only settles the page when a stop lands close to a section
-   boundary, which is the "the page finishes the gesture for you" feel
-   without ever trapping the scroll.
+   boundary, which is the "the buffer finishes the gesture for you"
+   feel without ever trapping the scroll.
 
    Desktop only, and off under reduced motion. Below `lg` the page is a
    single column of tall stacked blocks and snapping to their tops is
@@ -415,9 +399,7 @@
 
 /* -- Typographic and interaction polish (page-wide) ---------------- */
 @layer base {
-  /* Orphaned words: one word alone on a heading's last line.
-     `balance` evens a heading's lines, `pretty` stops a paragraph's
-     last line from being a single word. */
+  /* Orphaned words: one word alone on a heading's last line. */
   h1,
   h2,
   h3,
@@ -431,7 +413,8 @@
   }
 
   /* Dates, counts and metrics live in the mono face. Without tabular
-     figures they jitter as digits change width. */
+     figures they jitter as digits change width - and in a terminal
+     every figure is a column of a table. */
   time,
   [role='progressbar'],
   .font-mono {
@@ -439,9 +422,7 @@
   }
 
   /* A visible focus ring is an accessibility requirement, not
-     decoration. Restored on every focusable element and tinted to the
-     theme, because a reset can otherwise leave keyboard users with no
-     indicator at all. */
+     decoration. */
   :where(a, button, [role='button'], input, select, textarea, summary, [tabindex]):focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
@@ -462,10 +443,12 @@
   }
 }
 
-/* -- The Double-Bezel (Doppelrand) ---------------------------------
-   A premium card must never sit flatly on the background. It reads as
-   machined hardware: a glass plate resting in a metal tray, built from
-   two nested enclosures.
+/* -- The shell plate -----------------------------------------------
+   A panel in this theme is a terminal window: a flat lit surface with a
+   hairline ring, a lit top edge and a small radius. It is NOT a pillow
+   and it does not float on a shadow - a dark stage gives a shadow
+   nowhere to fall.
+
      .bezel       the outer tray: tinted, hairline-ringed, padded
      .bezel-core  the inner plate: its own fill, its own inner
                   highlight, and a SMALLER radius so the two curves stay
@@ -476,9 +459,9 @@
   position: relative;
   border-radius: var(--radius-shell);
   padding: 0.375rem;
-  /* The tray is the foreground at 5%, not a flat grey: a literal grey
-     would not track the ramp when the theme flips. */
-  background-color: color-mix(in oklab, var(--foreground) 5%, transparent);
+  /* The tray is the foreground at 4%, not a flat grey: a literal grey
+     would not track the ramp if the palette ever moved. */
+  background-color: color-mix(in oklab, var(--foreground) 4%, transparent);
   box-shadow: inset 0 0 0 1px var(--border), var(--elev-card);
 }
 
@@ -490,14 +473,83 @@
   overflow: hidden;
 }
 
+/* -- A terminal window ---------------------------------------------
+   The plate plus its own title bar, which is what makes it read as a
+   session rather than as a card. The bar is a three-dot traffic light
+   and a caption; it carries no controls, so nothing in it is pressable
+   and nothing in it is a lie. */
+@utility term {
+  position: relative;
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+  box-shadow: var(--elev-inset), inset 0 0 0 1px var(--border), var(--elev-card);
+  overflow: hidden;
+}
+
+@utility term-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding-inline: 0.875rem;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* -- The block caret -----------------------------------------------
+   A terminal cursor is a filled block that blinks at a steady rate, not
+   a thin bar that fades. `steps(1, end)` is what makes it a blink
+   instead of a pulse. It is decorative, so it is `aria-hidden` at every
+   call site. */
+@utility caret {
+  display: inline-block;
+  width: 0.52em;
+  height: 0.92em;
+  margin-left: 0.12em;
+  vertical-align: -0.08em;
+  background-color: var(--accent);
+  animation: caret-blink 1.06s steps(1, end) infinite;
+}
+
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* -- A dashed rule --------------------------------------------------
+   The hairline of this theme. A dashed rule reads as a boundary a
+   terminal would draw, where a solid 1px gradient line reads as a
+   website. */
+@utility rule-dash {
+  border: 0;
+  height: 1px;
+  background-image: linear-gradient(
+    90deg,
+    var(--border-strong) 0 6px,
+    transparent 6px 12px
+  );
+  background-size: 12px 1px;
+  background-repeat: repeat-x;
+}
+
 /* -- A plate that lifts and warms under the cursor -----------------
-   The project plates and the featured credential cards. Transform and
-   box-shadow only, both compositor-friendly. The ember edge is what
-   makes a plate feel distinct from its neighbours without giving each
-   one its own colour. */
+   Transform and box-shadow only, both compositor-friendly. The amber
+   edge is what makes a plate feel distinct from its neighbours without
+   giving each one its own colour. */
 @utility plate {
   position: relative;
-  border-radius: var(--radius-shell);
+  border-radius: var(--radius-card);
   background-color: var(--surface);
   box-shadow: var(--elev-inset), inset 0 0 0 1px var(--border), var(--elev-card);
   transition:
@@ -511,7 +563,7 @@
     transform: translateY(-4px);
     box-shadow:
       var(--elev-inset),
-      inset 0 0 0 1px color-mix(in oklab, var(--accent) 42%, var(--border)),
+      inset 0 0 0 1px color-mix(in oklab, var(--accent) 46%, var(--border)),
       var(--elev-float);
   }
 }
@@ -520,8 +572,7 @@
    Drives the ported Marquee component. The registry ships the markup
    but not the animation, so the theme key and the keyframes live here.
    `linear` is correct here and only here: a marquee is constant-speed
-   by definition, which is why the ban on linear easing for UI
-   transitions does not reach it. */
+   by definition. */
 @theme {
   --animate-marquee: marquee var(--duration, 40s) linear infinite;
   --animate-marquee-vertical: marquee-vertical var(--duration, 40s) linear infinite;
@@ -546,11 +597,10 @@
 }
 
 /* -- Icon weight ----------------------------------------------------
-   Thick-stroked icon sets are banned; the library is permitted when
-   the project already depends on it, which this one does. Lucide
-   stamps every glyph with a `lucide` class and a default stroke-width
-   of 2, so the rule is answered here, once, instead of at forty call
-   sites that would each have to remember. */
+   Thick-stroked icon sets are banned; the library is permitted when the
+   project already depends on it, which this one does. Lucide stamps
+   every glyph with a `lucide` class and a default stroke-width of 2, so
+   the rule is answered here, once, instead of at forty call sites. */
 .lucide {
   stroke-width: 1.5;
 }
@@ -568,24 +618,16 @@
   inset: 0;
   z-index: 60;
   pointer-events: none;
-  opacity: 0.02;
+  opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* The grain's opacity is set once, on the utility above. There is no
-   second theme left to thin it for. */
-
 /* -- The hero's own texture ----------------------------------------
-   A dot lattice that fades out from the copy. The lattice is a faint
-   dark texture and costs no contrast at all.
-
-   THE AMBIENT EMBER POOL IS GONE ON PURPOSE. On the bone stage the
-   accent is dark, so the same mix reads as a warm SHADOW under the
-   hero's own text rather than as a lift. Measured at 320px it was the
-   entire contrast cost of this utility: the lattice alone leaves the
-   hero's 11px eyebrow at 4.57:1 and the pool dragged it to 4.38:1.
-   Light is now the only theme, so the pool is deleted outright rather
-   than kept behind a theme branch. Do not reintroduce it. */
+   Column guides, not a dot lattice and emphatically not a matrix of
+   falling glyphs. A ruled sheet is the same mark the gutter makes down
+   the left edge, so the hero and the chrome agree on the page's
+   geometry. The lattice is a faint LIGHT texture on the dark stage and
+   costs no contrast at all; it is masked away from the copy. */
 @utility hero-glow {
   position: relative;
   isolation: isolate;
@@ -596,15 +638,21 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background-image: radial-gradient(
-      circle at center,
-      color-mix(in oklab, var(--foreground) 12%, transparent) 1px,
-      transparent 1.4px
-    );
-    background-size: 30px 30px;
+    background-image:
+      linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--foreground) 6%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--foreground) 6%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 64px 64px;
     background-repeat: repeat;
-    -webkit-mask-image: radial-gradient(80% 70% at 58% 45%, #000 30%, transparent 100%);
-    mask-image: radial-gradient(80% 70% at 58% 45%, #000 30%, transparent 100%);
+    -webkit-mask-image: radial-gradient(85% 70% at 62% 42%, #000 24%, transparent 100%);
+    mask-image: radial-gradient(85% 70% at 62% 42%, #000 24%, transparent 100%);
   }
 }
 
@@ -668,9 +716,7 @@
    JavaScript. It used to go through `Reveal`/`Stagger`, whose reveal is
    written in a useEffect - i.e. only once React hydrates. Measured on a
    4x-throttled phone that held the name at opacity 0 for 5,102ms, making
-   LCP 5,512ms: the exact failure the entrance rule in DESIGN.md exists to
-   prevent. The 4s escape hatch does not rescue it, because hydration
-   eventually wins that race and then stands the hatch down.
+   LCP 5,512ms: the exact failure the entrance rule exists to prevent.
    So the hero runs off a keyframe instead. It starts at first paint, the
    stagger is `animation-delay`, and no bundle can gate it. `both` holds
    the `from` state through the delay so an item never flashes in early.
@@ -690,7 +736,7 @@
   animation: hero-rise 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* The hero's four text elements, in document order. 90ms is the `Stagger`
+/* The hero's text elements, in document order. 90ms is the `Stagger`
    step this copy used before the entrance became CSS. */
 .hero-rise-2 {
   animation-delay: 0.09s;
@@ -700,6 +746,9 @@
 }
 .hero-rise-4 {
   animation-delay: 0.27s;
+}
+.hero-rise-5 {
+  animation-delay: 0.36s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -761,19 +810,167 @@
 }
 
 /* ==================================================================
-   Motion preferences
+   SLOW SCROLL
+
+   Two dials for the smoothing layer in SmoothScroll.tsx, kept here so
+   the feel of the page can be tuned without opening the component. Both
+   are read once on mount, so they are a starting position rather than a
+   live value.
+
+     --scroll-rate   how far one wheel notch moves the page, where 1 is
+                     the browser's own step. Below 1 the page travels
+                     less per notch, which is the "slow" half of the
+                     effect.
+     --scroll-ease   the fraction of the remaining distance covered per
+                     frame. 0.09 is a long, unhurried glide; raise it
+                     toward 0.2 for something tighter and more direct.
+
+   Nothing here reaches the CSS motion layer below: the scroll-driven
+   animations read the real scroll position, which this layer is moving,
+   so a slower scroll simply gives each of them more frames to play
+   across. Under `prefers-reduced-motion` the component unmounts its
+   listeners entirely and the browser's own scrolling returns.
    ================================================================== */
+:root {
+  --scroll-rate: 0.6;
+  --scroll-ease: 0.09;
+}
+
+/* ==================================================================
+   SCROLL-DRIVEN MOTION
+
+   The rule this file is built around: an effect that is a FUNCTION OF
+   SCROLL POSITION moves on every scroll, however small, and one that is
+   a one-shot entrance fires once and is then inert. Both are used here,
+   for different jobs.
+
+   Everything below is a CSS scroll-driven animation (`animation-timeline`).
+   Three properties of that choice matter:
+     - It runs on the compositor, so it costs no main-thread work at all
+       and cannot jank the scroll it is responding to.
+     - It works with JavaScript disabled, so the "the page answers every
+       scroll" promise does not depend on a bundle arriving.
+     - It is a pure function of position. Scroll back up and it plays
+       backwards, which is what makes it feel attached to the gesture
+       rather than triggered by it.
+
+   Unsupported browsers and reduced motion get the RESTING state - the
+   `from` frame is always the readable one, never a hidden one. There is
+   deliberately no JS fallback: a JS fallback for these is a scroll
+   listener, and a scroll listener for decoration is the thing this
+   whole file exists to avoid.
+   ================================================================== */
+
+/* -- The line-number gutter advances with the page ------------------
+   The numeric column translates from its top to its own bottom minus a
+   viewport, so it advances about one line per line of page travel and
+   stops exactly when the page does. */
+@keyframes gutter-scroll {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 calc(-100% + 100vh);
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .gutter-track {
+      animation: gutter-scroll linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+/* -- The status line's progress fill --------------------------------
+   The whole document is the range, so the fill is the scroll position
+   itself and not a smoothed estimate of it. */
+@keyframes fill-x {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-fill {
+      transform-origin: left center;
+      animation: fill-x linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+/* -- Headings type themselves in ------------------------------------
+   A wipe from the left, scrubbed by the heading's own travel through the
+   viewport: the words appear in reading order at reading speed, and
+   scroll back up and they un-type. `clip-path` is compositor-friendly
+   and never changes layout, so nothing on the page reflows as it runs.
+   The `from` frame clips the text away entirely, so this one may ONLY
+   be applied to an element whose content is duplicated elsewhere or is
+   decorative - it is used on section titles, which the `<h2>`'s own
+   text still supplies to a screen reader (a clip is not a removal). */
+@keyframes type-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .type-in {
+      animation: type-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 10% entry 55%;
+    }
+  }
+}
+
+/* -- Decorative drift -----------------------------------------------
+   A slow parallax for elements that have no content of their own: a
+   watermark, a rule, the terminal window's glow. `--drift` sets the
+   half-travel in px, so the element crosses 2x that over its whole
+   journey through the viewport. */
+@keyframes drift-y {
+  from {
+    translate: 0 var(--drift, 32px);
+  }
+  to {
+    translate: 0 calc(-1 * var(--drift, 32px));
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .drift {
+      animation: drift-y linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+  .gutter-track,
+  .scroll-fill,
+  .type-in,
+  .drift {
+    animation: none;
   }
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  .type-in {
+    clip-path: none;
+  }
+
+  .caret {
+    animation: none;
   }
 }
 
@@ -783,8 +980,6 @@
    layout. Each is switched off under reduced motion.
    ================================================================== */
 
-/* The hairline at the top of every section draws itself in as the
-   section arrives. */
 @keyframes seam-sweep {
   from {
     transform: scaleX(0);
@@ -794,8 +989,23 @@
   }
 }
 
+/* The dashed seam at the top of every section draws itself in as the
+   section arrives. The whole ::before box is declared here rather than
+   in a pile of Tailwind `before:` utilities at the call site, so the
+   dash pattern lives beside the animation that reveals it. */
 .seam::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
   transform-origin: left center;
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--accent) 45%, transparent) 0 6px,
+    transparent 6px 14px
+  );
   animation: seam-sweep 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 

@@ -346,7 +346,7 @@ export function TechStack() {
   return (
     <Section id="techstack">
       <SectionHeading
-        eyebrow="Tech stack"
+        command="~/stack"
         title="The tools I actually reach for"
         description={`${total} tools across four domains, each rated from learning to daily driver.`}
       />

@@ -91,6 +91,7 @@ export function Contact() {
   return (
     <Section id="contact">
       <SectionHeading
+        command="~/contact"
         title={profile.availability}
         description="Email is the fastest route. Nothing is sent or stored from this page."
       />

@@ -1,215 +1,177 @@
 'use client';
 
-import { useRef, useState, type CSSProperties } from 'react';
-import { Download, Eye } from 'lucide-react';
-import { BrandIcon } from '@/components/BrandIcons';
+import { useRef, useState } from 'react';
+import { ArrowUpRight } from 'lucide-react';
+import { ScrollExit, VelocityMarquee } from '@/components/ui/Cinematic';
 import { CvPreviewDialog } from '@/components/ui/CvPreviewDialog';
-import { JupiterHero } from '@/components/hero/JupiterHero';
 import { profile } from '@/data/profile';
-import { Reveal } from '@/components/ui/Reveal';
-import { DURATION, EASE, STAGGER_STEP } from '@/lib/motion';
+import { focusAreas } from '@/data/resume';
 
 /**
- * The hero's copy entrance runs as a CSS animation, not through the shared
- * variants, and that is deliberate.
- *
- * These elements are the first thing painted and the name is the largest thing
- * on the page. An entrance driven by JavaScript cannot start until React has
- * hydrated, so the hero sits blank for as long as the bundle takes — and the
- * largest-contentful paint is held out with it, because an element at zero
- * opacity does not count as painted. A keyframe starts at first paint and
- * needs no JavaScript at all.
- *
- * The stagger is the shared step, handed to the stylesheet as a custom
- * property so the rule below stays declarative.
+ * The name, split once so the surname can carry the display emphasis.
+ * `profile.name` stays the single source of truth; nothing here is authored,
+ * and a one-word name would simply render unemphasised.
  */
-const heroDelay = (index: number): CSSProperties =>
-  ({ '--hero-delay': `${(index * STAGGER_STEP).toFixed(2)}s` }) as CSSProperties;
-
-/** The three routes worth surfacing in the hero. */
-const heroSocials = profile.socials.filter((social) =>
-  ['github', 'linkedin', 'email'].includes(social.id),
-);
-
-/** Years since the first line of code, derived so it never needs a hand edit. */
-const YEARS_CODING = Math.max(1, new Date().getFullYear() - profile.codingSince);
+const [givenName, ...surnameParts] = profile.name.split(' ');
+const surname = surnameParts.join(' ');
 
 /**
- * The scannable facts that used to open the About section. They belong with
- * the name and the role: this is what a recruiter looks for first, and it
- * should not need a scroll to reach.
- */
-const QUICK_FACTS: ReadonlyArray<{ label: string; value: string }> = [
-  { label: 'Location', value: profile.location },
-  { label: 'Availability', value: profile.availability },
-  { label: 'Experience', value: `${YEARS_CODING}+ years writing code` },
-  { label: 'Languages', value: profile.spokenLanguages.join(' \u00b7 ') },
-];
-
-/**
- * The opening section: a two-column hero (copy left, the 3D object right) on
- * a soft amber glow.
+ * The hero: the opening frame of a long scroll, and the most important frame
+ * on the page.
  *
- * The CTAs are the two things a reader reaches for first, the CV preview and
- * the download. The preview opens the same accessible modal the About section
- * used, so the CV never leaves the page.
+ * COMPOSITION - an asymmetric split, not a centred blob. The copy is hard left
+ * and occupies 7 of 12 columns; the remaining 5 are stage, which is where the
+ * `.hero-glow` utility already pools its ambient ember (its lift sits at 74%
+ * across). That utility is the whole ambient visual: a token-based dot lattice
+ * plus an ember pool, masked away from the copy so it never touches contrast.
+ * The previous build stacked a client-only WebGL particle field beside the
+ * copy; that is gone. It was several hundred kilobytes of three.js on the
+ * critical frame for an effect the CSS already gives, and the brief asks for
+ * the ambient layer to stay cheap. `.hero-glow` animates nothing and listens
+ * to nothing.
  *
- * The copy entrance is a CSS keyframe and the 3D band uses the shared CSS
- * `Reveal` primitive, so nothing on the page's first screen waits on
- * JavaScript to become visible. Reduced motion is handled in CSS.
+ * TEXT BUDGET - four elements, exactly: the role label, the name, the pitch
+ * and the CTA. The old quick-facts strip is deleted rather than moved; a
+ * feature list is what the dedicated sections below the hero are for. The
+ * role label is the page's hero eyebrow.
+ *
+ * ENTRANCE - a pure-CSS keyframe, and specifically NOT the `Reveal`/`Stagger`
+ * mechanism the sections use. `Reveal` writes its reveal in a useEffect, so its
+ * content stays invisible until React hydrates; measured on a 4x-throttled
+ * phone that held this name at opacity 0 for 5,102ms (LCP 5,512ms). The hero
+ * carries the LCP element, so it may not wait on a bundle: `.hero-rise` starts
+ * at first paint, its stagger is `animation-delay`, and nothing can gate it.
+ * The shared `.rise` heading keyframes are still not used here, because they
+ * run off a `view()` timeline tuned for blocks entering from below the fold,
+ * which would leave an above-the-fold hero part-faded.
  */
 export function Hero() {
   const [cvOpen, setCvOpen] = useState(false);
   const cvTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <section id="home" className="hero-glow relative isolate scroll-mt-20 overflow-hidden">
-      {/* The entrance for the copy below. Declared next to the elements it
-          drives so the rule, the keyframe and the markup stay together, and
-          `both` holds the resting state after it finishes — so the copy is
-          never left invisible if the animation is skipped. Reduced motion is
-          handled in CSS, which is the only place it can be handled before the
-          first paint. */}
-      <style>{`
-        .hero-rise {
-          animation: hero-rise ${DURATION.slow}s cubic-bezier(${EASE.join(', ')}) both;
-          animation-delay: var(--hero-delay, 0s);
-        }
-        @keyframes hero-rise {
-          from { opacity: 0; transform: translateY(40px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .hero-rise { animation: none; }
-        }
-      `}</style>
-      {/* `pb` used to be 64/96px, which measured as 96px of empty hero below the
-          graphic plus 112px of the next section's own top padding — 208px of
-          nothing between the planet and the Projects heading. */}
-      <div className="mx-auto w-full max-w-6xl px-5 pb-8 pt-28 sm:px-8 sm:pt-32 lg:pb-10 lg:pt-36">
-        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-16">
-          {/* Copy, first in the DOM, and lifted above the graphic, which is the
-              hero's background on a phone. */}
-          <div className="relative z-10 max-w-xl">
-            <h1
-              className="hero-rise font-display text-[clamp(2.5rem,8vw,4.5rem)] font-semibold leading-[0.98] tracking-[-0.03em] text-foreground"
-              style={heroDelay(0)}
-            >
-              {profile.name}
-            </h1>
+    <section
+      id="home"
+      data-snap
+      className="hero-glow relative scroll-mt-24 overflow-hidden"
+    >
+      {/* The whole frame departs through `ScrollExit`: as the reader scrolls
+          on, the composition scales a hair, lifts and fades to 45%. It rests
+          at its fully-visible state on load (its `from` values are the resting
+          state) and only moves once the reader has actually scrolled, so
+          nothing here is gated behind a bundle. Transform and opacity only. */}
+      <ScrollExit to={0.96} fade={0.45} lift={-56}>
+        {/* The frame. `pt-[var(--space-section)]` is the page's one vertical
+            rhythm token, and it is applied from `lg` up only. Below `lg` the
+            content is top-aligned, and the old 144px of dead space at the top
+            of a phone screen existed for one reason: clearing the fixed nav
+            island. The island is gone, so the hero now owns the top edge and
+            the padding is a deliberate 96px opening frame instead of a
+            clearance. `min-h-[100dvh]`, never `h-screen`, so a phone browser's
+            dynamic chrome cannot crop the frame.
 
-            <p
-              className="hero-rise mt-4 font-mono text-sm uppercase tracking-[0.14em] text-accent"
-              style={heroDelay(1)}
-            >
-              {profile.role}
-            </p>
-
-            <p
-              className="hero-rise mt-6 max-w-lg text-base leading-relaxed text-muted sm:text-lg"
-              style={heroDelay(2)}
-            >
-              {profile.pitch}
-            </p>
-
-            <dl
-              className="hero-rise mt-10 grid grid-cols-1 gap-x-8 gap-y-5 border-t border-border pt-8 sm:grid-cols-2"
-              style={heroDelay(3)}
-            >
-              {QUICK_FACTS.map((fact) => (
-                <div key={fact.label}>
-                  <dt className="font-mono text-micro uppercase tracking-[0.16em] text-muted">
-                    {fact.label}
-                  </dt>
-                  <dd className="mt-1.5 text-sm font-medium text-foreground">{fact.value}</dd>
+            MOBILE FALLBACK (<768px): the 12-column split below collapses to a
+            single stacked column; the frame stays a full `100dvh` tall but its
+            content is top-aligned rather than vertically centred (a centred
+            column taller than a short screen would clip its own eyebrow); and
+            the display name wraps rather than overflowing, so the frame stays
+            inside 320px. */}
+        <div className="mx-auto flex w-full max-w-6xl flex-col px-5 pt-24 pb-16 sm:px-8 sm:pt-28 lg:min-h-[100dvh] lg:justify-center lg:pt-[var(--space-section)] lg:pb-24">
+          {/* One grid, two zones. The copy takes the left 7 columns; the right
+              5 are the ambient stage. A single grid child leaves the other
+              columns empty by construction, so no placeholder element is
+              needed and the split stays honestly asymmetric. */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-7">
+              <div>
+                {/* The page's hero eyebrow. `text-accent` rather than the
+                    `text-faint` micro-label step: the hero carries the
+                    `.hero-glow` ambient lift behind this line, and that lift
+                    lightens the local backdrop enough to pull `faint` down to
+                    4.44:1 at 11px. Ember measures 6.2:1 there, and it also
+                    matches the eyebrow structure in `SectionHeading`. */}
+                <div className="hero-rise flex items-center gap-3">
+                  <span aria-hidden="true" className="h-px w-8 bg-accent" />
+                  <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
+                    {profile.role}
+                  </span>
                 </div>
-              ))}
-            </dl>
 
-            {/* The CV pair sits under the facts, so the details a reader scans
-                for come first and the two actions follow them. Download is the
-                accent fill, matching the weight it carries everywhere else on
-                the page; the preview is the secondary. */}
-            <div
-              className="hero-rise mt-8 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-center"
-              style={heroDelay(4)}
-            >
-              <button
-                ref={cvTriggerRef}
-                type="button"
-                onClick={() => setCvOpen(true)}
-                aria-haspopup="dialog"
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-card rounded border border-border-strong bg-surface px-6 text-sm font-semibold text-foreground transition-colors duration-200 ease-out hover:border-accent/60 hover:text-accent sm:w-auto"
-              >
-                <Eye size={16} aria-hidden="true" />
-                Preview CV
-              </button>
-              <a
-                href={profile.resumeUrl}
-                download="Carlo_Baclao_Resume.pdf"
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-card rounded bg-accent px-6 text-sm font-semibold text-on-accent transition-colors duration-200 ease-out hover:bg-accent-hover sm:w-auto"
-              >
-                <Download size={16} aria-hidden="true" />
-                Download CV
-              </a>
+                {/* The only h1 on the page, real selectable type at display
+                    scale. The surname is italicised for emphasis: the same
+                    family, never a serif injected into the sans headline.
+                    This is the LCP element, so it takes the CSS entrance and
+                    is on screen from the first paint - see the ENTRANCE note
+                    above. */}
+                <div className="hero-rise hero-rise-2">
+                  <h1 className="mt-5 font-display text-display leading-display tracking-display text-foreground">
+                    {givenName}{' '}
+                    <span className="italic">{surname}</span>
+                  </h1>
+                </div>
+
+                <p className="hero-rise hero-rise-3 mt-5 max-w-[48ch] text-lg leading-relaxed text-muted sm:text-xl">
+                  {profile.pitch}
+                </p>
+
+                {/* One intent, one label, page-wide. The CV is the only
+                    affordance here and the nav deliberately carries no second
+                    "Contact" button; the download lives inside the dialog.
+
+                    The hover lean is CSS only. The button names the `scale`
+                    property in its transition, not `transform`, because
+                    Tailwind v4 writes `scale-*` and `translate-*` to the
+                    `scale` and `translate` properties, so a
+                    `transition-transform` would leave the hover state instant. */}
+                <div className="hero-rise hero-rise-4 mt-8">
+                    <button
+                      ref={cvTriggerRef}
+                      type="button"
+                      onClick={() => setCvOpen(true)}
+                      aria-haspopup="dialog"
+                      className="group inline-flex min-h-12 items-center gap-3 rounded-full bg-accent pl-6 pr-1.5 text-sm font-semibold text-on-accent transition-[scale] duration-500 ease-fluid hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      View CV
+                      <span
+                        aria-hidden="true"
+                        className="grid h-9 w-9 place-items-center rounded-full bg-on-accent/15 transition-[translate,scale] duration-500 ease-fluid group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:scale-105"
+                      >
+                        <ArrowUpRight size={16} />
+                      </span>
+                    </button>
+                </div>
+              </div>
             </div>
-
-            <ul className="hero-rise mt-8 flex items-center gap-1" style={heroDelay(5)}>
-              {heroSocials.map((social) => (
-                <li key={social.id}>
-                  <a
-                    href={social.url}
-                    target={social.url.startsWith('mailto:') ? undefined : '_blank'}
-                    rel={social.url.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                    aria-label={social.label}
-                    className="grid h-11 w-11 place-items-center rounded-full text-muted transition-colors hover:bg-surface hover:text-foreground"
-                  >
-                    <BrandIcon name={social.icon} size={17} />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* The graphic band. From `lg` up it is the right-hand column of the
-              grid; below `lg` it stays in the flow and sits under the copy.
-
-              It used to leave the flow below `lg` and become a dimmed
-              background behind the hero. Measured, that was not survivable: the
-              planet's lit band lifted the pixels under the stats list to about
-              2.5:1 against the muted 11px labels, and dimming it enough to clear
-              4.5:1 left the graphic effectively invisible — the arithmetic
-              wanted roughly a seventh of the strength it had. Sitting in the
-              flow instead, no copy is ever over it, so it can be shown whole on
-              a phone rather than at 45% and still failing.
-
-              `pointer-events-none` keeps it from stealing the CTAs' clicks. */}
-          {/* Decorative: the live planet inside is drag-to-spin, but it carries
-              no information, so it stays out of the accessibility tree and out
-              of the tab order. `pointer-events-none` is undone on the canvas
-              itself, which is the only part that wants the pointer. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none relative z-0 mx-auto grid w-full place-items-center lg:static lg:z-auto lg:mx-0 lg:block"
-          >
-            <Reveal
-              y={0}
-              scale={0.9}
-              className="relative isolate aspect-square w-[min(112%,25rem)] lg:mx-auto lg:w-[112%] lg:max-w-none"
-            >
-              <div
-                aria-hidden="true"
-                className="absolute inset-0 -z-10"
-                style={{
-                  background:
-                    'radial-gradient(50% 46% at 50% 80%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 70%)',
-                }}
-              />
-              <JupiterHero className="h-full w-full" />
-            </Reveal>
           </div>
         </div>
-      </div>
+
+        {/* The closing band: the practice areas as one run of display type.
+            It is the hero's gesture toward the sections below and it is the
+            ONLY marquee on the page. `VelocityMarquee` renders its children
+            twice (the second copy is `aria-hidden`), so the loop is seamless;
+            it is `overflow-hidden` and transform-only, so it costs one clipped
+            row at every width. The separator is a mono slash in ember, not a
+            middle dot, which the design rations. Each item carries its own
+            trailing space so the seam between the two copies matches the gap
+            between items inside a copy. */}
+        <div className="mx-auto w-full max-w-6xl px-5 pb-[var(--space-section)] sm:px-8">
+          <VelocityMarquee baseVelocity={10} direction={1}>
+            {focusAreas.map((area) => (
+              <span key={area.title} className="flex shrink-0 items-center gap-16 pr-16">
+                <span className="whitespace-nowrap font-display text-3xl font-medium tracking-tight text-muted sm:text-4xl">
+                  {area.title}
+                </span>
+                <span aria-hidden="true" className="font-mono text-3xl text-accent sm:text-4xl">
+                  /
+                </span>
+              </span>
+            ))}
+          </VelocityMarquee>
+        </div>
+      </ScrollExit>
+
+      {/* There is deliberately NO scroll cue: the reader knows what scrolling
+          is, and the taste rules ban them outright. */}
 
       <CvPreviewDialog
         open={cvOpen}

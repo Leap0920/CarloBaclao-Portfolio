@@ -822,8 +822,12 @@
                      less per notch, which is the "slow" half of the
                      effect.
      --scroll-ease   the fraction of the remaining distance covered per
-                     frame. 0.09 is a long, unhurried glide; raise it
+                     frame. 0.12 arrives promptly; lower it toward 0.06
+                     for a longer, more unhurried glide, or raise it
                      toward 0.2 for something tighter and more direct.
+
+   Both were raised once on the user's call ("make the scroll a little
+   bit faster") from 0.6 / 0.09, which read as too slow to get anywhere.
 
    Nothing here reaches the CSS motion layer below: the scroll-driven
    animations read the real scroll position, which this layer is moving,
@@ -832,8 +836,8 @@
    listeners entirely and the browser's own scrolling returns.
    ================================================================== */
 :root {
-  --scroll-rate: 0.6;
-  --scroll-ease: 0.09;
+  --scroll-rate: 0.75;
+  --scroll-ease: 0.12;
 }
 
 /* ==================================================================

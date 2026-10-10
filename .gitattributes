@@ -1,0 +1,23 @@
+# Normalise line endings in the repository, not in the working tree.
+#
+# Without this the whole tree reads as modified on a Windows checkout
+# (CRLF in the files, LF in the index), which buries real changes in noise
+# and makes `git diff` useless. `eol=lf` is what the toolchain expects;
+# the Windows-only launchers keep CRLF because cmd.exe wants it.
+* text=auto eol=lf
+
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary assets: never touch these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary

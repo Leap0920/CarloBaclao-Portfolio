@@ -23,6 +23,12 @@ const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
   images: {
     formats: ['image/avif', 'image/webp'],
+    // Next 16 restricts the optimizer to an allowlist (default: [75]) and answers
+    // any other quality with a 400. Projects.tsx asks for `quality={60}` at both
+    // of its call sites, so 60 has to be declared here or that request is
+    // rejected outright. Keeping 75 as well: it is the default the rest of the
+    // site (and next/image's own blur placeholder) relies on.
+    qualities: [60, 75],
   },
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],

@@ -68,4 +68,14 @@ skills-section.png
 
 # Isolated production build output + dev tooling logs
 /.next-build/
+/.next-prod/
 /cp-*.log
+
+# Local tooling artifacts
+/pw-qa/
+/hermes-page.html
+/skills-lock.json
+/.hermes/
+/.agents/
+/.codebuddy/
+/.codegraph/

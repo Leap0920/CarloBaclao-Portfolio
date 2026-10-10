@@ -1,0 +1,44 @@
+name: CI
+
+# No `push` trigger on purpose: this repo is wired to Vercel, where any push
+# deploys. CI is for pull requests and manual runs only.
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # Enforced: fails the build if the home route's first-load JS exceeds
+      # the ratchet in scripts/bundle-budget.mjs.
+      - name: Bundle budget
+        run: npm run bundle:budget
+
+      # Non-blocking for now: 17 first-party errors remain, all from the
+      # React Compiler rules in eslint-config-next 16 (setState inside an
+      # effect, impure calls during render, refs read during render). They
+      # sit in files owned by other workstreams. Drop `continue-on-error`
+      # once `npm run lint` reports 0 errors — see BACKLOG.md item 6.
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true

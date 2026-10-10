@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, type ReactNode, type HTMLAttributes } from 'react';
+import { onScrollGeometry } from '@/lib/scrollGeometry';
 
 export interface MagnetProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -29,9 +30,16 @@ const EASE_FLUID = 'cubic-bezier(0.32, 0.72, 0, 1)';
  *     a synchronous layout, at pointer rate, for a purely decorative effect.
  *  3. Its listeners were on `window` and never removed while `disabled`.
  *
- * Now: the rect is cached and refreshed on scroll/resize, the offset is written
- * straight to `style.transform` with no state at all, and a move that does not
- * change the offset does no work. The public API is unchanged.
+ * Now: the box is cached in DOCUMENT space and refreshed only when the
+ * document actually moves, the offset is written straight to `style.transform`
+ * with no state at all, and a move that does not change the offset does no
+ * work. The public API is unchanged.
+ *
+ * Caching in document space rather than viewport space is what takes the
+ * element off the scroll path. Its viewport position is `top - scrollY`, and
+ * reading the scroll offset costs nothing, so a scroll no longer re-measures
+ * anything - which it used to do on every scroll event, at the cost of a
+ * forced layout per frame.
  *
  * The transition defaults are also this repo's curve rather than upstream's
  * `ease-out` / `ease-in-out`, so a caller that forgets to override still gets
@@ -60,21 +68,26 @@ const Magnet: React.FC<MagnetProps> = ({
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (reduced.matches) return;
 
-    let rect = wrapper.getBoundingClientRect();
+    /** The wrapper's box in document space. */
+    let box = { left: 0, top: 0, width: 0, height: 0 };
     const measure = () => {
-      rect = wrapper.getBoundingClientRect();
+      const r = wrapper.getBoundingClientRect();
+      box = { left: r.left + window.scrollX, top: r.top + window.scrollY, width: r.width, height: r.height };
     };
+    measure();
 
     let active = false;
     let lastX = 0;
     let lastY = 0;
 
     const onMove = (e: PointerEvent) => {
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
+      // Document box -> viewport box. `scrollY` is a cheap read and never
+      // forces a layout, which is the whole reason the box is stored this way.
+      const centerX = box.left - window.scrollX + box.width / 2;
+      const centerY = box.top - window.scrollY + box.height / 2;
       const distX = Math.abs(centerX - e.clientX);
       const distY = Math.abs(centerY - e.clientY);
-      const within = distX < rect.width / 2 + padding && distY < rect.height / 2 + padding;
+      const within = distX < box.width / 2 + padding && distY < box.height / 2 + padding;
 
       // Only touch the transition when the engagement state actually flips.
       if (within !== active) {
@@ -91,12 +104,13 @@ const Magnet: React.FC<MagnetProps> = ({
     };
 
     window.addEventListener('pointermove', onMove, { passive: true });
-    window.addEventListener('scroll', measure, { passive: true });
-    window.addEventListener('resize', measure);
+    // Re-measure when the document moves - a resize, or the monospace font
+    // settling and re-laying the page out - instead of on every scroll.
+    const offGeometry = onScrollGeometry(measure);
+
     return () => {
       window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('scroll', measure);
-      window.removeEventListener('resize', measure);
+      offGeometry();
     };
   }, [padding, disabled, magnetStrength, activeTransition, inactiveTransition]);
 

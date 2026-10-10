@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { onScrollGeometry, scrollGeometry } from '@/lib/scrollGeometry';
 
 /**
  * Hairline accent reading-progress bar pinned to the very top of the page.
@@ -16,6 +17,11 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
  * linear transition smooths the steps between scroll events. Under reduced
  * motion the value is written with no transition, so the bar tracks the scroll
  * position exactly instead of easing toward it.
+ *
+ * The scrollable height comes from the shared cached geometry rather than a
+ * `scrollHeight` read: this listener fires on every scroll frame, and a read
+ * there forces a synchronous layout against a tree GSAP has already dirtied.
+ * See src/lib/scrollGeometry.ts.
  */
 export function ScrollProgress() {
   const reduced = useReducedMotion();
@@ -29,7 +35,7 @@ export function ScrollProgress() {
 
     const draw = () => {
       frame = 0;
-      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollable = scrollGeometry().maxScroll;
       const progress = scrollable > 0 ? window.scrollY / scrollable : 0;
       const clamped = progress < 0 ? 0 : progress > 1 ? 1 : progress;
       bar.style.transform = `scaleX(${clamped})`;
@@ -44,9 +50,12 @@ export function ScrollProgress() {
     draw();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
+    // The document height moved, so the fraction behind the bar is stale.
+    const offGeometry = onScrollGeometry(onScroll);
 
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
+      offGeometry();
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
     };

@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { onScrollGeometry } from '@/lib/scrollGeometry';
 import { cn } from '@/lib/cn';
 
 /** Grace period after the transition should have finished, before we force the
@@ -24,17 +25,37 @@ const TRIGGER_MARGIN = 70;
 const StaggerDelay = createContext(0);
 
 /**
+ * A block waiting to play: its stagger delay, and its top edge in DOCUMENT
+ * space. `NaN` means "not measured yet".
+ */
+interface Pending {
+  delayMs: number;
+  top: number;
+}
+
+/**
  * Blocks waiting to play, and the work that plays them.
  *
  * This is hand-rolled rather than an IntersectionObserver on purpose. An
  * observer only reports *changes* in intersection, so a jump — a nav link, a
  * restored scroll position, `scrollTo` — can carry a block from below the
  * viewport to above it between two observation points, and no callback ever
- * arrives: the block stays at zero opacity for good. A rect check on each
+ * arrives: the block stays at zero opacity for good. A position check on each
  * scroll frame cannot miss it, because "above the line" is just a position.
+ *
+ * The position is CACHED, though. This used to call `getBoundingClientRect()`
+ * on every pending block on every scroll frame, and against a tree GSAP had
+ * already dirtied that is a forced synchronous layout per frame - measured at
+ * 3% of the main thread for the length of the first scroll down the page. A
+ * block's document offset does not change when the page scrolls, so it is
+ * measured once and then compared against `scrollY`, which is free. The
+ * offsets are invalidated when the geometry module reports the document has
+ * moved (fonts settling, a resize), so a stale offset can only ever mis-time
+ * one entrance by a frame or two.
  */
-const waiting = new Map<HTMLElement, number>();
+const waiting = new Map<HTMLElement, Pending>();
 let listening = false;
+let offGeometry: (() => void) | null = null;
 
 function play(node: HTMLElement, delayMs: number) {
   if (node.dataset.reveal === 'shown') return;
@@ -49,16 +70,20 @@ function play(node: HTMLElement, delayMs: number) {
  * Runs straight off the scroll event rather than through a frame callback:
  * `requestAnimationFrame` is throttled to nothing in a background or occluded
  * window, which would leave blocks that require a scroll parked at zero opacity.
- * Reads happen first and writes second, so the pass costs one layout, not one
- * per block.
+ * Reads happen first and writes second, so the whole pass costs at most one
+ * layout, and in the steady state it costs none at all.
  */
 function measure() {
   const line = window.innerHeight - TRIGGER_MARGIN;
+  const y = window.scrollY;
   let ready: Array<[HTMLElement, number]> | null = null;
 
-  for (const [node, delayMs] of waiting) {
-    if (node.getBoundingClientRect().top >= line) continue;
-    (ready ??= []).push([node, delayMs]);
+  for (const [node, entry] of waiting) {
+    // Read first, in this pass, so the batch still costs a single layout.
+    if (Number.isNaN(entry.top)) entry.top = node.getBoundingClientRect().top + y;
+    // `entry.top - y` is the node's top edge in the viewport.
+    if (entry.top - y >= line) continue;
+    (ready ??= []).push([node, entry.delayMs]);
   }
 
   if (!ready) return;
@@ -69,17 +94,26 @@ function measure() {
   if (waiting.size === 0) stopWatching();
 }
 
+/** The document moved under us: every cached offset is suspect. */
+function invalidate() {
+  for (const entry of waiting.values()) entry.top = Number.NaN;
+  measure();
+}
+
 function startWatching() {
   if (listening) return;
   listening = true;
   window.addEventListener('scroll', measure, { passive: true });
   window.addEventListener('resize', measure, { passive: true });
+  offGeometry = onScrollGeometry(invalidate);
 }
 
 function stopWatching() {
   listening = false;
   window.removeEventListener('scroll', measure);
   window.removeEventListener('resize', measure);
+  offGeometry?.();
+  offGeometry = null;
 }
 
 /** The tags a reveal can land on without changing the markup's semantics. */
@@ -140,7 +174,7 @@ export function Reveal({
     }
 
     const delayMs = Math.round(delay * 1000);
-    waiting.set(node, delayMs);
+    waiting.set(node, { delayMs, top: Number.NaN });
     startWatching();
     measure();
 

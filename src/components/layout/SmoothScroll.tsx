@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { onScrollGeometry, scrollGeometry } from '@/lib/scrollGeometry';
 
 /**
  * Slow scroll.
@@ -24,9 +25,9 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
  * 2. It only takes over a FINE pointer. A touch device already has
  *    momentum, rubber-banding and a scrollbar the OS draws; a JS lerp on
  *    top of that fights the platform and loses on the first flick.
- * 3. A scroll the page did not author always wins. Anchor jumps, keyboard
- *    PageDown, a scrollbar drag and the browser restoring a position all
- *    move `scrollY` without us, and when that happens we drop the loop and
+ * 3. A scroll the page did not author always wins. Keyboard PageDown, a
+ *    scrollbar drag and the browser restoring a position all move
+ *    `scrollY` without us, and when that happens we drop the loop and
  *    re-seat on the real position rather than dragging the reader back.
  * 4. A wheel event inside a nested scroller belongs to that element. The
  *    CV dialog is a scrollable panel over a locked page; stealing its
@@ -54,6 +55,22 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
  * `scrollTo()` would ask the browser to animate toward a position the
  * loop is already animating toward, and the two easings would compound
  * into a rubber band.
+ *
+ * ONE MOTION LANGUAGE
+ * An in-page navigation click is the same gesture as a wheel notch, so it
+ * gets the same glide rather than the browser's own `scroll-behavior:
+ * smooth`, which is a different curve arriving at a different moment.
+ * Without this the page had two feels: a glide from the wheel and a
+ * separate, quicker slide from the status bar. Keyboard paging is left
+ * alone deliberately - instant paging is what the key means, and taking
+ * it over is the hijack rule 1 exists to refuse.
+ *
+ * WHAT IT READS
+ * Nothing. The scroll limit comes from the shared cached geometry, never
+ * from `scrollHeight` here: a per-frame `scrollHeight` read forces a
+ * synchronous layout (GSAP has already dirtied the tree that frame by
+ * writing transforms) and it measured 5.5% of the main thread across one
+ * gesture. See src/lib/scrollGeometry.ts.
  *
  * The dials are CSS custom properties, so they are tunable from
  * globals.css without touching this file:
@@ -95,9 +112,14 @@ export function SmoothScroll() {
 
     const RATE = cssNum('--scroll-rate', 0.6);
     const EASE = Math.min(cssNum('--scroll-ease', 0.09), 1);
-    // Sub-pixel. Anything smaller and the loop spins on a distance the
-    // reader cannot see.
-    const EPS = 0.4;
+    // The glide settles on whole device pixels: that is the finest step the
+    // compositor can show, so travelling closer than one is work the reader
+    // cannot see.
+    const DPR = window.devicePixelRatio || 1;
+    const PIXEL = 1 / DPR;
+    // Stop once the remaining distance is under one device pixel, then snap
+    // the rest: carrying on only buys a long tail of frames that move nothing.
+    const EPS = PIXEL;
     // How far outside the corridor `scrollY` has to land before we call
     // the scroll someone else's. Covers the browser's own rounding and
     // any clamping it applies to our writes.
@@ -116,8 +138,7 @@ export function SmoothScroll() {
     let running = false;
     let lastFrame = 0;
 
-    const maxScroll = () => Math.max(0, root.scrollHeight - window.innerHeight);
-    const clamp = (v: number) => Math.min(Math.max(v, 0), maxScroll());
+    const clamp = (v: number) => Math.min(Math.max(v, 0), scrollGeometry().maxScroll);
 
     const write = (v: number) => {
       window.scrollTo({ top: v, behavior: 'instant' });
@@ -132,9 +153,9 @@ export function SmoothScroll() {
       lastFrame = now;
       const k = 1 - Math.pow(1 - EASE, dt / (1000 / 60));
 
-      // Re-read the limit every frame. The gutter resizes the document
-      // once fonts settle, and a target past the new end would otherwise
-      // keep the loop alive against a wall.
+      // The limit is re-read from the cache every frame. The gutter
+      // resizes the document once fonts settle, and a target past the new
+      // end would otherwise keep the loop alive against a wall.
       target = clamp(target);
       current += (target - current) * k;
 
@@ -163,6 +184,16 @@ export function SmoothScroll() {
       running = false;
       lastFrame = 0;
       current = target = window.scrollY;
+    };
+
+    /** Aim the glide at a position, widening the corridor if it is in flight. */
+    const aim = (to: number) => {
+      target = clamp(to);
+      if (running) {
+        burstLo = Math.min(burstLo, target);
+        burstHi = Math.max(burstHi, target);
+      }
+      kick();
     };
 
     const onScroll = () => {
@@ -201,7 +232,7 @@ export function SmoothScroll() {
       // Ctrl+wheel is pinch-zoom, and a handler upstream that already
       // called preventDefault has claimed the gesture.
       if (e.ctrlKey || e.defaultPrevented) return;
-      if (maxScroll() <= 0) return;
+      if (scrollGeometry().maxScroll <= 0) return;
       if (inNestedScroller(e.target)) return;
 
       e.preventDefault();
@@ -209,27 +240,70 @@ export function SmoothScroll() {
       // `deltaMode` is lines in some browsers and some mice; 16px is the
       // conventional line. Pixels otherwise, which is Chrome on Windows.
       const delta = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
-      target = clamp(target + delta * RATE);
-      if (running) {
-        burstLo = Math.min(burstLo, target);
-        burstHi = Math.max(burstHi, target);
-      }
-      kick();
+      aim(target + delta * RATE);
     };
 
-    const onResize = () => release();
+    /**
+     * A nav click glides like a wheel notch instead of sliding on the
+     * browser's own curve, so the page has one motion language. The
+     * `scroll-margin-top` on the destination (the header offset the
+     * sections carry) is honoured by hand, because it is what the browser
+     * would have applied to the jump we just took over.
+     */
+    const onClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (scrollGeometry().maxScroll <= 0) return;
+
+      const anchor = e.target instanceof Element ? e.target.closest('a[href^="#"]') : null;
+      if (!anchor) return;
+
+      const href = anchor.getAttribute('href');
+      if (!href || href === '#') return;
+
+      let dest: HTMLElement | null = null;
+      try {
+        dest = document.getElementById(decodeURIComponent(href.slice(1)));
+      } catch {
+        return;
+      }
+      if (!dest) return;
+
+      e.preventDefault();
+
+      const offset = parseFloat(getComputedStyle(dest).scrollMarginTop) || 0;
+      aim(dest.getBoundingClientRect().top + window.scrollY - offset);
+
+      // Keep the address bar and the back button honest without letting
+      // the browser also jump to the hash.
+      try {
+        history.pushState(null, '', href);
+      } catch {
+        /* a sandboxed or file: context refuses pushState; the glide still ran */
+      }
+    };
+
+    // The document can grow or shrink under a glide (fonts settling, the
+    // gutter re-laying out, a section expanding). Re-clamp the target so
+    // it cannot sit past the new end and hold the loop open against a wall.
+    const offGeometry = onScrollGeometry(() => {
+      target = clamp(target);
+    });
 
     window.addEventListener('wheel', onWheel, { passive: false });
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('resize', release, { passive: true });
     window.addEventListener('hashchange', onHash);
+    document.addEventListener('click', onClick);
 
     return () => {
       cancelAnimationFrame(raf);
+      offGeometry();
       window.removeEventListener('wheel', onWheel);
       window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener('resize', release);
       window.removeEventListener('hashchange', onHash);
+      document.removeEventListener('click', onClick);
       root.style.scrollSnapType = previousSnap;
     };
   }, [reduced]);

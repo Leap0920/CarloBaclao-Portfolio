@@ -166,7 +166,7 @@ export function CvPreviewDialog({ open, onClose, triggerRef }: CvPreviewDialogPr
             className="inline-flex min-h-11 items-center gap-2 rounded-card rounded bg-accent px-4 text-sm font-semibold text-on-accent transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           >
             <Download size={15} aria-hidden="true" />
-            Download
+            Download CV
           </a>
         </div>
       </div>

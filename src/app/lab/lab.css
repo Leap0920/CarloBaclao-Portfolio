@@ -1,0 +1,158 @@
+/* /lab — showcase styling. Dark-only, matching the site's palette. */
+
+.lab-root {
+  --lab-bg: #050505;
+  --lab-surface: #0a0a0a;
+  --lab-surface-2: #141414;
+  --lab-text: #fafafa;
+  --lab-muted: #b0b0b0;
+  --lab-faint: #7d7d7d;
+  --lab-accent: #fafafa;
+  --lab-border: rgba(244, 236, 222, 0.1);
+
+  min-height: 100vh;
+  background: var(--lab-bg);
+  color: var(--lab-text);
+  padding: clamp(1.5rem, 4vw, 4rem) clamp(1rem, 4vw, 4rem) 8rem;
+}
+
+.lab-hero {
+  max-width: 70ch;
+  margin: 0 auto clamp(3rem, 8vw, 6rem);
+  text-align: center;
+}
+
+.lab-hero h1 {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  letter-spacing: -0.03em;
+  margin: 0 0 1rem;
+}
+
+.lab-hero p {
+  color: var(--lab-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.lab-group {
+  margin: 0 auto clamp(3.5rem, 9vw, 7rem);
+  max-width: 1200px;
+}
+
+.lab-group-head {
+  border-bottom: 1px solid var(--lab-border);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+}
+
+.lab-group-head h2 {
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.25rem;
+}
+
+.lab-group-head p {
+  color: var(--lab-faint);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.lab-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+
+.lab-tile {
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-border);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lab-head {
+  align-items: baseline;
+  border-bottom: 1px solid var(--lab-border);
+  display: flex;
+  gap: 0.6rem;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+}
+
+.lab-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.lab-note {
+  color: var(--lab-faint);
+  font-size: 0.7rem;
+}
+
+.lab-stage {
+  align-items: center;
+  background: var(--lab-surface-2);
+  display: flex;
+  justify-content: center;
+  min-height: 170px;
+  overflow: hidden;
+  padding: 1rem;
+  position: relative;
+}
+
+.lab-stage-tall {
+  min-height: 280px;
+}
+
+.lab-loading {
+  color: var(--lab-faint);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+/* background picker */
+.lab-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.lab-pick {
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-border);
+  border-radius: 999px;
+  color: var(--lab-muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.85rem;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.lab-pick:hover {
+  border-color: rgba(244, 236, 222, 0.4);
+  color: var(--lab-text);
+}
+
+.lab-pick-on {
+  border-color: var(--lab-accent);
+  color: var(--lab-accent);
+}
+
+.lab-bgstage {
+  background: var(--lab-surface-2);
+  border: 1px solid var(--lab-border);
+  border-radius: 14px;
+  height: min(60vh, 520px);
+  overflow: hidden;
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-pick {
+    transition: none;
+  }
+}

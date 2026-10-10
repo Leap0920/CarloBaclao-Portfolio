@@ -1,0 +1,59 @@
+.shuffle-parent {
+  display: inline-block;
+  white-space: normal;
+  word-wrap: break-word;
+  will-change: transform;
+  line-height: 1;
+  font-size: 4rem;
+  font-family: 'Press Start 2P', sans-serif;
+  text-transform: uppercase;
+  visibility: hidden;
+}
+
+.shuffle-parent.is-ready {
+  visibility: visible;
+}
+
+.shuffle-char-wrapper {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: baseline;
+  position: relative;
+}
+
+.shuffle-char-wrapper > span {
+  display: inline-flex;
+  will-change: transform;
+}
+
+.shuffle-char {
+  line-height: 1;
+  display: inline-block;
+  text-align: center;
+}
+
+/*
+ * Showcase defaults, neutralised.
+ *
+ * Upstream styles this for its own demo page: 4rem, 'Press Start 2P', uppercase
+ * and a tight line-height. Dropped into a section heading that already has its
+ * own type scale and face, that overrides the site instead of serving it — the
+ * headings came out uppercase and wrapped from one line to three. Shuffle's job
+ * here is to animate the letters; the type is the heading's business, so it
+ * inherits rather than imposing.
+ *
+ * `line-height` is restated after `font` on purpose: the `font` shorthand
+ * resets it, so the inherit has to come second to win.
+ *
+ * The `visibility: hidden` above is deliberately kept. It is what stops the
+ * unsplit text flashing before GSAP splits it, and Shuffle sets `.is-ready` on
+ * the normal path and on the reduced-motion one, so the heading cannot get
+ * stuck invisible.
+ */
+.shuffle-parent {
+  font: inherit;
+  line-height: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: none;
+}

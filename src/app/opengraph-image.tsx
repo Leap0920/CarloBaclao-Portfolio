@@ -8,9 +8,14 @@ import { profile } from '@/data/profile';
  *
  * Satori (what renders this) supports a subset of CSS: flexbox only, no grid,
  * and every element with more than one child needs an explicit `display`.
+ *
+ * The palette is the site's, hardcoded because Satori cannot read CSS custom
+ * properties: off-black #050505, off-white #FAFAFA, muted #B0B0B0, faint
+ * #7D7D7D, surface #141414. Monochrome, like everything else — the card used
+ * to be the one place the old amber survived.
  */
 
-export const alt = `${profile.name} — ${profile.role}`;
+export const alt = `${profile.name} - ${profile.role}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -25,10 +30,10 @@ export default function OpengraphImage() {
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '72px 80px',
-          backgroundColor: '#100E0B',
+          backgroundColor: '#050505',
           backgroundImage:
-            'radial-gradient(60% 55% at 10% 0%, rgba(232,163,61,0.18), transparent 70%)',
-          color: '#F5F1E8',
+            'radial-gradient(60% 55% at 10% 0%, rgba(255,255,255,0.10), transparent 70%)',
+          color: '#FAFAFA',
           fontFamily: 'sans-serif',
         }}
       >
@@ -41,8 +46,8 @@ export default function OpengraphImage() {
               width: 68,
               height: 68,
               borderRadius: 18,
-              border: '1px solid rgba(244,236,222,0.18)',
-              backgroundColor: '#1A1712',
+              border: '1px solid rgba(255,255,255,0.14)',
+              backgroundColor: '#141414',
               fontSize: 26,
               fontWeight: 600,
             }}
@@ -55,7 +60,7 @@ export default function OpengraphImage() {
               fontSize: 22,
               letterSpacing: 5,
               textTransform: 'uppercase',
-              color: '#E8A33D',
+              color: '#B0B0B0',
             }}
           >
             {profile.role}
@@ -81,7 +86,7 @@ export default function OpengraphImage() {
               maxWidth: 920,
               fontSize: 30,
               lineHeight: 1.35,
-              color: '#A79E8D',
+              color: '#B0B0B0',
             }}
           >
             {profile.pitch}
@@ -94,13 +99,13 @@ export default function OpengraphImage() {
             alignItems: 'center',
             gap: 18,
             paddingTop: 26,
-            borderTop: '1px solid rgba(244,236,222,0.14)',
+            borderTop: '1px solid rgba(255,255,255,0.12)',
             fontSize: 24,
-            color: '#A79E8D',
+            color: '#B0B0B0',
           }}
         >
           <div style={{ display: 'flex' }}>{profile.location}</div>
-          <div style={{ display: 'flex', color: '#8B8271' }}>·</div>
+          <div style={{ display: 'flex', color: '#7D7D7D' }}>·</div>
           <div style={{ display: 'flex' }}>{profile.availability}</div>
         </div>
       </div>

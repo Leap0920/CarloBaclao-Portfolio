@@ -18,7 +18,11 @@ export const metadata: Metadata = {
  */
 export default function NotFound() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-5 py-24 text-center sm:px-8">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-5 py-24 text-center focus:outline-none sm:px-8"
+    >
       <p className="font-mono text-sm uppercase tracking-[0.18em] text-accent">404</p>
 
       <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">

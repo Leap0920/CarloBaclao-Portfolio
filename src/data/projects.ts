@@ -1,10 +1,18 @@
 import type { Project } from '@/types';
 
+/**
+ * `impact` is the showcase card's line: one or two sentences, taken
+ * verbatim from the front of `description` so the plate and the dialog
+ * can never disagree about what a project is. `description` stays the
+ * long form the dialog renders in full.
+ */
 export const projects: Project[] = [
   {
     slug: 'dcph-tracker',
     name: 'DCPH Tracker',
     subtitle: 'Community tracking platform for Detective Conan PH',
+    impact:
+      'Episode, movie, and OVA progress tracking for a live fan community of 500 users, with an integrated AI chatbot and a searchable case index.',
     description:
       'Episode, movie, and OVA progress tracking for a live fan community of 500 users, with an integrated AI chatbot, sync across devices, watch guides, leaderboards, and a searchable case index. Metadata is pulled from five sources: Kitsu, AniList, Jikan, the DC Wiki, and Wikipedia.',
     tech: ['Next.js', 'React', 'Tailwind CSS', 'Vercel'],
@@ -20,6 +28,8 @@ export const projects: Project[] = [
     slug: 'attendance',
     name: 'Attendance Management System',
     subtitle: 'Full-stack IoT deployment on a Raspberry Pi',
+    impact:
+      'Attendance system for a real client: Spring Boot API, React, PostgreSQL on a Raspberry Pi, with Flyway migrations and a Windows installer.',
     description:
       'Attendance system for a real client: Spring Boot API, React, PostgreSQL on a Raspberry Pi, with Flyway migrations and a Windows installer.',
     tech: [
@@ -44,6 +54,8 @@ export const projects: Project[] = [
     slug: 'devcard',
     name: 'DevCard',
     subtitle: 'GitHub profile README builder',
+    impact:
+      'Visual builder for GitHub profile READMEs: pick a stack, drag sections, see live markdown as GitHub renders it.',
     description:
       'Visual builder for GitHub profile READMEs: pick a stack, drag sections, see live markdown as GitHub renders it. One-click copy or download.',
     tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Zustand'],
@@ -59,6 +71,8 @@ export const projects: Project[] = [
     slug: 'loophabit',
     name: 'LoopHabit',
     subtitle: 'Native Android habit tracker',
+    impact:
+      'Native Android habit tracker in Kotlin with daily streaks, reminders, and a quiet interface, distributed through Google Play.',
     description:
       'Native Android habit tracker in Kotlin: daily streaks, reminders, and a quiet interface. Distributed via Google Play and the project site.',
     tech: ['Kotlin', 'Android Studio', 'Java'],
@@ -74,6 +88,8 @@ export const projects: Project[] = [
     slug: 'wallet',
     name: 'Wallet',
     subtitle: 'Digital wallet app',
+    impact:
+      'A digital wallet built with Next.js and MongoDB for tracking balances, transfers, and payment history.',
     description:
       'A digital wallet built with Next.js and MongoDB for tracking balances, transfers, and payment history.',
     tech: ['Next.js', 'TypeScript', 'MongoDB', 'Tailwind CSS'],
@@ -87,7 +103,9 @@ export const projects: Project[] = [
   {
     slug: 'accounting',
     name: 'Accounting & Finance System',
-    subtitle: 'Coursework · financial records',
+    subtitle: 'Coursework, financial records',
+    impact:
+      'A PHP and MySQL accounting system for recording transactions, generating statements, and managing ledgers.',
     description:
       'A PHP and MySQL accounting system for recording transactions, generating statements, and managing ledgers. Built for a systems integration course.',
     tech: ['PHP', 'MySQL', 'JavaScript', 'HTML', 'CSS'],
@@ -102,6 +120,8 @@ export const projects: Project[] = [
     slug: 'tally-dcph',
     name: 'Tally DCPH',
     subtitle: 'Competition scoring dashboard',
+    impact:
+      'A scoring and record-keeping dashboard for tracking competition results, with an admin view for entering scores.',
     description:
       'A scoring and record-keeping dashboard for tracking competition results, with a simple admin view for entering scores.',
     tech: ['JavaScript', 'HTML', 'CSS', 'MySQL'],
@@ -116,6 +136,8 @@ export const projects: Project[] = [
     slug: 'lecuisine',
     name: 'LECUISINE',
     subtitle: 'Responsive marketing site',
+    impact:
+      'A responsive restaurant site built from scratch with vanilla JavaScript and CSS, deployed on GitHub Pages.',
     description:
       'A responsive restaurant site built from scratch with vanilla JavaScript and CSS, deployed on GitHub Pages.',
     tech: ['JavaScript', 'HTML', 'CSS', 'GitHub Pages'],

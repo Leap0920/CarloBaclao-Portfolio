@@ -1,45 +1,28 @@
 'use client';
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent as ReactKeyboardEvent,
-} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { ChevronDown, ChevronUp, ExternalLink, X as CloseIcon } from 'lucide-react';
+import { ArrowUpRight, X as CloseIcon } from 'lucide-react';
 import { BrandIcon } from '@/components/BrandIcons';
+import { Parallax } from '@/components/ui/Parallax';
 import { Reveal } from '@/components/ui/Reveal';
 import { Section, SectionHeading } from '@/components/ui/Section';
-import { TiltCard } from '@/components/ui/TiltCard';
+import { featuredProjects, otherProjects } from '@/data/projects';
 import { profile } from '@/data/profile';
-import { projects } from '@/data/projects';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { cn } from '@/lib/cn';
-import type { Project, ProjectCategory } from '@/types';
-
-type Filter = 'All' | ProjectCategory;
-
-/** The categories actually present in the data, behind an "All". */
-const FILTERS: Filter[] = [
-  'All',
-  ...Array.from(new Set(projects.map((project) => project.category))),
-];
+import type { Project } from '@/types';
 
 /**
- * The project the band opens on. It also leads the list, which is what puts
- * DCPH-Tracker on the first line.
+ * Every project, featured first, so a dialog lookup by slug can never miss
+ * regardless of which list a scene or an index row was rendered from.
  */
-const HIGHLIGHT_SLUG = 'dcph-tracker';
+const ALL_PROJECTS: Project[] = [...featuredProjects, ...otherProjects];
 
 /**
- * A project carries one `url`; split it into the two links the view shows.
- * When that url is a repository, it is the code link and there is no live
- * site — never label a repo as a deployment.
+ * A project carries one `url`; split it into the two links the scene shows.
+ * When that url is a repository it is the code link and there is no live
+ * site, so a repo is never mislabelled as a deployment.
  */
 function projectLinks(project: Project): { live?: string; repo?: string } {
   const urlIsRepo = project.url.includes('github.com');
@@ -49,126 +32,275 @@ function projectLinks(project: Project): { live?: string; repo?: string } {
   };
 }
 
-/* ── View ─────────────────────────────────────────────────────────── */
+/**
+ * The bare host a project lives at, for the window's chrome bar.
+ *
+ * Prefers the live site and falls back to the repository, so a project that
+ * only exists as source still gets a truthful address. It is a LABEL, not a
+ * link: the address is not always a browsable page, and a chrome bar that
+ * looks clickable but is not is worse than one that plainly is not.
+ */
+function displayHost(project: Project): string {
+  const { live, repo } = projectLinks(project);
+  return (live ?? repo ?? project.url)
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/\/.*$/, '');
+}
 
 /**
- * Whatever the list has selected, shown at size: the art, the description and
- * the whole tech list, with the dialog one press away. It carries no trigger
- * over its own surface — the panel is content now, and the list beside it is
- * what moves the selection.
+ * The two CTAs every scene leads with. Both are real links, laid out side by
+ * side and legible at rest: neither depends on a hover to be reachable or
+ * readable, and each clears the 44px tap floor on its own.
+ *
+ * The accent button does not introduce a second colour to signal hover. It
+ * lifts and deepens its shadow instead, which keeps the single-ember rule
+ * intact across both themes.
  */
-function ProjectView({
+function ProjectCtas({ project, className }: { project: Project; className?: string }) {
+  const { live, repo } = projectLinks(project);
+
+  return (
+    <div className={cn('flex flex-wrap items-center gap-2', className)}>
+      {live ? (
+        <a
+          href={live}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-accent px-3 text-[13px] font-medium text-on-accent transition-[translate,box-shadow] duration-300 ease-fluid hover:-translate-y-0.5 hover:shadow-float sm:gap-2 sm:px-5 sm:text-sm"
+        >
+          <ArrowUpRight size={14} aria-hidden="true" />
+          View live
+        </a>
+      ) : null}
+      {repo ? (
+        <a
+          href={repo}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border-strong px-3 text-[13px] font-medium text-foreground transition-colors duration-300 ease-fluid hover:border-accent hover:text-accent sm:gap-2 sm:px-5 sm:text-sm"
+        >
+          <BrandIcon name="github" size={14} />
+          Source code
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Tech badges: hairline chips in the copy column, never pills over an image.
+ *
+ * Below `lg` only the first three are shown, so the chip row stays one line on
+ * a phone and the scene keeps its momentum; the dialog always carries the
+ * complete list. There is deliberately no `+N` chip: the row must never wrap
+ * on a 320px screen, and a fourth chip is what tips it over.
+ *
+ * The chips used to sit on the photograph and needed a brighter ink step to
+ * clear 4.5:1. They now sit in the copy column on the page background, so the
+ * ordinary `muted` is both correct and simpler.
+ */
+function TechBadges({ tech, className }: { tech: string[]; className?: string }) {
+  return (
+    <ul className={cn('flex flex-wrap items-center gap-1.5', className)}>
+      {tech.map((item, index) => (
+        <li
+          key={item}
+          className={cn(
+            'rounded-full border border-border-strong px-2.5 py-0.5 font-mono text-[11px] text-muted',
+            index >= 3 && 'hidden lg:block',
+          )}
+        >
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/* -- The framed scene ---------------------------------------------- */
+
+/**
+ * One featured project as a SPLIT FRAME: the copy in one column, the product
+ * itself in the other, set in a browser window rather than bled edge to edge.
+ *
+ * Why this replaced the full-bleed reel. The reel gave every project a
+ * full-viewport photograph with the text laid over it, which meant (a) the
+ * text was legal only because a token scrim sat between it and the image, and
+ * (b) the cover's scroll-linked motion was almost invisible — an image 116%
+ * tall inside a 100vh frame moves a long way for a very small change on
+ * screen. A fixed-aspect window makes the same pan read as a deliberate
+ * camera move, and moving the copy off the image retires the scrim and the
+ * whole contrast question with it.
+ *
+ * The window is the section's IMAGE-DOMINANT device and it stays that way:
+ * the frame is the larger column (7 of 12), and it is the only thing on the
+ * page that is a picture of a product.
+ *
+ * SIDES ALTERNATE. Odd rows put the window on the left, so the eye zigzags
+ * down the section instead of running straight down a single gutter. The DOM
+ * order never changes: the window is always first, so on a phone the reading
+ * order opens on the visual and the copy follows it.
+ *
+ * Below `lg` the split collapses to one column and nothing is hidden — the
+ * chrome bar, the host label and the whole copy block survive at every width.
+ */
+function ProjectFrame({
   project,
-  position,
+  index,
   total,
   onOpen,
   setTrigger,
 }: {
   project: Project;
-  position: number;
+  index: number;
   total: number;
   onOpen: () => void;
   setTrigger: (el: HTMLButtonElement | null) => void;
 }) {
-  const { live, repo } = projectLinks(project);
+  const counter = `${String(index + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+  const host = displayHost(project);
+  /** Odd rows mirror, so the window alternates sides on wide screens. */
+  const flip = index % 2 === 1;
 
   return (
-    <TiltCard className="h-full">
-      <article className="group relative flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface transition-transform duration-300 ease-out hover:-translate-y-1.5">
-        {/* Soft accent glow. Opacity only — no layout property moves. */}
+    <li className="group/scene">
+      <div className="grid items-center gap-6 lg:grid-cols-12 lg:items-center lg:gap-10 xl:gap-14">
+        {/* The window. DOM-first so mobile opens on the visual; on lg it is
+            pushed right on even rows and left on odd ones. */}
         <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 rounded-card opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{
-            background:
-              'radial-gradient(90% 65% at 50% 0%, color-mix(in oklab, var(--accent) 24%, transparent), transparent 72%)',
-          }}
-        />
+          className={cn(
+            'order-first lg:col-span-7',
+            flip ? 'lg:order-first' : 'lg:order-last',
+          )}
+        >
+          <div className="overflow-hidden rounded-card border border-hairline bg-surface shadow-card">
+            {/* The chrome. Three inert dots and the real host, both on the
+                micro step. The dots are decoration and stay hidden from
+                assistive tech; the host is the one piece of information. */}
+            <div className="flex items-center gap-3 border-b border-hairline bg-surface-2 px-3.5 py-2.5">
+              <span aria-hidden="true" className="flex shrink-0 items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full border border-border-strong" />
+                <span className="h-2.5 w-2.5 rounded-full border border-border-strong" />
+                <span className="h-2.5 w-2.5 rounded-full border border-border-strong" />
+              </span>
+              <span className="min-w-0 truncate font-mono text-[11px] tracking-[0.06em] text-faint">
+                {host}
+              </span>
+            </div>
 
-        <div className="relative flex h-full flex-col">
-          <div className="relative aspect-[2/1] overflow-hidden bg-surface-2 sm:aspect-[16/9]">
-            <Image
-              src={project.image}
-              alt={`${project.name} — ${project.subtitle}`}
-              fill
-              sizes="(max-width: 1024px) 100vw, 640px"
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-            />
-            {/* Where this project sits in the set — the same count the index
-                shows, so the two columns agree at a glance. */}
-            <span className="absolute left-3 top-3 rounded-full border border-border bg-background px-2.5 py-1 font-mono text-[11px] tabular-nums text-muted">
-              <span className="text-foreground">{String(position).padStart(2, '0')}</span>
-              {' / '}
-              {String(total).padStart(2, '0')}
-            </span>
+            {/* The viewport. A fixed 16:10 window, so the parallax layer below
+                is a visible pan rather than an imperceptible drift. */}
+            <div className="relative aspect-[16/10] w-full overflow-hidden bg-surface-2">
+              {/* 120% tall and offset up 10%, so a +/-8% travel can never
+                  reveal a bare edge. */}
+              <Parallax speed={0.08} className="absolute inset-x-0 top-[-10%] h-[120%]">
+                <Image
+                  src={project.image}
+                  alt={`${project.name}: ${project.subtitle}`}
+                  fill
+                  sizes="(max-width: 1023px) 100vw, 58vw"
+                  quality={60}
+                  className="object-cover"
+                />
+              </Parallax>
+            </div>
           </div>
+        </div>
 
-          <div className="flex flex-1 flex-col p-4 sm:p-7">
-            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-              {project.category} · {project.year}
+        {/* The copy. */}
+        <div className={cn('lg:col-span-5', flip && 'lg:order-last')}>
+          <Reveal>
+            {/* The reel counter counts scenes inside one section. It is not a
+                section-number eyebrow, and it is the only numbering on the
+                page. */}
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+              {counter}
             </p>
-            <h3 className="mt-2 font-display text-xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              {project.name}
-            </h3>
-            <p className="mt-1.5 text-sm font-medium text-muted">{project.subtitle}</p>
-            <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-muted sm:mt-4 sm:line-clamp-none">{project.description}</p>
 
-            <ul className="mt-4 flex flex-wrap gap-1.5 sm:mt-5">
-              {project.tech.map((tech) => (
-                <li
-                  key={tech}
-                  className="rounded-full border border-border bg-background/40 px-2.5 py-1 font-mono text-[11px] text-muted"
-                >
-                  {tech}
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 pt-4 sm:gap-x-5 sm:pt-6">
+            <h3 className="mt-2 font-display text-2xl font-semibold leading-[1.08] tracking-[-0.025em] text-foreground md:text-title">
+              {/* The name is the dialog's trigger: a real control styled as
+                  the display line. It carries `min-h-11` so its own box
+                  clears the 44px tap floor even when the name is one line,
+                  with an ember underline sweep on the inner span so it reads
+                  as pressable without a hover being required to find it. */}
               <button
                 ref={setTrigger}
                 type="button"
                 onClick={onOpen}
-                aria-label={`Open details for ${project.name}`}
-                className="inline-flex min-h-11 sm:min-h-12 items-center rounded-full border border-border px-4 text-sm font-medium text-foreground transition-colors hover:border-accent/50 hover:text-accent"
+                aria-haspopup="dialog"
+                className="inline-flex min-h-11 items-center text-left transition-colors duration-300 ease-fluid hover:text-accent focus-visible:text-accent"
               >
-                View details
+                <span className="link-sweep">{project.name}</span>
               </button>
-              {live ? (
-                <a
-                  href={live}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-11 sm:min-h-12 items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent"
-                >
-                  Live
-                  <ExternalLink size={14} aria-hidden="true" />
-                </a>
-              ) : null}
-              {repo ? (
-                <a
-                  href={repo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-11 sm:min-h-12 items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent"
-                >
-                  <BrandIcon name="github" size={15} />
-                  GitHub
-                </a>
-              ) : null}
-            </div>
-          </div>
+            </h3>
+
+            <p className="mt-3 max-w-[46ch] text-[0.9375rem] leading-relaxed text-muted md:text-base">
+              {project.impact}
+            </p>
+
+            <TechBadges tech={project.tech} className="mt-4" />
+
+            <ProjectCtas project={project} className="mt-5" />
+          </Reveal>
         </div>
-      </article>
-    </TiltCard>
+      </div>
+    </li>
   );
 }
 
-/* ── Dialog ───────────────────────────────────────────────────────── */
+/* -- The compact mono index ---------------------------------------- */
+
+/**
+ * One of the remaining projects as a single dense line: name in `ink-soft`,
+ * year and category in `faint`, rows divided by a hairline. No image, no
+ * card. This is what keeps the scroll from feeling drawn out after four
+ * framed scenes. The whole line is one control that opens the same dialog
+ * the scenes use, so nothing on the page is a dead end.
+ *
+ * The row is a flex-wrap: at 320px the year and category drop to their own
+ * line rather than forcing the name to clip.
+ */
+function IndexRow({
+  project,
+  onOpen,
+  setTrigger,
+}: {
+  project: Project;
+  onOpen: () => void;
+  setTrigger: (el: HTMLButtonElement | null) => void;
+}) {
+  return (
+    <button
+      ref={setTrigger}
+      type="button"
+      onClick={onOpen}
+      aria-haspopup="dialog"
+      className="group/row flex min-h-11 w-full flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-3.5 text-left"
+    >
+      <span className="font-display text-[15px] font-medium tracking-tight text-ink-soft transition-colors duration-300 ease-fluid group-hover/row:text-accent group-focus-visible/row:text-accent">
+        {project.name}
+      </span>
+      <span className="flex items-baseline gap-4 font-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+        <span>{project.category}</span>
+        <span>{project.year}</span>
+      </span>
+    </button>
+  );
+}
+
+/* -- Dialog -------------------------------------------------------- */
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+/**
+ * The project detail dialog. Kept intact from the previous build: it locks
+ * body scroll while open, lands focus inside on mount, traps Tab, closes on
+ * Escape, and the section returns focus to the control that opened it. Only
+ * the skin changed. Its backdrop is one of the two places a backdrop blur is
+ * permitted.
+ */
 function ProjectDialog({ project, onClose }: { project: Project; onClose: () => void }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -232,10 +364,12 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
 
   return createPortal(
     <div className="project-dialog-backdrop fixed inset-0 z-[120] flex items-end justify-center p-3 sm:items-center sm:p-6">
+      {/* The scrim is fixed chrome, so a backdrop blur is allowed here and
+          nowhere in the scrolling content. */}
       <div
         aria-hidden="true"
         onClick={onClose}
-        className="absolute inset-0 bg-background/95"
+        className="absolute inset-0 bg-background/80 backdrop-blur-md"
       />
 
       <div
@@ -245,79 +379,89 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        className="project-dialog-panel relative z-10 max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-card border border-border bg-surface shadow-2xl"
+        className="project-dialog-panel relative z-10 w-full max-w-2xl"
       >
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-surface-2">
-          <Image
-            src={project.image}
-            alt={`${project.name} — ${project.subtitle}`}
-            fill
-            sizes="(max-width: 672px) 100vw, 672px"
-            className="object-cover"
-          />
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={onClose}
-            aria-label="Close dialog"
-            className="absolute right-3 top-3 grid h-12 w-12 place-items-center rounded-full border border-border bg-surface text-foreground"
-          >
-            <CloseIcon size={18} aria-hidden="true" />
-          </button>
-        </div>
+        {/* The dialog is a major surface, so it wears the same double-bezel as
+            the machined chrome elsewhere: tray, then core, then one scroll
+            region. */}
+        <div className="bezel">
+          <div className="bezel-core">
+            <div className="max-h-[85vh] overflow-y-auto">
+              <div className="relative aspect-[16/9] w-full overflow-hidden bg-surface-2">
+                <Image
+                  src={project.image}
+                  alt={`${project.name}: ${project.subtitle}`}
+                  fill
+                  sizes="(max-width: 672px) 100vw, 672px"
+                  className="object-cover"
+                />
+                <button
+                  ref={closeRef}
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Close dialog"
+                  className="absolute right-3 top-3 grid h-12 w-12 place-items-center rounded-full border border-border-strong bg-surface text-foreground transition-colors duration-300 ease-fluid hover:border-accent hover:text-accent"
+                >
+                  <CloseIcon size={18} aria-hidden="true" />
+                </button>
+              </div>
 
-        <div className="p-5 sm:p-7">
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            {project.category} · {project.year}
-          </p>
-          <h3
-            id={titleId}
-            className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground"
-          >
-            {project.name}
-          </h3>
-          <p className="mt-1 text-sm font-medium text-muted">{project.subtitle}</p>
-          <p id={descriptionId} className="mt-4 text-sm leading-relaxed text-muted">
-            {project.description}
-          </p>
+              <div className="p-5 sm:p-7">
+                <p className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+                  <span>{project.category}</span>
+                  <span>{project.year}</span>
+                </p>
+                <h3
+                  id={titleId}
+                  className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground"
+                >
+                  {project.name}
+                </h3>
+                <p className="mt-1 text-sm font-medium text-muted">{project.subtitle}</p>
+                <p id={descriptionId} className="mt-4 max-w-[65ch] text-sm leading-relaxed text-muted">
+                  {project.description}
+                </p>
 
-          <h4 className="mt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Tech
-          </h4>
-          <ul className="mt-3 flex flex-wrap gap-1.5">
-            {project.tech.map((tech) => (
-              <li
-                key={tech}
-                className="rounded-full border border-border bg-background/40 px-2.5 py-1 font-mono text-[11px] text-muted"
-              >
-                {tech}
-              </li>
-            ))}
-          </ul>
+                <h4 className="mt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+                  Tech
+                </h4>
+                <ul className="mt-3 flex flex-wrap gap-1.5">
+                  {project.tech.map((tech) => (
+                    <li
+                      key={tech}
+                      className="rounded-full border border-border bg-surface-2 px-3 py-1 font-mono text-[11px] text-muted"
+                    >
+                      {tech}
+                    </li>
+                  ))}
+                </ul>
 
-          <div className="mt-6 flex flex-wrap gap-3 border-t border-border pt-5">
-            {live ? (
-              <a
-                href={live}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-accent px-4 text-sm font-medium text-on-accent"
-              >
-                <ExternalLink size={15} aria-hidden="true" />
-                Live site
-              </a>
-            ) : null}
-            {repo ? (
-              <a
-                href={repo}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium text-foreground"
-              >
-                <BrandIcon name="github" size={15} />
-                View code
-              </a>
-            ) : null}
+                <div className="mt-6 flex flex-wrap gap-3 border-t border-border pt-5">
+                  {live ? (
+                    <a
+                      href={live}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-12 items-center gap-2 rounded-full bg-accent px-4 text-sm font-medium text-on-accent transition-[translate,box-shadow] duration-300 ease-fluid hover:-translate-y-0.5 hover:shadow-float"
+                    >
+                      <ArrowUpRight size={15} aria-hidden="true" />
+                      View live
+                    </a>
+                  ) : null}
+                  {repo ? (
+                    <a
+                      href={repo}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border-strong px-4 text-sm font-medium text-foreground transition-colors duration-300 ease-fluid hover:border-accent hover:text-accent"
+                    >
+                      <BrandIcon name="github" size={15} />
+                      Source code
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -326,49 +470,39 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
   );
 }
 
-/* ── Section ──────────────────────────────────────────────────────── */
+/* -- Section ------------------------------------------------------- */
 
+/**
+ * Projects: the split showcase (DESIGN.md 10a).
+ *
+ * Not a grid and no longer a full-bleed reel. Each featured project is a
+ * two-column frame — copy on one side, the product in a browser window on the
+ * other — and the remaining projects collapse into a compact mono index
+ * underneath. This is the page's IMAGE-DOMINANT section on purpose: Tech
+ * Stack is type-dominant and Certifications is list-dominant, so the three
+ * heaviest sections never share a skeleton.
+ *
+ * Why not a sticky stack of full-height plates, which was the other candidate:
+ * `Experience` already owns that skeleton, and two sections pinning and
+ * covering each other on the same page reads as one trick used twice.
+ *
+ * The section no longer needs `bleed` — the window is a contained frame, not
+ * an edge-to-edge band — so the default `max-w-6xl` container applies and
+ * there is no `w-screen -translate-x-1/2` breakout, which would overflow
+ * horizontally on Windows Chrome because `100vw` includes the scrollbar.
+ *
+ * Every entrance is CSS: `Reveal` for the copy and the index rows, the
+ * `.rise` utilities for the heading. No Framer entrance variants, so nothing
+ * server-renders an inline `opacity: 0` that a slow bundle could strand.
+ */
 export function Projects() {
-  const reduced = useReducedMotion();
-  const [filter, setFilter] = useState<Filter>('All');
   const [openSlug, setOpenSlug] = useState<string | null>(null);
-  const [selectedSlug, setSelectedSlug] = useState<string>(HIGHLIGHT_SLUG);
-  /** Which way the last move went, so the view can arrive from that side. */
-  const [direction, setDirection] = useState<1 | -1>(1);
-
   const triggers = useRef(new Map<string, HTMLButtonElement>());
   const lastTrigger = useRef<HTMLButtonElement | null>(null);
-  /** The view panel, so a press on a phone can bring it into sight. */
-  const viewRef = useRef<HTMLDivElement>(null);
 
-  const filtered = useMemo(
-    () => (filter === 'All' ? projects : projects.filter((p) => p.category === filter)),
-    [filter],
-  );
-
-  /**
-   * What the left of the band shows. The selection is held by slug, so it
-   * survives a filter that happens to hide it: when the selected project is
-   * not in the filtered set the view falls to the leader, then to the first
-   * match — never to nothing while the set is non-empty.
-   */
-  const selected = useMemo(
-    () =>
-      filtered.find((project) => project.slug === selectedSlug) ??
-      filtered.find((project) => project.slug === HIGHLIGHT_SLUG) ??
-      filtered[0] ??
-      null,
-    [filtered, selectedSlug],
-  );
-
-  const selectedIndex = selected
-    ? filtered.findIndex((project) => project.slug === selected.slug)
-    : -1;
-
-  const openProject = useMemo(
-    () => projects.find((project) => project.slug === openSlug) ?? null,
-    [openSlug],
-  );
+  const openProject = openSlug
+    ? (ALL_PROJECTS.find((project) => project.slug === openSlug) ?? null)
+    : null;
 
   const open = useCallback((slug: string) => {
     lastTrigger.current = triggers.current.get(slug) ?? null;
@@ -381,128 +515,47 @@ export function Projects() {
     window.requestAnimationFrame(() => target?.focus({ preventScroll: true }));
   }, []);
 
-  /**
-   * Select by position, and on a phone bring the view into sight. Every move
-   * goes through here — a row press, an arrow, a key — so the travel direction
-   * is always known and no path can skip the nudge.
-   *
-   * Below `lg` the view sits ABOVE the index, so a row press changes something
-   * that is off screen above the reader. It only nudges when the panel is fully
-   * off screen, and only as far as `block: 'nearest'` needs — never yanking a
-   * half-visible panel.
-   */
-  const selectIndex = useCallback(
-    (next: number) => {
-      const target = filtered[next];
-      if (!target) return;
-
-      const index = filtered.findIndex((project) => project.slug === selectedSlug);
-      const from = index === -1 ? 0 : index;
-      setDirection(next >= from ? 1 : -1);
-      setSelectedSlug(target.slug);
-
-      if (window.matchMedia('(min-width: 1024px)').matches) return;
-      const node = viewRef.current;
-      if (!node) return;
-      const rect = node.getBoundingClientRect();
-      if (rect.top >= window.innerHeight || rect.bottom <= 0) {
-        node.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' });
-      }
+  const registerTrigger = useCallback(
+    (slug: string) => (el: HTMLButtonElement | null) => {
+      if (el) triggers.current.set(slug, el);
+      else triggers.current.delete(slug);
     },
-    [filtered, selectedSlug, reduced],
-  );
-
-  /**
-   * One press = one project, so the view never lands between two. The set
-   * wraps: past the last project comes the first, and before the first comes
-   * the last. That is why the arrows are never disabled — there is always
-   * somewhere to go.
-   */
-  const step = useCallback(
-    (delta: 1 | -1) => {
-      const count = filtered.length;
-      if (count === 0) return;
-      const index = filtered.findIndex((project) => project.slug === selectedSlug);
-      const from = index === -1 ? 0 : index;
-      selectIndex((from + delta + count) % count);
-    },
-    [filtered, selectedSlug, selectIndex],
-  );
-
-  /**
-   * The index is a listbox in everything but name: Up/Down walk it and wrap
-   * with it, Home/End jump to the ends, and focus moves with the selection so
-   * the next press lands on the row the reader just chose.
-   */
-  const onListKeyDown = useCallback(
-    (event: ReactKeyboardEvent<HTMLUListElement>) => {
-      const { key } = event;
-      if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Home' && key !== 'End') return;
-      event.preventDefault();
-
-      const count = filtered.length;
-      if (count === 0) return;
-      const index = filtered.findIndex((project) => project.slug === selectedSlug);
-      const from = index === -1 ? 0 : index;
-      const next =
-        key === 'ArrowDown'
-          ? (from + 1) % count
-          : key === 'ArrowUp'
-            ? (from - 1 + count) % count
-            : key === 'Home'
-              ? 0
-              : count - 1;
-
-      selectIndex(next);
-      event.currentTarget
-        .querySelectorAll<HTMLButtonElement>('button')
-        [next]?.focus({ preventScroll: true });
-    },
-    [filtered, selectedSlug, selectIndex],
+    [],
   );
 
   return (
     <Section id="projects">
-      {/* The three entrance animations this section still owns, as CSS
-          keyframes rather than Framer variants: the direction-aware view swap
-          and the two dialog surfaces. The scroll reveals are the `Reveal`
-          primitive's job. All three stand down under reduced motion. */}
+      {/* The dialog's entrance. Transform and opacity only, and a CSS keyframe
+          rather than a variant, so a failed bundle still shows a dialog rather
+          than a blank scrim. */}
       <style>{`
-        @keyframes project-swap-in {
-          from { opacity: 0; transform: translateY(var(--swap-y, 0px)); }
-          to { opacity: 1; transform: none; }
-        }
-        .project-swap { animation: project-swap-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
-
         @keyframes project-dialog-backdrop-in {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        .project-dialog-backdrop { animation: project-dialog-backdrop-in 0.25s ease-out both; }
+        .project-dialog-backdrop { animation: project-dialog-backdrop-in 0.3s cubic-bezier(0.32, 0.72, 0, 1) both; }
 
         @keyframes project-dialog-panel-in {
           from { opacity: 0; transform: translateY(16px) scale(0.96); }
           to { opacity: 1; transform: none; }
         }
-        .project-dialog-panel { animation: project-dialog-panel-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .project-dialog-panel { animation: project-dialog-panel-in 0.5s cubic-bezier(0.32, 0.72, 0, 1) both; }
 
         @media (prefers-reduced-motion: reduce) {
-          .project-swap,
           .project-dialog-backdrop,
           .project-dialog-panel { animation: none; }
         }
       `}</style>
 
       <SectionHeading
-        index="01"
-        eyebrow="Projects"
         title="Things that I built"
+        description="Four products that shipped to real users, then the rest of the workbench behind them."
         action={
           <a
             href={profile.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted hover:text-foreground"
+            className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted transition-colors duration-300 ease-fluid hover:text-foreground"
           >
             <BrandIcon name="github" size={15} />
             All repositories
@@ -510,212 +563,46 @@ export function Projects() {
         }
       />
 
-      <div
-        role="group"
-        aria-label="Filter projects by category"
-        className="flex flex-wrap gap-2"
-      >
-        {FILTERS.map((item) => {
-          const isFilter = item === filter;
-          const count =
-            item === 'All'
-              ? projects.length
-              : projects.filter((project) => project.category === item).length;
+      {/* The frames. Generous air between them: each one is a scene, not a
+          row in a table. */}
+      <ol className="space-y-16 sm:space-y-24 lg:space-y-32">
+        {featuredProjects.map((project, index) => (
+          <ProjectFrame
+            key={project.slug}
+            project={project}
+            index={index}
+            total={featuredProjects.length}
+            onOpen={() => open(project.slug)}
+            setTrigger={registerTrigger(project.slug)}
+          />
+        ))}
+      </ol>
 
-          return (
-            <button
-              key={item}
-              type="button"
-              onClick={() => {
-                setFilter(item);
-                // A new set opens on its leader again rather than on whatever
-                // happened to be selected under the previous one.
-                setSelectedSlug(HIGHLIGHT_SLUG);
-              }}
-              aria-pressed={isFilter}
-              aria-label={`${item}, ${count} ${count === 1 ? 'project' : 'projects'}`}
-              className={cn(
-                'inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors',
-                isFilter
-                  ? 'border-accent bg-accent text-on-accent'
-                  : 'border-border bg-surface text-muted hover:text-foreground',
-              )}
+      {/* The compact mono index: the rest of the workbench, one line each. */}
+      <div className="mt-16 sm:mt-24">
+        <Reveal>
+          <h3 className="font-mono text-[11px] uppercase tracking-[0.14em] text-faint">
+            More work
+          </h3>
+        </Reveal>
+
+        <ul className="mt-4 border-b border-hairline sm:mt-5">
+          {otherProjects.map((project, index) => (
+            <Reveal
+              as="li"
+              key={project.slug}
+              delay={Math.min(index, 4) * 0.05}
+              className="border-t border-hairline"
             >
-              {item}
-              <span
-                aria-hidden="true"
-                className={cn(
-                  'font-mono text-[11px] tabular-nums',
-                  isFilter ? 'text-on-accent' : 'text-muted',
-                )}
-              >
-                {count}
-              </span>
-            </button>
-          );
-        })}
+              <IndexRow
+                project={project}
+                onOpen={() => open(project.slug)}
+                setTrigger={registerTrigger(project.slug)}
+              />
+            </Reveal>
+          ))}
+        </ul>
       </div>
-
-      {filtered.length > 0 ? (
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-8">
-          {/* The index. It stays first in the DOM — it is the control — but it
-              is ordered AFTER the view at every width, so on a phone the
-              highlights are what you land on and the list follows underneath. */}
-          <Reveal x={80} y={0} className="order-2 min-w-0">
-            <div className="flex items-center justify-between gap-4">
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-                Projects · {filtered.length}
-              </p>
-              <div className="flex items-center gap-3">
-                {/* The arrows say which way the reader can go; this says how
-                    far along they are. */}
-                <span className="font-mono text-[11px] tabular-nums text-faint">
-                  <span className="text-foreground">
-                    {selectedIndex >= 0 ? String(selectedIndex + 1).padStart(2, '0') : '--'}
-                  </span>
-                  {' / '}
-                  {String(filtered.length).padStart(2, '0')}
-                </span>
-                {filtered.length > 1 ? (
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => step(-1)}
-                      aria-label="Previous project"
-                      className="grid h-11 w-11 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent"
-                    >
-                      <ChevronUp size={18} aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => step(1)}
-                      aria-label="Next project"
-                      className="grid h-11 w-11 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-accent/50 hover:text-accent"
-                    >
-                      <ChevronDown size={18} aria-hidden="true" />
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <ul
-              aria-label="Projects"
-              onKeyDown={onListKeyDown}
-              className="mt-4 flex flex-col gap-1.5"
-            >
-              {filtered.map((project, index) => {
-                const isSelected = project.slug === selected?.slug;
-
-                return (
-                  <li key={project.slug}>
-                    <Reveal y={14} delay={Math.min(index, 7) * 0.04}>
-                      <button
-                        type="button"
-                        onClick={() => selectIndex(index)}
-                        aria-pressed={isSelected}
-                        className={cn(
-                          'group relative flex w-full items-center gap-3 overflow-hidden rounded-card border py-2.5 pl-4 pr-3.5 text-left transition-colors duration-200',
-                          isSelected
-                            ? 'border-accent/50 bg-surface-2'
-                            : 'border-transparent hover:border-border hover:bg-surface',
-                        )}
-                      >
-                        {/* The rail marks the selection without moving a box. */}
-                        <span
-                          aria-hidden="true"
-                          className={cn(
-                            'absolute inset-y-2.5 left-0 w-[3px] rounded-full bg-accent transition-opacity duration-200',
-                            isSelected ? 'opacity-100' : 'opacity-0',
-                          )}
-                        />
-
-                        {/* A recognisable thumbnail does the work a number
-                            cannot — the covers are the same art as the view. */}
-                        <span className="relative block h-11 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-2">
-                          <Image
-                            src={project.image}
-                            alt=""
-                            fill
-                            sizes="64px"
-                            className={cn(
-                              'object-cover transition-[opacity,scale] duration-200',
-                              isSelected
-                                ? 'scale-105 opacity-100'
-                                : 'opacity-60 group-hover:scale-105 group-hover:opacity-100',
-                            )}
-                          />
-                        </span>
-
-                        <span className="min-w-0 flex-1">
-                          <span
-                            className={cn(
-                              'block font-mono text-[11px] tabular-nums tracking-[0.16em]',
-                              isSelected ? 'text-accent' : 'text-faint',
-                            )}
-                          >
-                            {String(index + 1).padStart(2, '0')}
-                          </span>
-                          <span
-                            className={cn(
-                              'mt-1 block break-words text-sm font-medium',
-                              isSelected ? 'text-foreground' : 'text-muted group-hover:text-foreground',
-                            )}
-                          >
-                            {project.name}
-                          </span>
-                        </span>
-
-                        <span
-                          className={cn(
-                            'hidden shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] sm:block',
-                            isSelected ? 'text-accent' : 'text-faint',
-                          )}
-                        >
-                          {project.category}
-                        </span>
-                      </button>
-                    </Reveal>
-                  </li>
-                );
-              })}
-            </ul>
-          </Reveal>
-
-          {/* The view of whatever the list has selected. Left column from `lg`,
-              and first on a phone so the highlights lead. Announced politely so
-              a screen reader hears the swap. */}
-          <Reveal x={-80} y={0} className="order-1 min-w-0">
-            <div ref={viewRef} aria-live="polite" className="h-full">
-              {selected ? (
-                <div
-                  key={selected.slug}
-                  style={{ '--swap-y': `${10 * direction}px` } as CSSProperties}
-                  className="project-swap h-full"
-                >
-                  <ProjectView
-                    project={selected}
-                    position={selectedIndex + 1}
-                    total={filtered.length}
-                    onOpen={() => open(selected.slug)}
-                    setTrigger={(el) => {
-                      if (el) triggers.current.set(selected.slug, el);
-                      else triggers.current.delete(selected.slug);
-                    }}
-                  />
-                </div>
-              ) : null}
-            </div>
-          </Reveal>
-        </div>
-      ) : (
-        <p
-          role="status"
-          className="mt-8 rounded-card border border-border bg-surface p-5 sm:p-6 text-sm text-muted"
-        >
-          No {filter} projects yet — try another category.
-        </p>
-      )}
 
       {openProject ? (
         <ProjectDialog key={openProject.slug} project={openProject} onClose={close} />

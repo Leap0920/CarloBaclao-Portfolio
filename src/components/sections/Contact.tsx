@@ -1,290 +1,183 @@
 'use client';
 
-import { useId, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { AlertCircle, Mail, MapPin, Phone } from 'lucide-react';
+import { ArrowUpRight, MapPin, Phone } from 'lucide-react';
 import { BrandIcon } from '@/components/BrandIcons';
+import Magnet from '@/components/reactbits/Magnet/Magnet';
 import { Reveal } from '@/components/ui/Reveal';
 import { Section, SectionHeading } from '@/components/ui/Section';
 import { profile } from '@/data/profile';
 import { cn } from '@/lib/cn';
-import type { SocialLink } from '@/types';
 
 /**
- * The platforms the client asked for, in order. Only the ones that exist in
- * the profile data are rendered: there is no Facebook or X account in any of
- * Carlo's data or public profiles, and a link is never invented to fill a gap.
- * Adding one to `profile.socials` is all it takes for it to appear here.
+ * Every profile link except email. The email address is this section's single
+ * control (the ember plate), so repeating it as an icon would be a second
+ * control for the same intent. Every other entry in `profile.socials` is a
+ * real, published route to Carlo, so it renders; nothing is invented to fill
+ * a gap and no platform is added that is not already in the data.
  */
-const REQUESTED_SOCIALS = ['github', 'linkedin', 'facebook', 'instagram', 'x'] as const;
+const socials = profile.socials.filter((social) => social.id !== 'email');
 
-const socials = REQUESTED_SOCIALS.map((id) =>
-  profile.socials.find((social) => social.id === id),
-).filter((social): social is SocialLink => Boolean(social));
-
-/** The two facts a hiring manager needs before writing. */
+/**
+ * The two facts a hiring manager needs before writing. Both come straight from
+ * `profile.ts`; no phone number, calendar link or street address is introduced
+ * here.
+ */
 const FACTS: { icon: typeof MapPin; value: string; href?: string }[] = [
   { icon: MapPin, value: profile.location },
   { icon: Phone, value: profile.phone, href: `tel:${profile.phone}` },
 ];
 
-interface FormValues {
-  name: string;
-  email: string;
-  message: string;
-}
+/**
+ * The design system's one curve, `--ease-fluid`, handed to Magnet as a CSS
+ * timing function. Magnet's own defaults are `ease-out` and `ease-in-out`, and
+ * `ease-in-out` is banned by the design contract, so both of its transitions
+ * are overridden here rather than left at the library default. The hero applies
+ * the identical override to the same component.
+ */
+const FLUID = 'cubic-bezier(0.32, 0.72, 0, 1)';
 
-type FormErrors = Partial<Record<keyof FormValues, string>>;
+/**
+ * Button-in-Button: a fully-rounded pill whose trailing glyph is nested in its
+ * own circular wrapper, seated flush against the pill's right inner padding,
+ * never a naked arrow beside the label. `pl-6`/`py-3` give the pill its mass
+ * and a 48px tap target; the smaller `pr-3` is the gutter the circle sits in,
+ * so the circle's right edge is flush with the inner padding edge. On hover the
+ * circle travels diagonally and scales a touch; the whole pill presses to
+ * `scale-[0.98]`. Transform and colour only, on the design system's own curve.
+ */
+const PILL =
+  'group inline-flex min-h-12 items-center gap-3 rounded-full py-3 pl-6 pr-3 text-sm font-semibold transition-transform duration-300 ease-fluid active:scale-[0.98]';
 
-const FIELDS = ['name', 'email', 'message'] as const;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function validate(values: FormValues): FormErrors {
-  const errors: FormErrors = {};
-
-  if (!values.name.trim()) errors.name = 'Enter your name.';
-
-  if (!values.email.trim()) {
-    errors.email = 'Enter your email address.';
-  } else if (!EMAIL_PATTERN.test(values.email.trim())) {
-    errors.email = 'Enter a valid email address, like name@example.com.';
-  }
-
-  if (!values.message.trim()) {
-    errors.message = 'Enter a short message.';
-  } else if (values.message.trim().length < 10) {
-    errors.message = 'Add a little more detail — at least 10 characters.';
-  }
-
-  return errors;
-}
-
-export function Contact() {
-  const [values, setValues] = useState<FormValues>({ name: '', email: '', message: '' });
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [opened, setOpened] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-
-  const nameId = useId();
-  const emailId = useId();
-  const messageId = useId();
-  const errorId = useMemo(
-    () => ({
-      name: `${nameId}-error`,
-      email: `${emailId}-error`,
-      message: `${messageId}-error`,
-    }),
-    [nameId, emailId, messageId],
+/**
+ * The trailing glyph, hard-wired to the on-accent treatment: it only ever sits
+ * on the ember plate, which is the section's single control.
+ */
+function TrailingArrow() {
+  return (
+    <span
+      aria-hidden="true"
+      className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-on-accent/15 text-on-accent transition-transform duration-500 ease-fluid group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:scale-105"
+    >
+      <ArrowUpRight size={16} />
+    </span>
   );
+}
 
-  const update = (field: keyof FormValues) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const value = event.target.value;
-    setValues((previous) => ({ ...previous, [field]: value }));
-    // Clear a field's error the moment it is corrected. Leaving
-    // aria-invalid="true" on a field the visitor has already fixed tells a
-    // screen-reader user their input is still wrong.
-    setErrors((previous) => {
-      if (!previous[field]) return previous;
-      if (validate({ ...values, [field]: value })[field]) return previous;
-      const next = { ...previous };
-      delete next[field];
-      return next;
-    });
-    setOpened(false);
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const nextErrors = validate(values);
-    setErrors(nextErrors);
-
-    const firstInvalid = FIELDS.find((field) => nextErrors[field]);
-    if (firstInvalid) {
-      setOpened(false);
-      formRef.current?.querySelector<HTMLElement>(`[name="${firstInvalid}"]`)?.focus();
-      return;
-    }
-
-    const subject = `Portfolio enquiry from ${values.name.trim()}`;
-    const body = `Name: ${values.name.trim()}\nEmail: ${values.email.trim()}\n\n${values.message.trim()}`;
-    window.location.href = `mailto:${profile.email}?subject=${encodeURIComponent(
-      subject,
-    )}&body=${encodeURIComponent(body)}`;
-    setOpened(true);
-  };
-
-  const inputClass =
-    'mt-2 w-full rounded-card border border-border bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted focus-visible:border-accent';
-
+/**
+ * The closing section: the page's last frame.
+ *
+ * The statement of intent is the section heading (no eyebrow: the page is at
+ * its eyebrow budget and a closing frame needs none), and the bezel panel
+ * beneath it holds the actual ways to reach Carlo. There is deliberately no
+ * contact form.
+ *
+ * ONE CONTROL PER INTENT. The hero owns "View CV"; this section owns "Email
+ * me". The address is shown as plain, selectable text beside the plate, not as
+ * a second control for the same intent, so the section carries exactly one
+ * ember plate and no competing accent.
+ *
+ * Entrances are CSS. The heading rides the shared `SectionHeading`, whose
+ * `.rise` keyframe does the work, and the panel rides `Reveal`. Neither can
+ * leave content invisible if the bundle is slow or fails, because the hidden
+ * state lives behind the `html.js-reveal` boot class rather than an inline
+ * style, and no Framer entrance variant survives in this file.
+ *
+ * Layout family (DESIGN.md section 10): full-width statement + bezel panel.
+ * Below 768px (`md`) the panel is one column with `p-6`, and the two columns
+ * collapse to one; from `md` up they sit side by side and a single hairline
+ * splits them. Nothing here exceeds the column at 320px.
+ */
+export function Contact() {
   return (
     <Section id="contact">
       <SectionHeading
-        index="06"
-        eyebrow="Contact"
         title={profile.availability}
-        description="Email is the fastest route. The form opens your own mail app with the message ready to send — nothing is stored on a server."
+        description="Email is the fastest route. Nothing is sent or stored from this page."
       />
 
-      {/* The address is the primary action, so it gets the title treatment. */}
       <Reveal y={40}>
-        <a
-          href={`mailto:${profile.email}`}
-          className="block break-all font-display text-title font-semibold tracking-title text-foreground underline-offset-[6px] hover:underline hover:decoration-accent"
-        >
-          {profile.email}
-        </a>
-      </Reveal>
+        <div className="bezel">
+          <div className="bezel-core p-6 sm:p-10">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-[1.15fr_1fr] md:gap-12">
+              {/* The primary route: one control per intent, the ember plate.
+                  The address is plain, selectable text so it is not a second
+                  control for the same intent.
 
-      <div className="mt-8 grid gap-8 sm:gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
-        <Reveal y={40}>
-          <form
-            ref={formRef}
-            noValidate
-            onSubmit={handleSubmit}
-            className="rounded-card border border-border bg-surface p-4 sm:p-7"
-          >
-            <div>
-              <label htmlFor={nameId} className="block text-sm font-medium text-foreground">
-                Name
-              </label>
-              <input
-                id={nameId}
-                name="name"
-                type="text"
-                autoComplete="name"
-                required
-                value={values.name}
-                onChange={update('name')}
-                aria-invalid={errors.name ? true : undefined}
-                aria-describedby={errors.name ? errorId.name : undefined}
-                className={inputClass}
-              />
-              {errors.name ? (
-                <p id={errorId.name} className="mt-2 flex items-start gap-2 text-sm text-foreground">
-                  <AlertCircle size={15} aria-hidden="true" className="mt-0.5 shrink-0 text-accent" />
-                  <span>{errors.name}</span>
-                </p>
-              ) : null}
-            </div>
-
-            <div className="mt-5">
-              <label htmlFor={emailId} className="block text-sm font-medium text-foreground">
-                Email
-              </label>
-              <input
-                id={emailId}
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={values.email}
-                onChange={update('email')}
-                aria-invalid={errors.email ? true : undefined}
-                aria-describedby={errors.email ? errorId.email : undefined}
-                className={inputClass}
-              />
-              {errors.email ? (
-                <p id={errorId.email} className="mt-2 flex items-start gap-2 text-sm text-foreground">
-                  <AlertCircle size={15} aria-hidden="true" className="mt-0.5 shrink-0 text-accent" />
-                  <span>{errors.email}</span>
-                </p>
-              ) : null}
-            </div>
-
-            <div className="mt-5">
-              <label htmlFor={messageId} className="block text-sm font-medium text-foreground">
-                Message
-              </label>
-              <textarea
-                id={messageId}
-                name="message"
-                rows={5}
-                required
-                value={values.message}
-                onChange={update('message')}
-                aria-invalid={errors.message ? true : undefined}
-                aria-describedby={errors.message ? errorId.message : undefined}
-                className={cn(inputClass, 'resize-y')}
-              />
-              {errors.message ? (
-                <p id={errorId.message} className="mt-2 flex items-start gap-2 text-sm text-foreground">
-                  <AlertCircle size={15} aria-hidden="true" className="mt-0.5 shrink-0 text-accent" />
-                  <span>{errors.message}</span>
-                </p>
-              ) : null}
-            </div>
-
-            <div className="mt-6 flex flex-wrap items-center gap-4">
-              <button
-                type="submit"
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-accent px-5 text-sm font-semibold text-on-accent"
-              >
-                <Mail size={16} aria-hidden="true" />
-                Open email draft
-              </button>
-              <p className="text-xs leading-relaxed text-muted">
-                Opens your mail app. Nothing is sent from this page.
-              </p>
-            </div>
-
-            <p role="status" aria-live="polite" className="mt-4 text-sm text-muted">
-              {opened ? (
-                <>
-                  Your mail app should be open with the message ready to send. If it did not open, email{' '}
+                  The reactbits `Magnet` wraps the plate so it leans a few
+                  pixels toward the cursor. It is deliberately subtle: a high
+                  `magnetStrength` (the offset is divided by it) and a small
+                  `padding` (the radius at which the pull engages) keep the lean
+                  to a few pixels. Magnet wraps the plate in a plain inline-block
+                  div and translates only that div, so the anchor's click
+                  target, focus ring and the global press state are untouched. */}
+              <div>
+                <Magnet
+                  magnetStrength={7}
+                  padding={32}
+                  activeTransition={`transform 0.3s ${FLUID}`}
+                  inactiveTransition={`transform 0.5s ${FLUID}`}
+                >
                   <a
                     href={`mailto:${profile.email}`}
-                    className="font-medium text-foreground underline underline-offset-4 hover:decoration-accent"
+                    className={cn(PILL, 'bg-accent text-on-accent')}
                   >
-                    {profile.email}
-                  </a>{' '}
-                  directly.
-                </>
-              ) : null}
-            </p>
-          </form>
-        </Reveal>
-
-        <Reveal y={40}>
-          <h3 className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Elsewhere
-          </h3>
-
-          <ul className="mt-4 flex flex-wrap gap-3">
-            {socials.map((social, index) => (
-              <Reveal as="li" key={social.id} y={40} delay={index * 0.12}>
-                {/* The anchor holds a fixed 44px box in every animation state —
-                    only the glyph pops, so the hit area can never shrink. */}
-                <a
-                  href={social.url}
-                  target={social.url.startsWith('mailto:') ? undefined : '_blank'}
-                  rel="noopener noreferrer"
-                  aria-label={`${social.label} — ${social.handle}`}
-                  className="grid h-11 w-11 place-items-center rounded-full border border-border bg-surface text-muted hover:text-foreground"
-                >
-                  <Reveal as="span" y={0} scale={0.9} delay={index * 0.12} className="grid place-items-center">
-                    <BrandIcon name={social.icon} size={18} />
-                  </Reveal>
-                </a>
-              </Reveal>
-            ))}
-          </ul>
-
-          <ul className="mt-6 space-y-3 border-t border-border pt-5 text-sm text-muted sm:mt-8 sm:pt-6">
-            {FACTS.map(({ icon: Icon, value, href }) => (
-              <li key={value} className="flex items-center gap-2">
-                <Icon size={15} aria-hidden="true" className="shrink-0" />
-                {href ? (
-                  <a href={href} className="hover:text-foreground">
-                    {value}
+                    <span className="whitespace-nowrap">Email me</span>
+                    <TrailingArrow />
                   </a>
-                ) : (
-                  value
-                )}
-              </li>
-            ))}
-          </ul>
-        </Reveal>
-      </div>
+                </Magnet>
+
+                <p className="mt-4 break-all text-sm text-muted">{profile.email}</p>
+              </div>
+
+              {/* The remaining routes and the two facts, split off by a single
+                  hairline on wide screens. */}
+              <div className="md:border-l md:border-border md:pl-12">
+                <ul className="flex flex-wrap gap-3">
+                  {socials.map((social) => (
+                    <li key={social.id}>
+                      {/* A fixed 44px box in every state: only the fill shifts,
+                          so the hit area can never shrink. The hover stays on
+                          the neutral ink token so ember is spent on the plate
+                          alone and no second accent is introduced. */}
+                      <a
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${social.label} - ${social.handle}`}
+                        className="grid h-11 w-11 place-items-center rounded-full bg-surface-2 text-ink-soft transition-colors duration-300 ease-fluid hover:bg-foreground/10 hover:text-foreground"
+                      >
+                        <BrandIcon name={social.icon} size={18} />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+
+                <ul className="mt-5 space-y-3 border-t border-border pt-5 text-sm text-muted">
+                  {FACTS.map(({ icon: Icon, value, href }) => (
+                    <li key={value} className="flex items-center gap-2">
+                      <Icon size={15} aria-hidden="true" className="shrink-0" />
+                      {href ? (
+                        /* A 44px tap target without moving the row: `min-h-11`
+                           grows the hit box and the negative margin takes the
+                           growth back out of the layout, so the fact list keeps
+                           its rhythm at every width. */
+                        <a
+                          href={href}
+                          className="-my-3 inline-flex min-h-11 items-center transition-colors duration-300 ease-fluid hover:text-foreground"
+                        >
+                          {value}
+                        </a>
+                      ) : (
+                        value
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
     </Section>
   );
 }

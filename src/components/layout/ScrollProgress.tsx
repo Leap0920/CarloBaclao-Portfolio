@@ -57,7 +57,7 @@ export function ScrollProgress() {
       ref={barRef}
       aria-hidden="true"
       style={reduced ? undefined : { transition: 'transform 120ms linear' }}
-      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 origin-left bg-[linear-gradient(90deg,color-mix(in_oklab,var(--accent)_45%,transparent),var(--accent))] shadow-[0_0_10px_-1px_var(--accent)] print-hide"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 origin-left bg-[linear-gradient(90deg,color-mix(in_oklab,var(--accent)_40%,transparent),var(--accent))] print-hide"
     />
   );
 }
